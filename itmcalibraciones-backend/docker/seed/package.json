@@ -1,0 +1,12 @@
+{
+  "name": "mongo-seed",
+  "version": "1.0.0",
+  "description": "Seeding script for ITM",
+  "main": "seed.js",
+  "scripts": {
+    "start": "node seed.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  
+  <style>
+    * {
+      margin: 0; 
+      padding: 0; 
+      border-spacing: 0;
+    }
+
+    p{
+      font-size: 12px;
+    }
+
+
+    @page {
+      size: A4 portait;
+      margin: 0;
+      margin: 0!important;
+      margin-top: 20mm!important;
+      margin-bottom: 27mm!important;
+      margin-left: 0cm!important;
+      margin-right: 0cm!important;
+    }
+
+    #portada{
+      height: 800px;
+      width: auto;
+      text-align: center;
+      margin: auto;
+      margin-bottom: 300px;
+    }
+
+    .no-break-inside {
+      break-inside: avoid;
+    }
+
+    body {
+      font-family:"Calibri", sans-serif;
+    }
+
+    .page{
+      padding-left: 100px !important;
+      padding-right: 100px; 
+      display:block;
+      text-align: justify;
+    }
+
+  </style>
+</head>
+<body>
+  
+  <div id="portada">
+    
+        <img width="300px" style="margin-bottom:150px; margin-top:100px" src="https://i.ibb.co/pzTc0q4/logo-itm-removebg-preview.png">
+        <h1 style="font-size: 28pt;">{{client}} - {{office}}</h1>
+        <br/>
+        <center><h1 style="font-size: 24pt;">Informe técnico</h1></center>
+        <br/><br/>
+        <center><h5 style="color:#336699; font-size: 14pt;">{{dateString}}</h5></center>        
+    
+  </div>
+
+  <div class="page" >
+
+    <div style="font-size:14px">
+        <span style="font-weight: bold;">Equipo:</span> {{instrumentType}}, {{model}}, N/S: {{serialNumber}}
+      </div>
+    <br/>
+
+    <div class="no-break-inside" style="font-size:14px">
+      <div> <span style="font-weight: bold;">Fecha: </span> {{date}}</div>
+      <br/>
+      
+      <p style="font-weight: bold;font-size:14px"> Descripción: </p>
+      <p> {{descriptions}} </p>
+      <br/>
+      
+      <p style="font-weight: bold;font-size:14px">Comentarios: </p>
+      <p> {{comments}} </p>
+      <br/>
+    </div>
+
+  </div>
+  
+</body>
+</html>

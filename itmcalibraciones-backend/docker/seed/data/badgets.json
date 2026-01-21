@@ -1,0 +1,155 @@
+[{
+  "_id": {
+    "$oid": "654b971d532948a408bdfc0b"
+  },
+  "types": [
+    "Calibración"
+  ],
+  "office": {
+    "$oid": "654b7258532948a408bdf983"
+  },
+  "advisor": {
+    "$oid": "6458cc839ed30bdbf0ac263a"
+  },
+  "attention": "",
+  "date": {
+    "$date": "2023-07-23T00:00:00.000Z"
+  },
+  "reference": "",
+  "deliveryTime": "7",
+  "offerValidity": 10,
+  "paymentTerms": "7 días FF",
+  "currency": "USD",
+  "vat": "NO_IVA",
+  "showTotal": true,
+  "selectedNotes": [
+    "Facturación",
+    "Condiciones fiscales",
+    "Garantía",
+    "Validez de la oferta",
+    "Lugar de entrega"
+  ],
+  "details": [
+    {
+      "quantity": 1,
+      "description": "Servicio de calibración de manómetro con tensiómetro BOKANG n/s: 48. Con emisión de certificado.",
+      "unitPrice": 225,
+      "discount": 0,
+      "totalPrice": 225,
+      "_id": {
+        "$oid": "654b9b56532948a408bdfcda"
+      }
+    },
+    {
+      "quantity": 1,
+      "description": "Servicio de calibración de Balanza de pie marca CAM, mide peso y estatura, rango hasta 140 kg. Con emisión de certificado.",
+      "unitPrice": 55,
+      "discount": 0,
+      "totalPrice": 55,
+      "_id": {
+        "$oid": "654b9b56532948a408bdfcdb"
+      }
+    },
+    {
+      "quantity": 1,
+      "description": "Servicio de calibración de manómetros O2.  Con emisión de certificado.",
+      "unitPrice": 55,
+      "discount": 0,
+      "totalPrice": 55,
+      "_id": {
+        "$oid": "654b9b56532948a408bdfcdc"
+      }
+    },
+    {
+      "quantity": 1,
+      "description": "Servicio de calibración de termómetro digital HANNA n/s: HI935007. Con emisión de certificado.",
+      "unitPrice": 80,
+      "discount": 0,
+      "totalPrice": 80,
+      "_id": {
+        "$oid": "654b9b56532948a408bdfcdd"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2023-11-08T14:11:41.615Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-08T14:29:42.183Z"
+  },
+  "year": 23,
+  "number": 3003,
+  "__v": 0,
+  "notes": "<b>Facturación</b>: A la fecha de facturación se utilizará el tipo de cambio del Banco de la Nación Argentina libre vendedor (cotización DIVISA) vigente al día anterior al de emisión de la factura. \n\nSi se produjera una variación del tipo de cambio entre el utilizado para la facturación y el vigente al día anterior al de la fecha de acreditación del pago mamyor al 5%, Calibraciones ITM S.A. emitirá una nota de crédito o de débito según fuera el caso, en la cual se indicará el monto que pudiera corresponder por el ajuste del tipo de cambio entre dichas fechas, con imputación a este acuerdo.\n     \nEn caso de realizar una facturación parcial por diferencia entre los plazos de entrega de cada item, Calibraciones ITM S.A. indicará que items se facturarán en conjunto y cuales no, y, en consecuencia, se deberán aceptar entregas parciales con facturación y pago parcial.\n    \nLos ítems cotizados en DÓLARES ESTADOUNIDENSES (US$), pueden pagarse en PESOS ARGENTINOS (AR$).<br/><br/><b>Condiciones fiscales</b>: I. V. A.: La presente cotización no incluye I.V.A. en los precios expresados y se sumará en la factura al momento de realizarse.<br/><br/><b>Garantía</b>: Garantía: 3 (TRES) MESES incluyendo el cambio de repuestos y/o elementos defectuosos por mal ensamblado o por fatiga prematura del material, no atribuibles a mal uso, abuso o desuso, impericia o imprudencia, entendiéndose como tales cualquier maniobra que no esté taxativamente detallada en el manual de operaciones, contados a partir de la fecha en que los bienes hayan sido entregados, o puestos en uso en caso de requerirse la intervención del Proveedor para tales efectos. No incluye consumibles tales como pilas, baterías, filtros, etc. ni daños causados por operación incorrecta o malos tratos, ni re-calibraciones posteriores a la entrega.<br/><br/><b>Validez de la oferta</b>: Luego de vencido el plazo informado en el documento, consultar mantenimiento o variación de la oferta.<br/><br/><b>Lugar de entrega</b>: Todos los equipos o productos serán entregados en nuestras oficinas en Almafuerte 357, Bahía Blanca (B8000), Buenos Aires, Argentina.\n    En caso de solicitar envío a las instalaciones del cliente, el flete quedará a cargo del solicitante. \n    \n    Calibraciones ITM S.A. deslinda toda responsabilidad por eventuales daños que pudiera sufrir el material una vez egresado de la empresa. Si el comprador desea cubrir ese riesgo mediante un seguro, la gestión y costo del mismo estarán a su cargo. La contratación o no de seguro deberá señalarse expresamente en la orden de compra o conformidad de servicio (según corresponda), y la no información al respecto supone todo el riesgo asumido por cuenta del comprador."
+},
+{
+  "_id": {
+    "$oid": "675c5599db266c64b87ea4f9"
+  },
+  "types": [
+    "Venta"
+  ],
+  "office": {
+    "$oid": "654390a735254fc96a693049"
+  },
+  "advisor": {
+    "$oid": "6458cc839ed30bdbf0ac263a"
+  },
+  "attention": "Chechu",
+  "date": {
+    "$date": "2024-12-13T00:00:00.000Z"
+  },
+  "reference": "Bladders",
+  "deliveryTime": "45",
+  "offerValidity": 10,
+  "paymentTerms": "30 días F.F.",
+  "currency": "USD",
+  "vat": "NO_IVA",
+  "showTotal": true,
+  "selectedNotes": [
+    "Validez de la oferta",
+    "Plazo de entrega"
+  ],
+  "instrumentsRelated": [],
+  "details": [
+    {
+      "quantity": 200,
+      "description": "Fabricación de 200 bladers de 90gr de latex",
+      "unitPrice": 84,
+      "discount": 10,
+      "totalPrice": 15120,
+      "_id": {
+        "$oid": "675c5599db266c64b87ea4fa"
+      }
+    },
+    {
+      "quantity": 1,
+      "description": "Búsqueda de fugas",
+      "unitPrice": 790,
+      "discount": 0,
+      "totalPrice": 790,
+      "_id": {
+        "$oid": "675c5599db266c64b87ea4fb"
+      }
+    },
+    {
+      "quantity": 1,
+      "description": "Cambio de tarro de agua",
+      "unitPrice": 180,
+      "discount": 0,
+      "totalPrice": 180,
+      "_id": {
+        "$oid": "675c5599db266c64b87ea4fc"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2024-12-13T15:41:13.183Z"
+  },
+  "updatedAt": {
+    "$date": "2024-12-13T15:41:13.183Z"
+  },
+  "year": 24,
+  "number": 3004,
+  "__v": 0
+}]

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  
+  <style>
+    * {
+      margin: 0; 
+      padding: 0; 
+      border-spacing: 0;
+    }
+
+    p{
+      font-size: 12px;
+    }
+
+    .changePage{
+      page-break-after:always;
+    }
+
+
+    @page {
+      size: A4 portait;
+      margin: 0;
+      margin: 0!important;
+      margin-top: 20mm!important;
+      margin-bottom: 27mm!important;
+      margin-left: 0cm!important;
+      margin-right: 0cm!important;
+    }
+
+    #portada{
+      height: 800px;
+      width: auto;
+      text-align: center;
+      margin: auto;
+      margin-bottom: 300px;
+    }
+
+    .no-break-inside {
+      break-inside: avoid;
+    }
+
+    body {
+      font-family:"Calibri", sans-serif;
+    }
+
+    .page{
+      padding-left: 100px !important;
+      padding-right: 100px; 
+      display:block;
+      text-align: justify;
+    }
+
+    .notes {
+      text-align: justify;
+      text-justify: inter-word;
+    }
+
+     table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .narrow-column {
+      width: 60px;
+    }
+
+    .description-column {
+      width: 40%;
+    }
+
+    .total-column {
+      font-weight: bold;
+    }
+
+    /* Estilo para las filas impares */
+    tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+
+     .description{
+        margin-bottom: 5px;
+    }
+
+    
+
+    p, div {
+        font-size: 13px;
+    }
+
+  </style>
+</head>
+<body>
+  
+  <div id="portada">
+    
+        <img width="300px" style="margin-bottom:150px; margin-top:100px" src="https://i.ibb.co/pzTc0q4/logo-itm-removebg-preview.png">
+        <h1 style="font-size: 28pt;">{{title}}</h1>
+        <br/><br/>
+        <h1 style="font-size: 22pt;">{{socialReason}} - CUIT: {{cuit}}</h1>
+        <br/><br/>
+        {{!-- <p>{{adress}} de la ciudad de {{cityName}}, {{state}} </p> --}}
+        <h5 style="color:#336699; font-size: 14pt;">{{dateString}}</h5>
+    
+  </div>
+
+  <div class="page" >
+
+    <div class="description"><b>Atte:</b> {{at}}</div>  
+    <div class="description"><b>Ref:</b> {{reference}}</div>
+    <div class="description"><b>Plazo de entrega:</b> {{deliveryTime}}</div>
+    <div class="description"><b>Validez de la oferta:</b> {{offerValidity}} días</div>
+    <div class="description"><b>Forma de pago:</b> {{paymentTerms}}</div>
+    <div class="description"><b>Moneda:</b> {{currency}}</div>
+    <div class="description"><b>IVA:</b> {{vatLabel}}</div>
+    </br></br>
+   <table>
+      <thead>
+        <tr>
+          <th class="narrow-column">Ítem</th>
+          <th class="narrow-column">Cantidad</th>
+          <th class="description-column">Descripción</th>
+          <th class="narrow-column">Precio unitario</th>
+          <th class="narrow-column">Bonif.</th>
+          <th class="narrow-column total-column">Precio total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each newDetails}}
+        <tr>
+          <td class="narrow-column">{{intemNumber}}</td>
+          <td class="narrow-column">{{quantity}}</td>
+          <td>{{description}}</td>
+          <td class="narrow-column">{{unitPrice}}</td>
+          <td class="narrow-column">{{discount}}</td>
+          <td class="narrow-column total-column">{{totalPrice}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    
+    {{#if showTotal }}
+        <br/>
+        <b>Total: {{currency}} $ {{total}}</b>
+        <br/>
+    {{/if}}
+    
+    <br/>
+    <div class="description"> <i><b>Asesor:</b> {{advisor}} </i></div>
+    <br/>
+
+    <div class="changePage"></div>
+    <h4 style="font-size: 14px;">Notas y clausulas:</h4>
+    <br/>
+    <div class="notes">
+      {{{notes}}}
+    </div>
+
+
+  </div>
+  
+</body>
+</html>

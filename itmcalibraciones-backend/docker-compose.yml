@@ -1,0 +1,62 @@
+version: "3.7"
+
+services:
+  # backup_mongo:
+  #   #Cron run from OS
+  #   image: purposely/mongodump-s3
+  #   container_name: mongodump
+  #   volumes:
+  #     - mongo-backup:/backup
+  #   environment:
+  #     MONGO_URI: "mongodb://${MONGO_USER}:${MONGO_PASS}@mongo:27018/itm"
+  #     AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+  #     AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+  #     TARGET_FOLDER: ""
+  #     TARGET_S3_FOLDER: "s3://backup.db.itmcalibraciones.com/"
+  #     CRON_SCHEDULE: "* * * * *"
+  #   network_mode: "host"
+  #   restart: always
+  #   depends_on:
+  #     - mongo
+  mongo:
+    container_name: "mongo"
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+    ports:
+      - '27018:27017'
+  api:
+    environment:
+      MONGO_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/itm
+      APP_PORT: 4000
+      NODE_ENV: PROD
+      FRONT_URL: https://app.itmcalibraciones.com
+      BACK_URL : https://api.itmcalibraciones.com
+      EVENT_ID: 63f5f82492b435262c15a14b
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+      VERIFY_SECRET: ${VERIFY_SECRET}
+      SMTP_USER : ${SMTP_USER}
+      SMTP_PASS : ${SMTP_PASS}
+      SMTP_PORT : 587
+      SMTP_HOST : email-smtp.us-east-1.amazonaws.com
+      EMAIL_FROM : app@itmcalibraciones.com
+    container_name: api
+    image: api:latest
+    build: .
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - "4000:4000"
+    expose:
+      - 80
+    volumes:
+      - .:/data
+      - /data/node_modules
+volumes:
+  mongo-data: {}
+  mongo-backup:

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .header {
+      width: 100%;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      width: 250px;
+      height: 100px;
+      margin-right: 20px;
+    }
+    
+    .logo > img {
+        width: 100%;
+    }
+
+    .title {
+      font-size: 14px;
+      line-height: 5px;
+      float: right;
+    }
+
+    .content{
+        margin: auto;
+    }
+
+   
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+        <img alt="logo" src="https://i.ibb.co/f27J773/Itm-logo-2936d8fb.png">
+    </div>
+    <div class="content">
+      <div class="title">
+        <p>Almafuerte 357 (8000) Bahía Blanca.</p>   
+        <p>Buenos Aires. Argentina</p>
+        <p>Tel/FAX: (0291) 453-3568 / 4007623</p>
+        <p>itmcalibraciones@itmcalibraciones.com</p>
+        <p>www.itmcalibraciones.com</p>
+        </div>
+    </div>
+  </div>
+  <hr/>
+  <div style="padding:20px">
+    <center><h1 style="color:#336699">Informe técnico</h1></center>
+
+    <div>Equipo: {{instrumentType}} {{model}} N/S: {{serialNumber}}</div>
+    <br/>
+    <div> Fecha: {{datel}}</div>
+    <h3> Descripción: </h3>
+    <p> {{descriptions}} </p>
+    <h3> Comentarios: </h3>
+    <p> {{comments}} </p>
+</div>
+</body>
+</html>

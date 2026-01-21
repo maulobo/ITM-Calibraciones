@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diseño para imprimir en PDF</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 378px;
+        max-height: 113.3px;
+        justify-content: space-between;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 2px; /* Margen interno para separar el contenido de los bordes */
+      border: 4px solid #326699; /* Borde negro */
+      display: flex; /* Establecer el contenedor principal como flexbox */
+      padding-right: 15px;
+      padding-top: 10px;
+    }
+    .qr {
+      max-width: 100px;
+      height: auto;
+      margin-top: -7px;
+    }
+    .rectangles {
+      display: flex; /* Establecer los rectángulos como flexbox */
+      align-items: center; /* Centrar verticalmente los rectángulos con el logo */
+      float: right;
+      font-weight: bolder;
+      font-size: 25px;
+      color: #326699
+    }
+    .rectangle {
+      width: 1.3cm; /* Ancho del rectángulo */
+      height: 1cm; /* Alto del rectángulo */
+      border: 3px solid #326699; /* Borde negro */
+      display: flex; /* Establecer el contenido del rectángulo como flexbox */
+      justify-content: center; /* Centrar el contenido horizontalmente */
+      align-items: center; /* Centrar el contenido verticalmente */
+    }
+    .separator {
+      margin: 0 5px; /* Margen horizontal para separar los rectángulos con la barra */
+      font-size: 40px; /* Tamaño de la barra (sustituir por el tamaño deseado) */
+      color: #326699
+    }
+    .box{
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        justify-content: center;
+    }
+    span{
+        text-transform: uppercase;
+        color: #326699;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+        margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  
+    <img class="qr" src="data:image/png;base64,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" alt="QR Equipment" placeholder="blur">
+    <div class="box">
+        <span>Vencimiento de la calibración: </span>
+        <div class="rectangles">
+            <div class="rectangle">22</div>
+            <span class="separator">/</span>
+            <div class="rectangle">22</div>
+            <span class="separator">/</span>
+            <div class="rectangle">22</div>
+        </div>
+        <hr/>
+        <span>www.itmcalibraciones.com</span>
+
+    </div>
+    
+  
+</body>
+</html>

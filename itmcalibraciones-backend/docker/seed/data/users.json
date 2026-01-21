@@ -1,0 +1,27 @@
+[
+  {
+    "_id": {
+      "$oid": "6458cc839ed30bdbf0ac263a"
+    },
+    "email": "user@user.com",
+    "name": "Administrador",
+    "lastName": "admin",
+    "phoneNumber": "+542914029656",
+    "password": "$2b$10$V/5FTskjv8X3DzE2vW9bh.jPit0LqGd5Lneb/3C2mV.FfgGUHr60y",
+    "loginAttemps": 0,
+    "lastLogin": {
+      "$date": "2025-11-21T17:57:32.972Z"
+    },
+    "office": {
+      "$oid": "646b774074df8939ef9f0eab"
+    },
+    "createdAt": {
+      "$date": "2023-05-08T10:18:43.413Z"
+    },
+    "updatedAt": {
+      "$date": "2025-11-21T17:57:32.977Z"
+    },
+    "__v": 0,
+    "roles": ["ADMIN"]
+  }
+]
