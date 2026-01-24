@@ -2,8 +2,15 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { LoginPage } from "../modules/auth/pages/LoginPage";
 import { DashboardPage } from "../modules/dashboard/pages/DashboardPage";
 import { ServiceOrdersPage } from "../modules/service-orders/pages/ServiceOrdersPage";
+import { ClientsPage } from "../modules/clients/pages/ClientsPage";
+import { ClientDetailsPage } from "../modules/clients/pages/ClientDetailsPage";
+import { OfficesPage } from "../modules/clients/pages/OfficesPage";
+import { TechniciansPage } from "../modules/technicians/pages/TechniciansPage";
 import { MainLayout } from "../layout/MainLayout";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
+import { RoleRedirect } from "../components/layout/RoleRedirect";
+import { ClientLayout } from "../modules/client-portal/layout/ClientLayout";
+import { ClientDashboardPage } from "../modules/client-portal/pages/ClientDashboardPage";
 import { Box, Typography } from "@mui/material";
 
 // Placeholder generic page
@@ -25,10 +32,26 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />, // Wrap protected routes
     children: [
       {
+        index: true,
+        element: <RoleRedirect />,
+      },
+      // Client Portal Routes
+      {
+        path: "/portal",
+        element: <ClientLayout />,
+        children: [
+          {
+            path: "",
+            element: <ClientDashboardPage />,
+          },
+        ],
+      },
+      // Admin / Technical Routes
+      {
         element: <MainLayout />,
         children: [
           {
-            path: "/",
+            path: "/dashboard",
             element: <DashboardPage />,
           },
           {
@@ -37,7 +60,17 @@ export const router = createBrowserRouter([
           },
           {
             path: "/clients",
-            element: <PlaceholderPage title="Clientes" />,
+            element: <ClientsPage />,
+          },
+          {            path: "clients/:id",
+            element: <ClientDetailsPage />,
+          },
+          {            path: "/offices",
+            element: <OfficesPage />,
+          },
+          {
+            path: "/technicians",
+            element: <TechniciansPage />,
           },
           {
             path: "/inventory",

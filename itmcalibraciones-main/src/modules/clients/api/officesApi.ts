@@ -1,0 +1,26 @@
+import axios from "../../../api/axios";
+import { API_ROUTES } from "../../../api/apiRoutes";
+import type { CreateOrUpdateOfficeDTO, Office } from "../types/officeTypes";
+
+export const officesApi = {
+  createOrUpdate: async (data: CreateOrUpdateOfficeDTO): Promise<Office> => {
+    const response = await axios.post(API_ROUTES.OFFICES.ADD_OR_UPDATE, data);
+    return response.data;
+  },
+
+  getAll: async (): Promise<Office[]> => {
+    const response = await axios.get(API_ROUTES.OFFICES.GET_ALL);
+    return response.data;
+  },
+
+  getByClient: async (clientId: string): Promise<Office[]> => {
+    const response = await axios.get(
+      `${API_ROUTES.OFFICES.GET_ALL}?client=${clientId}`,
+    );
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await axios.delete(`${API_ROUTES.OFFICES.DELETE}/${id}`);
+  },
+};

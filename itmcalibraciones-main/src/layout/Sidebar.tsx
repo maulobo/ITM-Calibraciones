@@ -23,6 +23,8 @@ import {
   Settings,
   ChevronLeft,
   Menu,
+  Wrench,
+  MapPinned,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,13 +38,19 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { text: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/" },
+  {
+    text: "Dashboard",
+    icon: <LayoutDashboard size={22} />,
+    path: "/dashboard",
+  },
   {
     text: "Ordenes",
     icon: <ClipboardList size={22} />,
     path: "/service-orders",
   },
   { text: "Clientes", icon: <Users size={22} />, path: "/clients" },
+  { text: "Oficinas", icon: <MapPinned size={22} />, path: "/offices" },
+  { text: "Técnicos", icon: <Wrench size={22} />, path: "/technicians" },
   { text: "Inventario", icon: <Package size={22} />, path: "/inventory" },
   { text: "Presupuestos", icon: <Calculator size={22} />, path: "/budgets" },
   { text: "Logística", icon: <Truck size={22} />, path: "/logistics" },
@@ -73,7 +81,11 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
           backgroundColor: "background.paper", // Use theme variable
           borderRight: 1,
           borderColor: "divider", // Use theme variable
-          boxShadow: open ? (theme.palette.mode === 'light' ? "4px 0 24px 0 rgba(0,0,0,0.02)" : "none") : "none",
+          boxShadow: open
+            ? theme.palette.mode === "light"
+              ? "4px 0 24px 0 rgba(0,0,0,0.02)"
+              : "none"
+            : "none",
         },
       }}
     >
@@ -142,12 +154,16 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
                   px: 2.5,
                   borderRadius: 2,
                   bgcolor: isActive
-                    ? (theme.palette.mode === 'light' ? "rgba(21, 101, 192, 0.08)" : "rgba(90, 147, 237, 0.16)")
+                    ? theme.palette.mode === "light"
+                      ? "rgba(21, 101, 192, 0.08)"
+                      : "rgba(90, 147, 237, 0.16)"
                     : "transparent",
                   color: isActive ? "primary.main" : "text.secondary",
                   "&:hover": {
                     bgcolor: isActive
-                      ? (theme.palette.mode === 'light' ? "rgba(21, 101, 192, 0.12)" : "rgba(90, 147, 237, 0.24)")
+                      ? theme.palette.mode === "light"
+                        ? "rgba(21, 101, 192, 0.12)"
+                        : "rgba(90, 147, 237, 0.24)"
                       : "action.hover",
                     color: isActive ? "primary.main" : "text.primary",
                   },

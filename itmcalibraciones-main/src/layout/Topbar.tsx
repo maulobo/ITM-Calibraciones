@@ -20,7 +20,9 @@ import {
   Moon,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useColorMode } from "../theme/AppTheme";
+import { useAuthStore } from "../store/useAuthStore";
 
 const drawerWidth = 260; // Must match Sidebar.tsx
 const collapsedDrawerWidth = 70;
@@ -32,6 +34,8 @@ interface TopbarProps {
 export const Topbar = ({ sidebarOpen }: TopbarProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { toggleColorMode, mode } = useColorMode();
+  const navigate = useNavigate();
+  const { logout, user } = useAuthStore();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -39,6 +43,12 @@ export const Topbar = ({ sidebarOpen }: TopbarProps) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleClose();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -139,9 +149,11 @@ export const Topbar = ({ sidebarOpen }: TopbarProps) => {
             }}
           >
             <Box sx={{ px: 2, py: 1 }}>
-              <Typography variant="subtitle2">Mauro Lobo</Typography>
+              <Typography variant="subtitle2">
+                {user?.name || "Usuario"}
+              </Typography>
               <Typography variant="caption" color="text.secondary">
-                Admin
+                {user?.email || "usuario@correo.com"}
               </Typography>
             </Box>
             <Divider sx={{ my: 0.5 }} />
@@ -157,7 +169,7 @@ export const Topbar = ({ sidebarOpen }: TopbarProps) => {
               </ListItemIcon>
               Configuración
             </MenuItem>
-            <MenuItem onClick={handleClose} sx={{ color: "error.main" }}>
+            <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
               <ListItemIcon sx={{ color: "error.main" }}>
                 <LogOut size={16} />
               </ListItemIcon>
