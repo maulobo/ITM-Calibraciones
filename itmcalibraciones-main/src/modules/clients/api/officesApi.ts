@@ -14,9 +14,12 @@ export const officesApi = {
   },
 
   getByClient: async (clientId: string): Promise<Office[]> => {
-    const response = await axios.get(
-      `${API_ROUTES.OFFICES.GET_ALL}?client=${clientId}`,
-    );
+    const url = `${API_ROUTES.OFFICES.GET_ALL}?client=${clientId}`;
+    console.log('🔍 [officesApi] Fetching offices for client:', clientId);
+    console.log('🔍 [officesApi] Full URL:', url);
+    const response = await axios.get(url);
+    console.log('🔍 [officesApi] Response data:', response.data);
+    console.log('🔍 [officesApi] Number of offices:', response.data?.length);
     return response.data;
   },
 

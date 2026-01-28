@@ -8,8 +8,6 @@ import {
   Chip,
   Tabs,
   Tab,
-  Card,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -36,6 +34,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useClients } from "../hooks/useClients";
+import { useOfficesByClient } from "../hooks/useOffices";
+import { OfficeFormDialog } from "../components/OfficeFormDialog";
+import type { Office } from "../types/officeTypes";
 
 // Mock Data for Instruments
 const MOCK_INSTRUMENTS = [
@@ -75,22 +76,22 @@ const MOCK_INSTRUMENTS = [
 ];
 
 const MOCK_HISTORY = [
-    {
-      id: "ORD-001",
-      date: "2025-12-10",
-      instrument: "Manómetro Digital",
-      type: "Calibración",
-      status: "Completado",
-      technician: "Juan Tecnico",
-    },
-    {
-      id: "ORD-002",
-      date: "2025-11-05",
-      instrument: "Termómetro IR",
-      type: "Reparación",
-      status: "Completado",
-      technician: "Pedro Tecnico",
-    },
+  {
+    id: "ORD-001",
+    date: "2025-12-10",
+    instrument: "Manómetro Digital",
+    type: "Calibración",
+    status: "Completado",
+    technician: "Juan Tecnico",
+  },
+  {
+    id: "ORD-002",
+    date: "2025-11-05",
+    instrument: "Termómetro IR",
+    type: "Reparación",
+    status: "Completado",
+    technician: "Pedro Tecnico",
+  },
 ];
 
 interface TabPanelProps {
@@ -157,11 +158,27 @@ export const ClientDetailsPage = () => {
   const navigate = useNavigate();
   const { data: clients } = useClients();
   const [tabValue, setTabValue] = useState(0);
+  const [officeDialogOpen, setOfficeDialogOpen] = useState(false);
+  const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
 
   const client = clients?.find((c) => c.id === id || c._id === id);
+  
+  // Fetch offices for this client
+  const clientId = client?._id || client?.id || "";
+  const { data: offices = [], isLoading: isLoadingOffices } = useOfficesByClient(clientId);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+  };
+
+  const handleCreateOffice = () => {
+    setSelectedOffice(null);
+    setOfficeDialogOpen(true);
+  };
+
+  const handleEditOffice = (office: Office) => {
+    setSelectedOffice(office);
+    setOfficeDialogOpen(true);
   };
 
   if (!client && clients) {
@@ -204,199 +221,470 @@ export const ClientDetailsPage = () => {
 
       <Grid container spacing={3}>
         {/* Left Column: Client Info */}
-        <Grid item xs={12} md={4} lg={3}>
-          <Paper elevation={0} sx={{ p: 0, overflow: "hidden", border: 1, borderColor: "divider", borderRadius: 3 }}>
-            <Box sx={{ p: 3, bgcolor: "primary.main", color: "primary.contrastText" }}>
-                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                    <Avatar sx={{ width: 80, height: 80, bgcolor: "white", color: "primary.main", fontSize: "2rem", fontWeight: "bold" }}>
-                        {client.socialReason.charAt(0)}
-                    </Avatar>
-                </Box>
-                <Typography variant="h6" align="center" fontWeight="bold">
-                    {client.socialReason}
-                </Typography>
-                 <Typography variant="body2" align="center" sx={{ opacity: 0.9 }}>
-                    {client.cityData?.name || client.cityName}, {client.stateData?.nombre || client.stateName}
-                </Typography>
+        <Grid size={{ xs: 12, md: 4, lg: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 0,
+              overflow: "hidden",
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 3,
+            }}
+          >
+            <Box
+              sx={{
+                p: 3,
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: "white",
+                    color: "primary.main",
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {client.socialReason.charAt(0)}
+                </Avatar>
+              </Box>
+              <Typography variant="h6" align="center" fontWeight="bold">
+                {client.socialReason}
+              </Typography>
+              <Typography variant="body2" align="center" sx={{ opacity: 0.9 }}>
+                {client.cityData?.name || client.cityName},{" "}
+                {client.stateData?.nombre || client.stateName}
+              </Typography>
             </Box>
-            
+
             <Box sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                    <Box>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                            EMAIL
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                            <Mail size={16} className="text-gray-500" />
-                            <Typography variant="body2">{client.email || "No registrado"}</Typography>
-                        </Box>
-                    </Box>
-                    <Divider />
-                    <Box>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                            TELÉFONO
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                            <Phone size={16} className="text-gray-500" />
-                            <Typography variant="body2">{client.phoneNumber || "No registrado"}</Typography>
-                        </Box>
-                    </Box>
-                     <Divider />
-                    <Box>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                            DIRECCIÓN
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                            <MapPin size={16} className="text-gray-500" />
-                            <Typography variant="body2">{client.adress || "No registrada"}</Typography>
-                        </Box>
-                    </Box>
-                    <Divider />
-                     <Box>
-                        <Typography variant="caption" color="text.secondary" fontWeight="bold">
-                            RESPONSABLE
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-                            <Building2 size={16} className="text-gray-500" />
-                            <Typography variant="body2">{client.responsable || "No registrado"}</Typography>
-                        </Box>
-                    </Box>
-                </Stack>
+              <Stack spacing={2}>
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    fontWeight="bold"
+                  >
+                    EMAIL
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 0.5,
+                    }}
+                  >
+                    <Mail size={16} className="text-gray-500" />
+                    <Typography variant="body2">
+                      {client.email || "No registrado"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Divider />
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    fontWeight="bold"
+                  >
+                    TELÉFONO
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 0.5,
+                    }}
+                  >
+                    <Phone size={16} className="text-gray-500" />
+                    <Typography variant="body2">
+                      {client.phoneNumber || "No registrado"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Divider />
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    fontWeight="bold"
+                  >
+                    DIRECCIÓN
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 0.5,
+                    }}
+                  >
+                    <MapPin size={16} className="text-gray-500" />
+                    <Typography variant="body2">
+                      {client.adress || "No registrada"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Divider />
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    fontWeight="bold"
+                  >
+                    RESPONSABLE
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 0.5,
+                    }}
+                  >
+                    <Building2 size={16} className="text-gray-500" />
+                    <Typography variant="body2">
+                      {client.responsable || "No registrado"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Stack>
             </Box>
           </Paper>
 
-           {/* Contacts Card */}
-           <Paper elevation={0} sx={{ p: 3, mt: 3, border: 1, borderColor: "divider", borderRadius: 3 }}>
-                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
-                    Contactos Adicionales
-                </Typography>
-                {client.contacts && client.contacts.length > 0 ? (
-                    <Stack spacing={2}>
-                        {client.contacts.map((contact, index) => (
-                            <Box key={index} sx={{ p: 1.5, bgcolor: "background.default", borderRadius: 2 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">{contact.name}</Typography>
-                                {contact.role && (
-                                     <Typography variant="caption" color="text.secondary" display="block">{contact.role}</Typography>
-                                )}
-                                <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                        <Mail size={14} className="text-gray-400" />
-                                        <Typography variant="caption">{contact.email}</Typography>
-                                    </Box>
-                                    {contact.phone && (
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                            <Phone size={14} className="text-gray-400" />
-                                            <Typography variant="caption">{contact.phone}</Typography>
-                                        </Box>
-                                    )}
-                                </Box>
-                            </Box>
-                        ))}
-                    </Stack>
-                ) : (
-                    <Typography variant="body2" color="text.secondary">No hay contactos adicionales.</Typography>
-                )}
-           </Paper>
+          {/* Contacts Card */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mt: 3,
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 3,
+            }}
+          >
+            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              Contactos Adicionales
+            </Typography>
+            {client.contacts && client.contacts.length > 0 ? (
+              <Stack spacing={2}>
+                {client.contacts.map((contact, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      p: 1.5,
+                      bgcolor: "background.default",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {contact.name}
+                    </Typography>
+                    {contact.role && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                      >
+                        {contact.role}
+                      </Typography>
+                    )}
+                    <Box
+                      sx={{
+                        mt: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Mail size={14} className="text-gray-400" />
+                        <Typography variant="caption">
+                          {contact.email}
+                        </Typography>
+                      </Box>
+                      {contact.phone && (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Phone size={14} className="text-gray-400" />
+                          <Typography variant="caption">
+                            {contact.phone}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No hay contactos adicionales.
+              </Typography>
+            )}
+          </Paper>
         </Grid>
 
         {/* Right Column: Details Tabs */}
-        <Grid item xs={12} md={8} lg={9}>
-          <Paper elevation={0} sx={{ border: 1, borderColor: "divider", borderRadius: 3 }}>
+        <Grid size={{ xs: 12, md: 8, lg: 9 }}>
+          <Paper
+            elevation={0}
+            sx={{ border: 1, borderColor: "divider", borderRadius: 3 }}
+          >
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <Tabs value={tabValue} onChange={handleTabChange} aria-label="client details tabs">
-                <Tab label="Instrumentos" icon={<Wrench size={18} />} iconPosition="start" />
-                <Tab label="Historial de Servicios" icon={<FileText size={18} />} iconPosition="start" />
-                <Tab label="Configuración" icon={<Settings size={18} />} iconPosition="start" />
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="client details tabs"
+              >
+                <Tab
+                  label="Instrumentos"
+                  icon={<Wrench size={18} />}
+                  iconPosition="start"
+                />
+                <Tab
+                  label="Oficinas"
+                  icon={<Building2 size={18} />}
+                  iconPosition="start"
+                />
+                <Tab
+                  label="Historial de Servicios"
+                  icon={<FileText size={18} />}
+                  iconPosition="start"
+                />
+                <Tab
+                  label="Configuración"
+                  icon={<Settings size={18} />}
+                  iconPosition="start"
+                />
               </Tabs>
             </Box>
 
             {/* Instruments Tab */}
             <CustomTabPanel value={tabValue} index={0}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, px: 3 }}>
-                    <Typography variant="h6" fontWeight="bold">Instrumentos Registrados</Typography>
-                    <Button variant="contained" size="small" startIcon={<Wrench size={16} />}>
-                        Registrar Instrumento
-                    </Button>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 3,
+                  px: 3,
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  Instrumentos Registrados
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Wrench size={16} />}
+                >
+                  Registrar Instrumento
+                </Button>
+              </Box>
+
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Tag</TableCell>
+                      <TableCell>Instrumento</TableCell>
+                      <TableCell>Marca / Modelo</TableCell>
+                      <TableCell>Nº Serie</TableCell>
+                      <TableCell>Próx. Calibración</TableCell>
+                      <TableCell align="right">Estado</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {MOCK_INSTRUMENTS.map((inst) => (
+                      <TableRow key={inst.id} hover>
+                        <TableCell
+                          sx={{ fontWeight: "medium", color: "primary.main" }}
+                        >
+                          {inst.tag}
+                        </TableCell>
+                        <TableCell>{inst.name}</TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{inst.brand}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {inst.model}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>{inst.serial}</TableCell>
+                        <TableCell>{inst.nextCalibration}</TableCell>
+                        <TableCell align="right">
+                          <StatusChip status={inst.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CustomTabPanel>
+
+            {/* Offices Tab - NEW */}
+            <CustomTabPanel value={tabValue} index={1}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 3,
+                  px: 3,
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  Oficinas del Cliente
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Building2 size={16} />}
+                  onClick={handleCreateOffice}
+                >
+                  Nueva Oficina
+                </Button>
+              </Box>
+
+              {isLoadingOffices ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                  <Typography>Cargando oficinas...</Typography>
                 </Box>
-                
+              ) : offices.length === 0 ? (
+                <Box sx={{ px: 3, textAlign: "center", py: 8 }}>
+                  <Building2 size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    No hay oficinas registradas
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Agregá la primera oficina para este cliente
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<Building2 size={16} />}
+                    onClick={handleCreateOffice}
+                    sx={{ mt: 3 }}
+                  >
+                    Nueva Oficina
+                  </Button>
+                </Box>
+              ) : (
                 <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Tag</TableCell>
-                                <TableCell>Instrumento</TableCell>
-                                <TableCell>Marca / Modelo</TableCell>
-                                <TableCell>Nº Serie</TableCell>
-                                <TableCell>Próx. Calibración</TableCell>
-                                <TableCell align="right">Estado</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {MOCK_INSTRUMENTS.map((inst) => (
-                                <TableRow key={inst.id} hover>
-                                    <TableCell sx={{ fontWeight: "medium", color: "primary.main" }}>{inst.tag}</TableCell>
-                                    <TableCell>{inst.name}</TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2">{inst.brand}</Typography>
-                                        <Typography variant="caption" color="text.secondary">{inst.model}</Typography>
-                                    </TableCell>
-                                    <TableCell>{inst.serial}</TableCell>
-                                    <TableCell>{inst.nextCalibration}</TableCell>
-                                    <TableCell align="right">
-                                        <StatusChip status={inst.status} />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Nombre</TableCell>
+                        <TableCell>Ubicación</TableCell>
+                        <TableCell>Dirección</TableCell>
+                        <TableCell>Responsable</TableCell>
+                        <TableCell>Teléfono</TableCell>
+                        <TableCell align="right">Acciones</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {offices.map((office) => (
+                        <TableRow key={office._id || office.id} hover>
+                          <TableCell sx={{ fontWeight: "medium" }}>
+                            {office.name}
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                              <MapPin size={14} />
+                              {office.cityName || "-"}, {office.stateName || "-"}
+                            </Box>
+                          </TableCell>
+                          <TableCell>{office.adress || "-"}</TableCell>
+                          <TableCell>{office.responsable || "-"}</TableCell>
+                          <TableCell>{office.phoneNumber || "-"}</TableCell>
+                          <TableCell align="right">
+                            <Button
+                              size="small"
+                              onClick={() => handleEditOffice(office)}
+                            >
+                              Editar
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </TableContainer>
+              )}
             </CustomTabPanel>
 
             {/* Services History Tab */}
-            <CustomTabPanel value={tabValue} index={1}>
-                <Box sx={{ px: 3 }}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>Historial de Servicios</Typography>
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Nº Orden</TableCell>
-                                    <TableCell>Fecha</TableCell>
-                                    <TableCell>Instrumento</TableCell>
-                                    <TableCell>Tipo</TableCell>
-                                    <TableCell>Técnico</TableCell>
-                                    <TableCell align="right">Estado</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {MOCK_HISTORY.map((order) => (
-                                    <TableRow key={order.id} hover>
-                                        <TableCell sx={{ fontWeight: "medium" }}>{order.id}</TableCell>
-                                        <TableCell>{order.date}</TableCell>
-                                        <TableCell>{order.instrument}</TableCell>
-                                        <TableCell>{order.type}</TableCell>
-                                        <TableCell>{order.technician}</TableCell>
-                                        <TableCell align="right">
-                                            <Chip label={order.status} size="small" color="success" variant="outlined" />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
+            <CustomTabPanel value={tabValue} index={2}>
+              <Box sx={{ px: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                  Historial de Servicios
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Nº Orden</TableCell>
+                        <TableCell>Fecha</TableCell>
+                        <TableCell>Instrumento</TableCell>
+                        <TableCell>Tipo</TableCell>
+                        <TableCell>Técnico</TableCell>
+                        <TableCell align="right">Estado</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {MOCK_HISTORY.map((order) => (
+                        <TableRow key={order.id} hover>
+                          <TableCell sx={{ fontWeight: "medium" }}>
+                            {order.id}
+                          </TableCell>
+                          <TableCell>{order.date}</TableCell>
+                          <TableCell>{order.instrument}</TableCell>
+                          <TableCell>{order.type}</TableCell>
+                          <TableCell>{order.technician}</TableCell>
+                          <TableCell align="right">
+                            <Chip
+                              label={order.status}
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
             </CustomTabPanel>
 
-             {/* Settings Tab */}
-             <CustomTabPanel value={tabValue} index={2}>
-                <Box sx={{ px: 3 }}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>Configuración del Cliente</Typography>
-                     <Typography color="text.secondary">Opciones de configuración específicas para {client.socialReason}.</Typography>
-                </Box>
-             </CustomTabPanel>
+            {/* Settings Tab */}
+            <CustomTabPanel value={tabValue} index={3}>
+              <Box sx={{ px: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+                  Configuración del Cliente
+                </Typography>
+                <Typography color="text.secondary">
+                  Opciones de configuración específicas para{" "}
+                  {client.socialReason}.
+                </Typography>
+              </Box>
+            </CustomTabPanel>
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Office Form Dialog */}
+      <OfficeFormDialog
+        open={officeDialogOpen}
+        onClose={() => setOfficeDialogOpen(false)}
+        office={selectedOffice}
+      />
     </Box>
   );
 };

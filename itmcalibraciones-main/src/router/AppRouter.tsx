@@ -11,6 +11,10 @@ import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import { RoleRedirect } from "../components/layout/RoleRedirect";
 import { ClientLayout } from "../modules/client-portal/layout/ClientLayout";
 import { ClientDashboardPage } from "../modules/client-portal/pages/ClientDashboardPage";
+import { EquipmentTypesPage } from "../modules/catalog/pages/EquipmentTypesPage";
+import { BrandsPage } from "../modules/catalog/pages/BrandsPage";
+import { ModelsPage } from "../modules/catalog/pages/ModelsPage";
+import { CreateServiceOrderPage } from "../modules/service-orders/pages/CreateServiceOrderPage";
 import { Box, Typography } from "@mui/material";
 
 // Placeholder generic page
@@ -59,6 +63,10 @@ export const router = createBrowserRouter([
             element: <ServiceOrdersPage />,
           },
           {
+            path: "/service-orders/new",
+            element: <CreateServiceOrderPage />,
+          },
+          {
             path: "/clients",
             element: <ClientsPage />,
           },
@@ -87,6 +95,18 @@ export const router = createBrowserRouter([
           {
             path: "/settings",
             element: <PlaceholderPage title="Configuración" />,
+          },
+          {
+            path: "/params/types",
+            element: <EquipmentTypesPage />,
+          },
+          {
+            path: "/params/brands",
+            element: <BrandsPage />,
+          },
+          {
+            path: "/params/models",
+            element: <ModelsPage />,
           },
         ],
       },

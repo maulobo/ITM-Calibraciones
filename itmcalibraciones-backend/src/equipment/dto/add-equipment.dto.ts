@@ -1,88 +1,83 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import {
   IsBoolean,
   IsEnum,
   IsMongoId,
-  IsNotEmpty, IsOptional, IsString
-} from 'class-validator';
-import { Types } from 'mongoose';
-import { EquipmentStateEnum } from '../const.enum';
-  
-  export class AddEquipmentDTO {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from "class-validator";
+import { Types } from "mongoose";
+import { EquipmentStateEnum } from "../const.enum";
 
-      @IsMongoId()
-      @IsOptional()
-      @ApiProperty()
-      id?: Types.ObjectId;
+export class AddEquipmentDTO {
+  @IsMongoId()
+  @IsOptional()
+  @ApiProperty()
+  id?: Types.ObjectId;
 
-      @Transform(({ value }) => String(value))
-      @IsString()
-      @IsNotEmpty()
-      @ApiProperty()
-      serialNumber: string;
+  @Transform(({ value }) => String(value))
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  serialNumber: string;
 
-      @IsString()
-      @IsOptional()
-      @ApiProperty()
-      customSerialNumber?: string;
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  customSerialNumber?: string;
 
-      @IsString()
-      @IsOptional()
-      @ApiProperty()
-      description?: string;
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  description?: string;
 
-      @Transform(({ value }) => String(value))
-      @IsString()
-      @IsOptional()
-      @ApiProperty()
-      range?: string;
+  @Transform(({ value }) => String(value))
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  range?: string;
 
-      @IsOptional()
-      @ApiProperty()
-      @IsEnum(EquipmentStateEnum)
-      state?: EquipmentStateEnum;
+  @IsOptional()
+  @ApiProperty()
+  @IsEnum(EquipmentStateEnum)
+  state?: EquipmentStateEnum;
 
-      @IsString()
-      @IsOptional()
-      @ApiProperty()
-      calibrationDate?: Date;
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  calibrationDate?: Date;
 
-      @IsString()
-      @IsOptional()
-      @ApiProperty()
-      calibrationExpirationDate?: Date;
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  calibrationExpirationDate?: Date;
 
-      @IsMongoId()
-      @IsNotEmpty()
-      @ApiProperty()
-      model: Types.ObjectId;
+  @IsMongoId()
+  @IsNotEmpty()
+  @ApiProperty()
+  model: Types.ObjectId;
 
-      @IsMongoId()
-      @IsNotEmpty()
-      @ApiProperty()
-      office: Types.ObjectId;
+  @IsMongoId()
+  @IsNotEmpty()
+  @ApiProperty()
+  office: Types.ObjectId;
 
-      @IsMongoId()
-      @IsNotEmpty()
-      @ApiProperty()
-      instrumentType: Types.ObjectId;
+  @IsOptional()
+  @ApiProperty()
+  label?: string;
 
-      @IsOptional()
-      @ApiProperty()
-      label?: string;
+  @IsOptional()
+  @ApiProperty()
+  qr?: string;
 
-      @IsOptional()
-      @ApiProperty()
-      qr?: string;
+  @IsOptional()
+  @ApiProperty()
+  @IsBoolean()
+  outOfService?: boolean;
 
-      @IsOptional()
-      @ApiProperty()
-      @IsBoolean()
-      outOfService?: boolean;
-
-      @IsOptional()
-      @IsBoolean()
-      sendEmailNotification?: boolean;
-
+  @IsOptional()
+  @IsBoolean()
+  sendEmailNotification?: boolean;
 }

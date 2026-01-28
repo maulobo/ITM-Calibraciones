@@ -528,7 +528,49 @@ export const ClientFormDialog = ({
                     </Box>
                   </Stack>
                 </Grid>
-
+                {/* Aviso de Creación Automática de Oficina */}
+                <Grid size={{ xs: 12 }}>
+                  <Box
+                    sx={{
+                      mt: 1,
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: alpha(theme.palette.info.main, 0.08),
+                      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                      display: "flex",
+                      alignItems: "start",
+                      gap: 1.5,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        p: 0.5,
+                        borderRadius: "50%",
+                        bgcolor: "info.main",
+                        color: "white",
+                        display: "flex",
+                      }}
+                    >
+                      <AlertCircle size={14} />
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        color="info.main"
+                        fontWeight={600}
+                        gutterBottom
+                      >
+                        Creación Automática de Oficina Central
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Al crear el cliente, se generará autómaticamente una{" "}
+                        <b>Oficina Central</b> utilizando esta dirección fiscal.
+                        Esto es necesario para registrar los usuarios iniciales.
+                        Podrás agregar más sucursales luego.
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
                 {/* Sección de Contactos Adicionales */}
                 <Grid size={{ xs: 12 }}>
                   <Divider sx={{ my: 2 }} />

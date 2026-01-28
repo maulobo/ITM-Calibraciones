@@ -79,9 +79,6 @@ export class EquipmentEntity extends Document {
   @Prop({ required: true, ref: "Office" })
   office: Types.ObjectId;
 
-  @Prop({ required: true, ref: "EquipmentTypes" })
-  instrumentType: Types.ObjectId;
-
   @Prop()
   label?: string;
 

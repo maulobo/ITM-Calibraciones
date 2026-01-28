@@ -1,8 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEmail, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Types } from 'mongoose';
-import { UserRoles } from 'src/common/enums/role.enum';
-
+import { ApiProperty } from "@nestjs/swagger";
+import {
+  IsArray,
+  IsEmail,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from "class-validator";
+import { Types } from "mongoose";
+import { UserRoles } from "src/common/enums/role.enum";
 
 export class CreateUserDTO {
   @IsNotEmpty()
@@ -41,13 +47,12 @@ export class CreateUserDTO {
   roles?: UserRoles[];
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsMongoId()
-  office: Types.ObjectId;
+  office?: Types.ObjectId;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
   area: string;
-
 }

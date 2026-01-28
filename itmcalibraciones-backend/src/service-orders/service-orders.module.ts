@@ -14,8 +14,8 @@ import {
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: ServiceOrderEntity.name, schema: ServiceOrderSchema },
-      { name: EquipmentEntity.name, schema: EquipmentSchema },
+      { name: "ServiceOrder", schema: ServiceOrderSchema },
+      { name: "Equipment", schema: EquipmentSchema },
     ]),
   ],
   controllers: [ServiceOrdersController],

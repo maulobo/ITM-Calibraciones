@@ -16,8 +16,19 @@ export interface Office {
   id: string;
   _id?: string;
   name: string;
-  client: string;
+  client: string | {
+    _id: string;
+    id?: string;
+    socialReason: string;
+    cuit: string;
+    email?: string;
+    responsable?: string;
+    phoneNumber?: string;
+    adress?: string;
+  };
   city: string;
+  cityName?: string;
+  stateName?: string;
   responsable?: string;
   phoneNumber?: string;
   adress?: string;

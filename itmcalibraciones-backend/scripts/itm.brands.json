@@ -1,0 +1,819 @@
+[{
+  "_id": {
+    "$oid": "6538315835254fc96a692f60"
+  },
+  "name": "Waukesha",
+  "createdAt": {
+    "$date": "2023-10-24T21:04:24.243Z"
+  },
+  "updatedAt": {
+    "$date": "2023-10-24T21:04:24.243Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "654390dc35254fc96a693062"
+  },
+  "name": "3M",
+  "createdAt": {
+    "$date": "2023-11-02T12:06:52.294Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-02T12:06:52.294Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6543917635254fc96a69309e"
+  },
+  "name": "GMI",
+  "createdAt": {
+    "$date": "2023-11-02T12:09:26.347Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-02T12:09:26.347Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "654aa76b532948a408bdf8e0"
+  },
+  "name": "Bokang",
+  "createdAt": {
+    "$date": "2023-11-07T21:08:59.345Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-07T21:08:59.345Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65959b15ec7ce63acd9cc0d2"
+  },
+  "name": "Lutron",
+  "createdAt": {
+    "$date": "2024-01-03T17:36:21.887Z"
+  },
+  "updatedAt": {
+    "$date": "2024-01-03T17:36:21.887Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6595a034ec7ce63acd9cc208"
+  },
+  "name": "Testo",
+  "createdAt": {
+    "$date": "2024-01-03T17:58:12.390Z"
+  },
+  "updatedAt": {
+    "$date": "2024-01-03T17:58:12.390Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65c523290673a087b5e74759"
+  },
+  "name": "Foxboro",
+  "createdAt": {
+    "$date": "2024-02-08T18:53:29.021Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-08T18:53:29.021Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420212"
+  },
+  "name": "Dallas",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.101Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.101Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420214"
+  },
+  "name": "Fisher",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.103Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.103Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420218"
+  },
+  "name": "Spirax Sarco",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.106Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.106Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42021a"
+  },
+  "name": "Epta",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.108Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.108Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420230"
+  },
+  "name": "Ashcroft",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.169Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.169Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420248"
+  },
+  "name": "Weisz",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.192Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.192Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42024c"
+  },
+  "name": "Winters",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.204Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.204Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42024f"
+  },
+  "name": "Bacharach",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.206Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.206Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420253"
+  },
+  "name": "ITM",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.210Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.210Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420255"
+  },
+  "name": "Mirbla",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.211Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.211Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42025b"
+  },
+  "name": "Fluke",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.221Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.221Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42025f"
+  },
+  "name": "Axel Semrau",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.224Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.224Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420261"
+  },
+  "name": "Metrel",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.225Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.225Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420265"
+  },
+  "name": "ELCOMETER",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.234Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.234Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420267"
+  },
+  "name": "DMQ",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.235Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.235Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420269"
+  },
+  "name": "Krautkramer",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.247Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.247Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42026b"
+  },
+  "name": "Tinker Rasor",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.248Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.248Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42026d"
+  },
+  "name": "Electrothermal",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.250Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.250Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42026f"
+  },
+  "name": "Wika",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.251Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.251Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420273"
+  },
+  "name": "Bourdon Sedeme",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.254Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.254Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420277"
+  },
+  "name": "Keller",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.258Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.258Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42027b"
+  },
+  "name": "Tes",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.261Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.261Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42027e"
+  },
+  "name": "MSA",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.265Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.265Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420282"
+  },
+  "name": "Scott",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.277Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.277Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420288"
+  },
+  "name": "Detcon",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.282Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.282Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202a2"
+  },
+  "name": "Honeywell",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.319Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.319Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202c0"
+  },
+  "name": "Drager",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.358Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.358Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202c4"
+  },
+  "name": "mPower Electronics",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.379Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.379Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202cc"
+  },
+  "name": "Schutz Messtechnik",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.391Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.391Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202cf"
+  },
+  "name": "Tek Know",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.399Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.399Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202d3"
+  },
+  "name": "Beamex",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.402Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.402Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202d5"
+  },
+  "name": "Huberg",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.404Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.404Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202d7"
+  },
+  "name": "Gmi",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.412Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.412Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202da"
+  },
+  "name": "Swagelok",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.417Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.417Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202de"
+  },
+  "name": "Worcester",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.423Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.423Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202e9"
+  },
+  "name": "Farinola",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.432Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.432Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202f3"
+  },
+  "name": "Candamio",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.443Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.443Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4202f5"
+  },
+  "name": "Danfoss",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.444Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.444Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420307"
+  },
+  "name": "Kyoritsu",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.460Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.460Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42031f"
+  },
+  "name": "Odorite",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.486Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.486Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42032d"
+  },
+  "name": "MIrbla",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.505Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.505Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420341"
+  },
+  "name": "Chem Oli",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.522Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.522Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420347"
+  },
+  "name": "Waree",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.526Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.526Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42034d"
+  },
+  "name": "Nuova Fima",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.531Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.531Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420351"
+  },
+  "name": "Trevisan",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.533Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.533Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d42036d"
+  },
+  "name": "Beyca",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.558Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.558Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420384"
+  },
+  "name": "Teledyne",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.593Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.593Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420386"
+  },
+  "name": "Simtronics",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.594Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.594Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4203c7"
+  },
+  "name": "Libus",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.688Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.688Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4203c9"
+  },
+  "name": "Instrutemp",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.689Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.689Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4203de"
+  },
+  "name": "BW",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.708Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.708Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4203e6"
+  },
+  "name": "Senko",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.719Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.719Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d4203ec"
+  },
+  "name": "Riken Keiki",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.725Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.725Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c1fc37f661f6d420406"
+  },
+  "name": "Ametek",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:19.752Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:19.752Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6618423328afe3a14443447f"
+  },
+  "name": "Luqstoff",
+  "createdAt": {
+    "$date": "2024-04-11T20:04:03.930Z"
+  },
+  "updatedAt": {
+    "$date": "2024-04-11T20:04:03.930Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "661d3bd928afe3a144434674"
+  },
+  "name": "SCHWYS",
+  "createdAt": {
+    "$date": "2024-04-15T14:38:17.902Z"
+  },
+  "updatedAt": {
+    "$date": "2024-04-15T14:38:17.902Z"
+  },
+  "__v": 0
+}]

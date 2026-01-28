@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -27,20 +27,30 @@ import { ServiceOrdersModule } from "./service-orders/service-orders.module";
 import { TechnicalInformModule } from "./technical-inform/technical-inform.module";
 import { UsersModule } from "./users/users.module";
 
-const ENV = process.env.NODE_ENV;
-
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [!ENV ? ".env" : `.env.${ENV}`],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, ".env"],
       isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "files"),
     }),
     ScheduleModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URL, {
-      autoIndex: true,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const mongoUrl = configService.get<string>("MONGO_URL");
+        console.log(
+          "🔍 DEBUG: Attempting to connect to MongoDB with URL:",
+          mongoUrl,
+        );
+        return {
+          uri: mongoUrl,
+          autoIndex: true,
+        };
+      },
+      inject: [ConfigService],
     }),
 
     ImageUploadModule,

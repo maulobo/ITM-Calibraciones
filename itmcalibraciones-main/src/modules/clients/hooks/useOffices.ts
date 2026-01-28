@@ -24,7 +24,17 @@ export const useOfficeMutation = () => {
   return useMutation({
     mutationFn: officesApi.createOrUpdate,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: OFFICES_KEY });
+      // Invalidate all queries that start with ["offices"]
+      // This will refresh both useAllOffices and useOfficesByClient
+      queryClient.invalidateQueries({ 
+        queryKey: OFFICES_KEY,
+        exact: false // This ensures it matches all queries starting with ["offices"]
+      });
+      
+      // Also invalidate all-offices specifically
+      queryClient.invalidateQueries({ 
+        queryKey: [...OFFICES_KEY, "all"]
+      });
     },
   });
 };

@@ -1,0 +1,634 @@
+[{
+  "_id": {
+    "$oid": "654390d135254fc96a69305e"
+  },
+  "type": "Filtros Gas 3M",
+  "description": "Filtros de gasa",
+  "createdAt": {
+    "$date": "2023-11-02T12:06:41.563Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-02T12:06:41.563Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6543916e35254fc96a69309a"
+  },
+  "type": "Explosimetro",
+  "description": "Detector de gas",
+  "createdAt": {
+    "$date": "2023-11-02T12:09:18.988Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-02T12:09:18.988Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "654aa756532948a408bdf8dc"
+  },
+  "type": "Manómetro de tensiómetro",
+  "description": "Manómetro que mide la presión de una persona.",
+  "createdAt": {
+    "$date": "2023-11-07T21:08:38.269Z"
+  },
+  "updatedAt": {
+    "$date": "2023-11-07T21:08:38.269Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65959b07ec7ce63acd9cc0c8"
+  },
+  "type": "Anemómetro",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-01-03T17:36:07.274Z"
+  },
+  "updatedAt": {
+    "$date": "2024-01-03T17:36:07.274Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6595a022ec7ce63acd9cc1fe"
+  },
+  "type": "Termohigrómetro",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-01-03T17:57:54.952Z"
+  },
+  "updatedAt": {
+    "$date": "2024-01-03T17:57:54.952Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6595a082ec7ce63acd9cc230"
+  },
+  "type": "Multímetro",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-01-03T17:59:30.760Z"
+  },
+  "updatedAt": {
+    "$date": "2024-01-03T17:59:30.760Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65c523210673a087b5e74755"
+  },
+  "type": "Válvula automática de control",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-02-08T18:53:21.531Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-08T18:53:21.531Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420555"
+  },
+  "type": "Registrador",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.883Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.883Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420559"
+  },
+  "type": "Odorímetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.888Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.888Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420565"
+  },
+  "type": "Medidor de puesta a tierra",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.904Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.904Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420569"
+  },
+  "type": "Medidor de espesores",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.907Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.907Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d42056b"
+  },
+  "type": "Manto calefactor",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.908Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.908Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d42056d"
+  },
+  "type": "Manómetro digital",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.911Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.911Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420587"
+  },
+  "type": "Calibrador de temperatura",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.955Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.955Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420589"
+  },
+  "type": "Calibrador de presión",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.958Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.958Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420590"
+  },
+  "type": "Bomboleta",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.972Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.972Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420592"
+  },
+  "type": "Actuador neumático",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.974Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.974Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420596"
+  },
+  "type": "Válvula de seguridad",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.977Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.977Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420598"
+  },
+  "type": "Torquímetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.978Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.978Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d42059e"
+  },
+  "type": "Válvula de control",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.982Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.982Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d4205a0"
+  },
+  "type": "Telurimetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.983Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.983Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c21c37f661f6d42060d"
+  },
+  "type": "Buscafugas",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:21.150Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:21.150Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c20c37f661f6d420573"
+  },
+  "type": "Luxómetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:20.915Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:20.915Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c21c37f661f6d420662"
+  },
+  "type": "Medidor de aislación",
+  "createdAt": {
+    "$date": "2024-02-22T14:37:21.269Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:37:21.269Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420ccf"
+  },
+  "type": "Vacuómetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.364Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.364Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420cd1"
+  },
+  "type": "Odorimetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.379Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.379Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420cdb"
+  },
+  "type": "Explosímetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.400Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.400Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420cfc"
+  },
+  "type": "Detector de metanol",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.474Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.474Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420d04"
+  },
+  "type": "Detector de Hexano",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.485Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.485Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420d1c"
+  },
+  "type": "Detector de HCl",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.526Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.526Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420d43"
+  },
+  "type": "Termostato",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.591Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.591Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c84c37f661f6d420d4f"
+  },
+  "type": "Presóstato",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:00.607Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:00.607Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420e6d"
+  },
+  "type": "Meghometro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.592Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.592Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420e6f"
+  },
+  "type": "Medidor de TBM",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.596Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.596Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420e88"
+  },
+  "type": "Termómetro bimetálico",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.667Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.667Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420ed2"
+  },
+  "type": "Detector Mezcla explosiva",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.850Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.850Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420ed6"
+  },
+  "type": "Manometro digital de presión",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.859Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.859Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c85c37f661f6d420ee5"
+  },
+  "type": "Manómetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:01.896Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:01.896Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d420f34"
+  },
+  "type": "Detector de gas",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.104Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.104Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d420f54"
+  },
+  "type": "Decibelímetro",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.211Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.211Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d420f5a"
+  },
+  "type": "Calibrador de campo y comunicador",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.235Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.235Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d420f8f"
+  },
+  "type": "Detector de fugas",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.327Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.327Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d420ffe"
+  },
+  "type": "Calibrador de proceso",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.506Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.506Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d421035"
+  },
+  "type": "Indicador de rotacion de fase",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.594Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.594Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65d75c86c37f661f6d421037"
+  },
+  "type": "Detector de mezcla explosiva",
+  "createdAt": {
+    "$date": "2024-02-22T14:39:02.599Z"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:39:02.599Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65f06f23c37f661f6d421f3a"
+  },
+  "type": "Termómetro",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-03-12T15:05:07.194Z"
+  },
+  "updatedAt": {
+    "$date": "2024-03-12T15:05:07.194Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65f06f5dc37f661f6d421f56"
+  },
+  "type": "Termómetro",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-03-12T15:06:05.704Z"
+  },
+  "updatedAt": {
+    "$date": "2024-03-12T15:06:05.704Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "668534d7bd6432cc823c8b72"
+  },
+  "type": "Termómetro Infrarrojo",
+  "description": "",
+  "createdAt": {
+    "$date": "2024-07-03T11:24:07.523Z"
+  },
+  "updatedAt": {
+    "$date": "2024-07-03T11:24:07.523Z"
+  },
+  "__v": 0
+}]

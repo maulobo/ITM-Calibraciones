@@ -12,22 +12,22 @@ import {
 @Injectable()
 export class ServiceOrdersService {
   constructor(
-    @InjectModel(ServiceOrderEntity.name)
+    @InjectModel("ServiceOrder")
     private readonly serviceOrderModel: Model<ServiceOrderEntity>,
-    @InjectModel(EquipmentEntity.name)
+    @InjectModel("Equipment")
     private readonly equipmentModel: Model<EquipmentEntity>,
   ) {}
 
   async create(createServiceOrderDto: CreateServiceOrderDto, user: any) {
-    const session = await this.serviceOrderModel.db.startSession();
-    session.startTransaction();
+    // TODO: Re-enable transactions when using MongoDB Replica Set in production
+    // const session = await this.serviceOrderModel.db.startSession();
+    // session.startTransaction();
     try {
-      // 1. Generate Incremental Code
+      // 1. Generate Incremental Code (Ej: "OT-26-0001")
       const year = new Date().getFullYear().toString().slice(-2);
       const lastOrder = await this.serviceOrderModel
         .findOne({ code: new RegExp(`^OT-${year}-`) })
-        .sort({ code: -1 })
-        .session(session);
+        .sort({ code: -1 });
 
       let sequence = 1;
       if (lastOrder) {
@@ -40,59 +40,82 @@ export class ServiceOrdersService {
 
       // 2. Create Service Order
       const newOrder = new this.serviceOrderModel({
-        ...createServiceOrderDto,
         code,
+        client: createServiceOrderDto.client,
+        office: createServiceOrderDto.office,
+        contact: createServiceOrderDto.contact,
+        observations: createServiceOrderDto.observations,
+        estimatedDeliveryDate: createServiceOrderDto.estimatedDeliveryDate,
         equipments: [],
       });
-      await newOrder.save({ session });
+      await newOrder.save();
 
-      // 3. Process Equipments
+      // 3. Process Equipments - Crear o actualizar cada equipo
       const equipmentIds = [];
-      const userOffice = user.office;
 
-      if (!userOffice) {
-        throw new Error("User office is required to register equipment.");
-      }
+      for (const [index, item] of createServiceOrderDto.items.entries()) {
+        // 🧠 UPSERT INTELIGENTE:
+        // Busca por Serial + Modelo (independiente de la oficina)
+        // Si el equipo ya existe, actualiza su ubicación actual
+        const filter = {
+          serialNumber: item.serialNumber,
+          model: item.model,
+        };
 
-      for (const item of createServiceOrderDto.items) {
+        // Datos a actualizar/crear
         const updateData = {
           model: item.model,
-          instrumentType: item.instrumentType,
+          office: createServiceOrderDto.office, // 🔥 Actualiza office si cambió de ubicación
           range: item.range,
-          description: item.description,
-          office: userOffice,
+          tag: item.tag,
           serviceOrder: newOrder._id,
+          orderIndex: index,
           technicalState: EquipmentTechnicalStateEnum.TO_CALIBRATE,
           logisticState: EquipmentLogisticStateEnum.RECEIVED,
         };
 
+        // findOneAndUpdate con upsert: true
+        // - Si existe (mismo serial+modelo): Actualiza y mueve de oficina si es necesario
+        // - Si no existe: Lo crea nuevo
         const eq = await this.equipmentModel.findOneAndUpdate(
-          { serialNumber: item.serialNumber, office: userOffice },
+          filter,
           { $set: updateData },
-          { new: true, upsert: true, session },
+          {
+            new: true, // Devuelve documento actualizado
+            upsert: true, // Crea si no existe
+            setDefaultsOnInsert: true, // Aplica defaults del schema si es nuevo
+          },
         );
+
         equipmentIds.push(eq._id);
       }
 
       // 4. Update Order with Equipments
       newOrder.equipments = equipmentIds;
-      await newOrder.save({ session });
+      await newOrder.save();
 
-      await session.commitTransaction();
+      // await session.commitTransaction();
       return newOrder;
     } catch (error) {
-      await session.abortTransaction();
+      // await session.abortTransaction();
       throw new InternalServerErrorException(error.message);
-    } finally {
-      session.endSession();
     }
+    // finally {
+    //   session.endSession();
+    // }
   }
 
   async findAll() {
     return this.serviceOrderModel
       .find()
       .populate("client")
-      .populate("equipments");
+      .populate({
+        path: "equipments",
+        select:
+          "serialNumber model technicalState logisticState tag orderIndex",
+        populate: { path: "model", populate: { path: "equipmentType" } },
+      })
+      .lean();
   }
 
   async findOne(id: string) {
@@ -102,7 +125,10 @@ export class ServiceOrdersService {
       .populate("client")
       .populate({
         path: "equipments",
-        populate: { path: "model" },
-      });
+        select:
+          "serialNumber model technicalState logisticState tag orderIndex range description",
+        populate: { path: "model", populate: { path: "equipmentType" } },
+      })
+      .lean();
   }
 }

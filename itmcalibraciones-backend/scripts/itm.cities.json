@@ -1,0 +1,464 @@
+[{
+  "_id": {
+    "$oid": "646b5eb3b8da11a0aa02513a"
+  },
+  "name": "Bahía Blanca",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2023-05-22T12:23:15.246Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "646b5f1fb8da11a0aa0251e2"
+  },
+  "name": "Tandil",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2023-05-22T12:25:03.895Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6595965e2707175e738ba69c"
+  },
+  "name": "CABA",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-01-03T17:16:14.255Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec51189"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523a"
+  },
+  "name": "Daireaux",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.236Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.236Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523b"
+  },
+  "name": "Ciudad Autónoma de Buenos Aires (CABA)",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec51189"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523c"
+  },
+  "name": "Mar del Plata",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523d"
+  },
+  "name": "Ing. White",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523e"
+  },
+  "name": "Dolavon",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec51199"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707523f"
+  },
+  "name": "Quequén",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.237Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.237Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075241"
+  },
+  "name": "Salliqueló",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075243"
+  },
+  "name": "Viedma",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119e"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075245"
+  },
+  "name": "Pehuajó",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075247"
+  },
+  "name": "Jujuy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075249"
+  },
+  "name": "Bariloche",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119e"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707524b"
+  },
+  "name": "Río Gallegos",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707524d"
+  },
+  "name": "Timbues",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec51195"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707524f"
+  },
+  "name": "Choele Choel",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119e"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075252"
+  },
+  "name": "Neuquén",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119c"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075254"
+  },
+  "name": "Necochea",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075256"
+  },
+  "name": "Lavalle",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075258"
+  },
+  "name": "El Calafate",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707525a"
+  },
+  "name": "Balcarce",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707525e"
+  },
+  "name": "Carlos Tejedor",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075260"
+  },
+  "name": "Madariaga",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075262"
+  },
+  "name": "Plaza Huincul",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119c"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075264"
+  },
+  "name": "Bolívar",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075266"
+  },
+  "name": "Rio Gallegos",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e7075268"
+  },
+  "name": "San Salvador de Jujuy",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5118f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.239Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "65d75b0342fafed7e707526d"
+  },
+  "name": "El Chalten",
+  "__v": 0,
+  "createdAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  },
+  "state": {
+    "$oid": "646b4dcdb853cc2c2ec5119f"
+  },
+  "updatedAt": {
+    "$date": "2024-02-22T14:32:35.238Z"
+  }
+}]

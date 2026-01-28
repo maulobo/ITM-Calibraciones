@@ -1,39 +1,45 @@
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
+  ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
 
+// DTO para el Contacto (snapshot)
 export class ContactDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @IsString()
   @IsOptional()
   phone?: string;
+
+  @IsString()
+  @IsOptional()
+  role?: string;
 }
 
+// DTO para los Equipos que vienen en la lista
 export class EquipmentItemDto {
   @IsString()
   @IsNotEmpty()
+  brand: string; // ID de Marca o Texto
+
+  @IsString()
+  @IsNotEmpty()
+  model: string; // ID de Modelo o Texto
+
+  @IsString()
+  @IsNotEmpty()
   serialNumber: string;
-
-  @IsString()
-  @IsNotEmpty()
-  model: string; // ObjectId
-
-  @IsString()
-  @IsNotEmpty()
-  instrumentType: string; // ObjectId
 
   @IsString()
   @IsOptional()
@@ -41,33 +47,37 @@ export class EquipmentItemDto {
 
   @IsString()
   @IsOptional()
-  description?: string;
-
-  // Assuming office is handled by backend based on user or explicit if needed.
-  // Adding it just in case, but optional.
-  @IsString()
-  @IsOptional()
-  office?: string;
+  tag?: string; // TAG del cliente
 }
 
 export class CreateServiceOrderDto {
+  // CLIENTE (obligatorio)
   @IsString()
   @IsNotEmpty()
-  client: string; // ObjectId
+  client: string;
 
-  @IsObject()
+  // OFICINA (obligatorio ahora)
+  @IsString()
+  @IsNotEmpty()
+  office: string;
+
+  // CONTACTO (snapshot)
+  @ValidateNested()
   @Type(() => ContactDto)
   contact: ContactDto;
 
-  @IsDate()
-  @Type(() => Date)
-  date: Date;
-
+  // LISTA DE EQUIPOS
   @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => EquipmentItemDto)
   items: EquipmentItemDto[];
 
+  // EXTRAS
   @IsString()
   @IsOptional()
   observations?: string;
+
+  @IsDateString()
+  @IsOptional()
+  estimatedDeliveryDate?: string;
 }

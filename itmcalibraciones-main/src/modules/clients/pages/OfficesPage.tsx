@@ -158,7 +158,14 @@ export const OfficesPage = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip label={office.client || "Sin cliente"} size="small" />
+                    <Chip 
+                      label={
+                        typeof office.client === 'object' && office.client 
+                          ? office.client.socialReason 
+                          : office.client || "Sin cliente"
+                      } 
+                      size="small" 
+                    />
                   </TableCell>
                   <TableCell>
                     <Box

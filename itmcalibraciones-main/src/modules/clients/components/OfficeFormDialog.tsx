@@ -48,7 +48,6 @@ export const OfficeFormDialog = ({
     watch,
   } = useForm<CreateOrUpdateOfficeDTO>({
     resolver: zodResolver(officeSchema),
-    defaultValues: office || {},
   });
 
   const selectedCityId = watch("city");
@@ -74,10 +73,16 @@ export const OfficeFormDialog = ({
       if (office) {
         console.log("Resetting form with office data:", office);
 
+        // Extraer el ID del cliente (puede venir como string o como objeto populated)
+        const clientId = typeof office.client === 'object' && office.client
+          ? office.client._id || office.client.id
+          : office.client;
+
         // Normalizar los datos antes de resetear el formulario
         // Específicamente, si 'city' es un objeto, extraemos solo el ID
         const normalizedOffice = {
           ...office,
+          client: clientId, // Asegurarse de que sea string
           city:
             typeof office.city === "object" && office.city !== null
               ? (office.city as any)._id
@@ -86,8 +91,9 @@ export const OfficeFormDialog = ({
 
         reset(normalizedOffice);
 
-        // Buscar el cliente correspondiente
-        const client = clients.find((c) => c.id === office.client);
+        // Buscar el cliente correspondiente usando el ID normalizado
+        const client = clients.find((c) => c.id === clientId || c._id === clientId);
+        console.log('Found client:', client, 'for ID:', clientId);
         setSelectedClient(client || null);
       } else {
         reset({
@@ -111,6 +117,8 @@ export const OfficeFormDialog = ({
       },
     });
   };
+
+  const isEditMode = !!office;
 
   return (
     <Dialog
@@ -141,36 +149,48 @@ export const OfficeFormDialog = ({
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <DialogContent dividers>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Autocomplete
-              value={selectedClient}
-              onChange={(_, newValue) => {
-                setSelectedClient(newValue);
-                setValue("client", newValue?.id || "");
-              }}
-              options={clients}
-              getOptionLabel={(option) => option.socialReason}
-              loading={isLoadingClients}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Cliente"
-                  required
-                  error={!!errors.client}
-                  helperText={errors.client?.message}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {isLoadingClients ? (
-                          <CircularProgress size={20} />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-            />
+            {isEditMode ? (
+              // Cliente en modo solo lectura cuando se edita
+              <TextField
+                label="Cliente"
+                value={selectedClient?.socialReason || "Cargando..."}
+                disabled
+                fullWidth
+                helperText="El cliente no puede modificarse en una oficina existente"
+              />
+            ) : (
+              // Cliente editable cuando se crea
+              <Autocomplete
+                value={selectedClient}
+                onChange={(_, newValue) => {
+                  setSelectedClient(newValue);
+                  setValue("client", newValue?.id || "");
+                }}
+                options={clients}
+                getOptionLabel={(option) => option.socialReason}
+                loading={isLoadingClients}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Cliente"
+                    required
+                    error={!!errors.client}
+                    helperText={errors.client?.message}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {isLoadingClients ? (
+                            <CircularProgress size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            )}
 
             <TextField
               label="Nombre de la Oficina"
