@@ -13,7 +13,7 @@ import {
   IconButton,
   Alert,
   useTheme,
-  Link as MuiLink
+  Link as MuiLink,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
@@ -184,10 +184,7 @@ export const LoginPage = () => {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Mail
-                          size={20}
-                          color={theme.palette.text.secondary}
-                        />
+                        <Mail size={20} color={theme.palette.text.secondary} />
                       </InputAdornment>
                     ),
                   },
@@ -208,10 +205,7 @@ export const LoginPage = () => {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock
-                          size={20}
-                          color={theme.palette.text.secondary}
-                        />
+                        <Lock size={20} color={theme.palette.text.secondary} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -270,9 +264,10 @@ export const LoginPage = () => {
                   "&:hover": {
                     bgcolor: "primary.dark",
                   },
-                  boxShadow: (theme) => theme.palette.mode === 'light' 
-                    ? "0 4px 6px -1px rgba(21, 101, 192, 0.4)" 
-                    : "0 4px 6px -1px rgba(0, 0, 0, 0.5)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "light"
+                      ? "0 4px 6px -1px rgba(21, 101, 192, 0.4)"
+                      : "0 4px 6px -1px rgba(0, 0, 0, 0.5)",
                 }}
               >
                 {isPending ? "Ingresando..." : "Iniciar Sesión"}

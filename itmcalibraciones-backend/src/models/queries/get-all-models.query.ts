@@ -1,21 +1,33 @@
-import { IQuery, IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { GetModelsDTO } from '../dto/get-model.dto';
-import { IModel } from '../interfaces/model.interface';
+import { IQuery, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { GetModelsDTO } from "../dto/get-model.dto";
+import { IModel } from "../interfaces/model.interface";
 
 export class FindAllModelsQuery implements IQuery {
-  constructor(
-    public filter:GetModelsDTO
-  ) {}
+  constructor(public filter: GetModelsDTO) {}
 }
 
 @QueryHandler(FindAllModelsQuery)
-export class FindAllModelsQueryHandler implements IQueryHandler<FindAllModelsQuery> {
-  constructor(@InjectModel('Model') private readonly modelModel: Model<IModel>) {}
+export class FindAllModelsQueryHandler
+  implements IQueryHandler<FindAllModelsQuery>
+{
+  constructor(
+    @InjectModel("Model") private readonly modelModel: Model<IModel>,
+  ) {}
 
   public async execute(query: FindAllModelsQuery) {
-    const { brand } = query.filter
-    return this.modelModel.find( {brand} ).populate("brand").exec();
+    const filter = {};
+    if (query.filter?.brand) {
+      filter["brand"] = query.filter.brand;
+    }
+    if (query.filter?.equipmentType) {
+      filter["equipmentType"] = query.filter.equipmentType;
+    }
+    return this.modelModel
+      .find(filter)
+      .populate("brand")
+      .populate("equipmentType")
+      .exec();
   }
 }

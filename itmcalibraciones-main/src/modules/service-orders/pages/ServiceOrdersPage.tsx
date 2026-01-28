@@ -8,7 +8,10 @@ import {
 } from "@mui/material";
 import { Plus, Search, Filter } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 export const ServiceOrdersPage = () => {
+  const navigate = useNavigate();
   return (
     <Box>
       <Box
@@ -31,6 +34,7 @@ export const ServiceOrdersPage = () => {
           variant="contained"
           startIcon={<Plus size={20} />}
           sx={{ px: 3 }}
+          onClick={() => navigate("/service-orders/new")}
         >
           Nueva Orden
         </Button>

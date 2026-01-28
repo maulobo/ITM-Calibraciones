@@ -1,13 +1,12 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Types } from "mongoose";
 
 @Schema({ timestamps: true, toJSON: { virtuals: true } })
 export class OfficeEntity extends Document {
-  @Prop({ required: true, ref: 'Client' })
+  @Prop({ required: true, ref: "Client", type: Types.ObjectId })
   client: Types.ObjectId;
-  
-  @Prop({ required: true, ref: 'City'})
+
+  @Prop({ required: true, ref: "City", type: Types.ObjectId })
   city: Types.ObjectId;
 
   @Prop()

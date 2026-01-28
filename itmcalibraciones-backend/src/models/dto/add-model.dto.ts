@@ -1,16 +1,20 @@
-import {
-    IsMongoId,
-    IsNotEmpty, IsString
-} from 'class-validator';
-import { Types } from 'mongoose';
-  
-  export class AddModelDTO {
-      @IsString()
-      @IsNotEmpty()
-      name: string;
+import { IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Types } from "mongoose";
 
-      @IsMongoId()
-      @IsNotEmpty()
-      brand: Types.ObjectId;
+export class AddModelDTO {
+  @IsOptional()
+  @IsMongoId()
+  id?: Types.ObjectId;
 
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsMongoId()
+  @IsNotEmpty()
+  brand: Types.ObjectId;
+
+  @IsMongoId()
+  @IsNotEmpty()
+  equipmentType: Types.ObjectId;
 }

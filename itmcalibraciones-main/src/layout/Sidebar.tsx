@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   Box,
   Drawer,
@@ -12,6 +13,7 @@ import {
   useTheme,
   Divider,
   useMediaQuery,
+  Collapse,
 } from "@mui/material";
 import {
   LayoutDashboard,
@@ -22,7 +24,15 @@ import {
   Truck,
   Settings,
   ChevronLeft,
+  ChevronDown,
+  ChevronRight,
   Menu,
+  Wrench,
+  MapPinned,
+  Tag,
+  Settings2,
+  Box as BoxIcon,
+  List as ListIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,17 +45,39 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-const menuItems = [
-  { text: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/" },
+interface MenuItem {
+  text: string;
+  icon: ReactNode;
+  path?: string;
+  children?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [
+  {
+    text: "Dashboard",
+    icon: <LayoutDashboard size={22} />,
+    path: "/dashboard",
+  },
   {
     text: "Ordenes",
     icon: <ClipboardList size={22} />,
     path: "/service-orders",
   },
   { text: "Clientes", icon: <Users size={22} />, path: "/clients" },
+  { text: "Oficinas", icon: <MapPinned size={22} />, path: "/offices" },
+  { text: "Técnicos", icon: <Wrench size={22} />, path: "/technicians" },
   { text: "Inventario", icon: <Package size={22} />, path: "/inventory" },
   { text: "Presupuestos", icon: <Calculator size={22} />, path: "/budgets" },
   { text: "Logística", icon: <Truck size={22} />, path: "/logistics" },
+  {
+    text: "Catálogo",
+    icon: <ListIcon size={22} />,
+    children: [
+      { text: "Marcas", icon: <Tag size={20} />, path: "/params/brands" },
+      { text: "Modelos", icon: <BoxIcon size={20} />, path: "/params/models" },
+      { text: "Tipos", icon: <Settings2 size={20} />, path: "/params/types" },
+    ],
+  },
   { text: "Configuración", icon: <Settings size={22} />, path: "/settings" },
 ];
 
@@ -54,6 +86,130 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>("Catálogo");
+
+  const handleSubmenuToggle = (text: string) => {
+    setOpenSubmenu(openSubmenu === text ? null : text);
+  };
+
+  const renderMenuItem = (item: MenuItem) => {
+    const isParent = !!item.children;
+    const isExpanded = openSubmenu === item.text;
+    const isActive = item.path === location.pathname || item.children?.some(child => child.path === location.pathname);
+
+    return (
+      <Box key={item.text}>
+        <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
+          <ListItemButton
+            onClick={() => {
+              if (isParent) {
+                if (!open) onToggle(); // Open sidebar if collapsed
+                handleSubmenuToggle(item.text);
+              } else {
+                navigate(item.path!);
+              }
+            }}
+            sx={{
+              minHeight: 48,
+              justifyContent: open ? "initial" : "center",
+              px: 2.5,
+              borderRadius: 2,
+              bgcolor: isActive && !isParent
+                ? theme.palette.mode === "light"
+                  ? "rgba(21, 101, 192, 0.08)"
+                  : "rgba(90, 147, 237, 0.16)"
+                : "transparent",
+              color: isActive && !isParent ? "primary.main" : "text.secondary",
+              "&:hover": {
+                bgcolor: isActive && !isParent
+                  ? theme.palette.mode === "light"
+                    ? "rgba(21, 101, 192, 0.12)"
+                    : "rgba(90, 147, 237, 0.24)"
+                  : "action.hover",
+                color: isActive && !isParent ? "primary.main" : "text.primary",
+              },
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: open ? 2 : "auto",
+                justifyContent: "center",
+                color: "inherit",
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText
+              primary={item.text}
+              sx={{
+                opacity: open ? 1 : 0,
+                display: open ? "block" : "none",
+                "& .MuiTypography-root": {
+                  fontWeight: isActive ? 600 : 400,
+                },
+              }}
+            />
+            {isParent && open && (
+              isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+            )}
+          </ListItemButton>
+        </ListItem>
+
+        {isParent && (
+          <Collapse in={open && isExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {item.children!.map((child) => {
+                const isChildActive = location.pathname === child.path;
+                return (
+                  <ListItemButton
+                    key={child.text}
+                    onClick={() => navigate(child.path!)}
+                    sx={{
+                      pl: 9, // Indent for submenu
+                      minHeight: 40,
+                      borderRadius: 2,
+                      mb: 0.5,
+                      bgcolor: isChildActive
+                        ? theme.palette.mode === "light"
+                          ? "rgba(21, 101, 192, 0.08)"
+                          : "rgba(90, 147, 237, 0.16)"
+                        : "transparent",
+                      color: isChildActive ? "primary.main" : "text.secondary",
+                      "&:hover": {
+                        color: "text.primary",
+                      },
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: 2,
+                        justifyContent: "center",
+                        color: "inherit",
+                        transform: "scale(0.9)"
+                      }}
+                    >
+                      {child.icon}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={child.text} 
+                      sx={{
+                        "& .MuiTypography-root": {
+                          fontWeight: isChildActive ? 600 : 400,
+                          fontSize: "0.9rem"
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </Collapse>
+        )}
+      </Box>
+    );
+  };
 
   return (
     <Drawer
@@ -70,10 +226,14 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
             duration: theme.transitions.duration.enteringScreen,
           }),
           overflowX: "hidden",
-          backgroundColor: "background.paper", // Use theme variable
+          backgroundColor: "background.paper",
           borderRight: 1,
-          borderColor: "divider", // Use theme variable
-          boxShadow: open ? (theme.palette.mode === 'light' ? "4px 0 24px 0 rgba(0,0,0,0.02)" : "none") : "none",
+          borderColor: "divider",
+          boxShadow: open
+            ? theme.palette.mode === "light"
+              ? "4px 0 24px 0 rgba(0,0,0,0.02)"
+              : "none"
+            : "none",
         },
       }}
     >
@@ -126,57 +286,7 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
       <Divider sx={{ opacity: 0.5 }} />
 
       <List sx={{ mt: 1, px: 1 }}>
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItem
-              key={item.text}
-              disablePadding
-              sx={{ display: "block", mb: 0.5 }}
-            >
-              <ListItemButton
-                onClick={() => navigate(item.path)}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                  borderRadius: 2,
-                  bgcolor: isActive
-                    ? (theme.palette.mode === 'light' ? "rgba(21, 101, 192, 0.08)" : "rgba(90, 147, 237, 0.16)")
-                    : "transparent",
-                  color: isActive ? "primary.main" : "text.secondary",
-                  "&:hover": {
-                    bgcolor: isActive
-                      ? (theme.palette.mode === 'light' ? "rgba(21, 101, 192, 0.12)" : "rgba(90, 147, 237, 0.24)")
-                      : "action.hover",
-                    color: isActive ? "primary.main" : "text.primary",
-                  },
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : "auto",
-                    justifyContent: "center",
-                    color: "inherit",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    opacity: open ? 1 : 0,
-                    display: open ? "block" : "none",
-                    "& .MuiTypography-root": {
-                      fontWeight: isActive ? 600 : 400,
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+        {menuItems.map(renderMenuItem)}
       </List>
     </Drawer>
   );

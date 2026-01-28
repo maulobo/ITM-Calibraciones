@@ -18,9 +18,15 @@ export class FindAllOfficesQueryHandler
 
   public async execute(query: FindAllOfficesQuery) {
     const filter = {};
-    if (query.filter && query.filter.client) {
-      Object.assign(filter, { client: query.filter.client });
+    if (query.filter?.client) {
+      // 🛠️ FIX: Busca tanto por ObjectId como por String por si la DB tiene datos mezclados
+      const clientId = query.filter.client;
+      filter["$or"] = [{ client: clientId }, { client: clientId.toString() }];
     }
-    return this.officeModel.find(filter).populate("city").exec();
+    return this.officeModel
+      .find(filter)
+      .populate("city")
+      .populate("client")
+      .exec();
   }
 }

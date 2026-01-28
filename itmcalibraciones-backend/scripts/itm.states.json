@@ -1,0 +1,144 @@
+[{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51189"
+  },
+  "nombre": "Ciudad Autónoma de Buenos Aires (CABA)"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118a"
+  },
+  "nombre": "Buenos Aires"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118b"
+  },
+  "nombre": "Catamarca"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118c"
+  },
+  "nombre": "Córdoba"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118d"
+  },
+  "nombre": "Corrientes"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118e"
+  },
+  "nombre": "Entre Ríos"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5118f"
+  },
+  "nombre": "Jujuy"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51190"
+  },
+  "nombre": "Mendoza"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51191"
+  },
+  "nombre": "La Rioja"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51192"
+  },
+  "nombre": "Salta"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51193"
+  },
+  "nombre": "San Juan"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51194"
+  },
+  "nombre": "San Luis"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51195"
+  },
+  "nombre": "Santa Fe"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51196"
+  },
+  "nombre": "Santiago del Estero"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51197"
+  },
+  "nombre": "Tucumán"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51198"
+  },
+  "nombre": "Chaco"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec51199"
+  },
+  "nombre": "Chubut"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119a"
+  },
+  "nombre": "Formosa"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119b"
+  },
+  "nombre": "Misiones"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119c"
+  },
+  "nombre": "Neuquén"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119d"
+  },
+  "nombre": "La Pampa"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119e"
+  },
+  "nombre": "Río Negro"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec5119f"
+  },
+  "nombre": "Santa Cruz"
+},
+{
+  "_id": {
+    "$oid": "646b4dcdb853cc2c2ec511a0"
+  },
+  "nombre": "Tierra del Fuego"
+}]

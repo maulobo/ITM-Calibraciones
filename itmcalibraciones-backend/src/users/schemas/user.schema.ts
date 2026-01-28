@@ -35,7 +35,7 @@ export class UserEntity extends Document {
   @Prop({ default: null })
   lastLogin: Date;
 
-  @Prop({ required: true, ref: "Office" })
+  @Prop({ required: true, ref: "Office", type: Types.ObjectId })
   office: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: "ClientsEntity", required: false })

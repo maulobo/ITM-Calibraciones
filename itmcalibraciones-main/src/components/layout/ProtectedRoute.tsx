@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { UserRoles } from "../../modules/auth/types/authTypes";
+import { Box, CircularProgress } from "@mui/material";
 
 interface ProtectedRouteProps {
   allowedRoles?: UserRoles[];
@@ -10,11 +11,19 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
 }) => {
-  const { isAuth, user } = useAuthStore();
-  const isLoading = false; // Zustand persistence is synchronous after initial load usually, or handled differently. for now assume loaded.
+  const { isAuth, user, _hasHydrated } = useAuthStore();
 
-  if (isLoading) {
-    return <div>Cargando...</div>;
+  if (!_hasHydrated) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!isAuth) {

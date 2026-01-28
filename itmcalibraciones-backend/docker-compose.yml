@@ -28,22 +28,22 @@ services:
       - mongo-data:/data/db
     restart: always
     ports:
-      - '27018:27017'
+      - "27018:27017"
   api:
     environment:
       MONGO_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/itm
       APP_PORT: 4000
       NODE_ENV: PROD
       FRONT_URL: https://app.itmcalibraciones.com
-      BACK_URL : https://api.itmcalibraciones.com
+      BACK_URL: https://api.itmcalibraciones.com
       EVENT_ID: 63f5f82492b435262c15a14b
       RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
       VERIFY_SECRET: ${VERIFY_SECRET}
-      SMTP_USER : ${SMTP_USER}
-      SMTP_PASS : ${SMTP_PASS}
-      SMTP_PORT : 587
-      SMTP_HOST : email-smtp.us-east-1.amazonaws.com
-      EMAIL_FROM : app@itmcalibraciones.com
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_PORT: 587
+      SMTP_HOST: email-smtp.us-east-1.amazonaws.com
+      EMAIL_FROM: app@itmcalibraciones.com
     container_name: api
     image: api:latest
     build: .

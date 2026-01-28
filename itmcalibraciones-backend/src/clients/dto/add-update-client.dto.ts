@@ -1,6 +1,36 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {
+  IsArray,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from "class-validator";
 import { Types } from "mongoose";
+
+class ContactDTO {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  email: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  role?: string;
+}
 
 export class AddOrUpdateClientDTO {
   @IsOptional()
@@ -34,9 +64,14 @@ export class AddOrUpdateClientDTO {
   phoneNumber?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
-  city: Types.ObjectId;
+  adress?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  city?: Types.ObjectId;
 
   @IsString()
   @IsOptional()
@@ -44,6 +79,19 @@ export class AddOrUpdateClientDTO {
   cityName?: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty()
   state?: Types.ObjectId;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  stateName?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ContactDTO)
+  @IsOptional()
+  @ApiProperty({ type: [ContactDTO] })
+  contacts?: ContactDTO[];
 }
