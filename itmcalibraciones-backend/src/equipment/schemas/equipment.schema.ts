@@ -62,6 +62,7 @@ export class EquipmentEntity extends Document {
       providerName: String,
       sentDate: Date,
       projectedReturnDate: Date,
+      actualReturnDate: Date,
       exitNote: String,
     },
   })
@@ -69,9 +70,23 @@ export class EquipmentEntity extends Document {
     providerName: string;
     sentDate: Date;
     projectedReturnDate: Date;
+    actualReturnDate: Date; // Fecha real de re-ingreso
     exitNote: string;
   };
-  // -------------------------------------
+
+  // --- Campos de Entrega / Retiro ---
+  @Prop()
+  certificateNumber?: string; // Nª de certificado
+
+  @Prop()
+  remittanceNumber?: string; // Nª de Remito
+
+  @Prop()
+  retireDate?: Date; // Fecha efectiva de retiro
+  // ----------------------------------
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: "StandardEquipment" }] })
+  usedStandards?: Types.ObjectId[];
 
   @Prop({ required: true, ref: "Model" })
   model: Types.ObjectId;

@@ -33,6 +33,8 @@ import {
   Settings2,
   Box as BoxIcon,
   List as ListIcon,
+  ShieldCheck,
+  FlaskConical,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -63,9 +65,19 @@ const menuItems: MenuItem[] = [
     icon: <ClipboardList size={22} />,
     path: "/service-orders",
   },
+  {
+    text: "Equipos",
+    icon: <FlaskConical size={22} />,
+    path: "/equipments",
+  },
   { text: "Clientes", icon: <Users size={22} />, path: "/clients" },
   { text: "Oficinas", icon: <MapPinned size={22} />, path: "/offices" },
   { text: "Técnicos", icon: <Wrench size={22} />, path: "/technicians" },
+  {
+    text: "Patrones",
+    icon: <ShieldCheck size={22} />,
+    path: "/standard-equipment",
+  },
   { text: "Inventario", icon: <Package size={22} />, path: "/inventory" },
   { text: "Presupuestos", icon: <Calculator size={22} />, path: "/budgets" },
   { text: "Logística", icon: <Truck size={22} />, path: "/logistics" },
@@ -95,7 +107,9 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
   const renderMenuItem = (item: MenuItem) => {
     const isParent = !!item.children;
     const isExpanded = openSubmenu === item.text;
-    const isActive = item.path === location.pathname || item.children?.some(child => child.path === location.pathname);
+    const isActive =
+      item.path === location.pathname ||
+      item.children?.some((child) => child.path === location.pathname);
 
     return (
       <Box key={item.text}>
@@ -114,18 +128,20 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
               justifyContent: open ? "initial" : "center",
               px: 2.5,
               borderRadius: 2,
-              bgcolor: isActive && !isParent
-                ? theme.palette.mode === "light"
-                  ? "rgba(21, 101, 192, 0.08)"
-                  : "rgba(90, 147, 237, 0.16)"
-                : "transparent",
+              bgcolor:
+                isActive && !isParent
+                  ? theme.palette.mode === "light"
+                    ? "rgba(21, 101, 192, 0.08)"
+                    : "rgba(90, 147, 237, 0.16)"
+                  : "transparent",
               color: isActive && !isParent ? "primary.main" : "text.secondary",
               "&:hover": {
-                bgcolor: isActive && !isParent
-                  ? theme.palette.mode === "light"
-                    ? "rgba(21, 101, 192, 0.12)"
-                    : "rgba(90, 147, 237, 0.24)"
-                  : "action.hover",
+                bgcolor:
+                  isActive && !isParent
+                    ? theme.palette.mode === "light"
+                      ? "rgba(21, 101, 192, 0.12)"
+                      : "rgba(90, 147, 237, 0.24)"
+                    : "action.hover",
                 color: isActive && !isParent ? "primary.main" : "text.primary",
               },
             }}
@@ -150,9 +166,13 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
                 },
               }}
             />
-            {isParent && open && (
-              isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
-            )}
+            {isParent &&
+              open &&
+              (isExpanded ? (
+                <ChevronDown size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              ))}
           </ListItemButton>
         </ListItem>
 
@@ -187,17 +207,17 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
                         mr: 2,
                         justifyContent: "center",
                         color: "inherit",
-                        transform: "scale(0.9)"
+                        transform: "scale(0.9)",
                       }}
                     >
                       {child.icon}
                     </ListItemIcon>
-                    <ListItemText 
-                      primary={child.text} 
+                    <ListItemText
+                      primary={child.text}
                       sx={{
                         "& .MuiTypography-root": {
                           fontWeight: isChildActive ? 600 : 400,
-                          fontSize: "0.9rem"
+                          fontSize: "0.9rem",
                         },
                       }}
                     />
@@ -285,9 +305,7 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
 
       <Divider sx={{ opacity: 0.5 }} />
 
-      <List sx={{ mt: 1, px: 1 }}>
-        {menuItems.map(renderMenuItem)}
-      </List>
+      <List sx={{ mt: 1, px: 1 }}>{menuItems.map(renderMenuItem)}</List>
     </Drawer>
   );
 };

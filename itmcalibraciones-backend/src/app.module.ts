@@ -24,6 +24,7 @@ import { OfficesModule } from "./offices/offices.module";
 import { PdfGeneratorModule } from "./pdf-generator/pdf-generator.module";
 import { QRModule } from "./qr/qr.module";
 import { ServiceOrdersModule } from "./service-orders/service-orders.module";
+import { StandardEquipmentModule } from "./standard-equipment/standard-equipment.module";
 import { TechnicalInformModule } from "./technical-inform/technical-inform.module";
 import { UsersModule } from "./users/users.module";
 
@@ -71,6 +72,7 @@ import { UsersModule } from "./users/users.module";
     BadgetsModule,
     ImportsModule,
     ServiceOrdersModule,
+    StandardEquipmentModule,
   ],
   controllers: [AppController],
   providers: [
