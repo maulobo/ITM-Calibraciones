@@ -14,7 +14,11 @@ import { ClientDashboardPage } from "../modules/client-portal/pages/ClientDashbo
 import { EquipmentTypesPage } from "../modules/catalog/pages/EquipmentTypesPage";
 import { BrandsPage } from "../modules/catalog/pages/BrandsPage";
 import { ModelsPage } from "../modules/catalog/pages/ModelsPage";
+import { StandardEquipmentPage } from "../modules/standard-equipment/pages/StandardEquipmentPage";
+import { StandardEquipmentDetailPage } from "../modules/standard-equipment/pages/StandardEquipmentDetailPage";
 import { CreateServiceOrderPage } from "../modules/service-orders/pages/CreateServiceOrderPage";
+import { EquipmentsPage } from "../modules/equipments/pages/EquipmentsPage";
+import { EquipmentDetailPage } from "../modules/equipments/pages/EquipmentDetailPage";
 import { Box, Typography } from "@mui/material";
 
 // Placeholder generic page
@@ -67,18 +71,30 @@ export const router = createBrowserRouter([
             element: <CreateServiceOrderPage />,
           },
           {
+            path: "/equipments",
+            element: <EquipmentsPage />,
+          },
+          {
+            path: "/equipments/:id",
+            element: <EquipmentDetailPage />,
+          },
+          {
             path: "/clients",
             element: <ClientsPage />,
           },
-          {            path: "clients/:id",
-            element: <ClientDetailsPage />,
-          },
-          {            path: "/offices",
-            element: <OfficesPage />,
-          },
+          { path: "clients/:id", element: <ClientDetailsPage /> },
+          { path: "/offices", element: <OfficesPage /> },
           {
             path: "/technicians",
             element: <TechniciansPage />,
+          },
+          {
+            path: "/standard-equipment",
+            element: <StandardEquipmentPage />,
+          },
+          {
+            path: "/standard-equipment/:id",
+            element: <StandardEquipmentDetailPage />,
           },
           {
             path: "/inventory",

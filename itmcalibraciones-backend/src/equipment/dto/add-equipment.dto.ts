@@ -9,7 +9,12 @@ import {
   IsString,
 } from "class-validator";
 import { Types } from "mongoose";
-import { EquipmentStateEnum } from "../const.enum";
+import {
+  EquipmentStateEnum,
+  EquipmentTechnicalStateEnum,
+  EquipmentLogisticStateEnum,
+  EquipmentLocationEnum,
+} from "../const.enum";
 
 export class AddEquipmentDTO {
   @IsMongoId()
@@ -23,11 +28,29 @@ export class AddEquipmentDTO {
   @ApiProperty()
   serialNumber: string;
 
+  @IsOptional()
+  @IsEnum(EquipmentTechnicalStateEnum)
+  @ApiProperty({ enum: EquipmentTechnicalStateEnum })
+  technicalState?: EquipmentTechnicalStateEnum;
+
+  @IsOptional()
+  @IsEnum(EquipmentLogisticStateEnum)
+  @ApiProperty({ enum: EquipmentLogisticStateEnum })
+  logisticState?: EquipmentLogisticStateEnum;
+
+  @IsOptional()
+  @IsEnum(EquipmentLocationEnum)
+  @ApiProperty({ enum: EquipmentLocationEnum })
+  location?: EquipmentLocationEnum;
+
   @IsString()
   @IsOptional()
   @ApiProperty()
   customSerialNumber?: string;
-
+  @IsOptional()
+  @IsMongoId({ each: true })
+  @ApiProperty()
+  usedStandards?: string[];
   @IsString()
   @IsOptional()
   @ApiProperty()

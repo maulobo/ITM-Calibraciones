@@ -23,7 +23,7 @@ import { EquipmentService } from './equipment.service';
 import { IEquipment } from './interfaces/equipment.interface';
   
               
-  @Controller('instruments')
+  @Controller('equipments')
   export class EquipmentController {
     constructor(
       private equipmentService: EquipmentService,
