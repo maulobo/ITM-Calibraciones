@@ -17,4 +17,8 @@ export class AddModelDTO {
   @IsMongoId()
   @IsNotEmpty()
   equipmentType: Types.ObjectId;
+
+  @IsOptional()
+  @IsString()
+  datasheet?: string;
 }

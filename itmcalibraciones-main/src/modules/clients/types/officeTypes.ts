@@ -7,7 +7,10 @@ export const officeSchema = z.object({
   city: z.string().min(1, "La ciudad es obligatoria"),
   responsable: z.string().optional(),
   phoneNumber: z.string().optional(),
-  adress: z.string().optional(),
+  adress: z.string().min(1, "La dirección es obligatoria"),
+  postalCode: z.string().optional(),
+  deliveryInstructions: z.string().optional(),
+  receptionHours: z.string().optional(),
 });
 
 export type CreateOrUpdateOfficeDTO = z.infer<typeof officeSchema>;
@@ -32,6 +35,9 @@ export interface Office {
   responsable?: string;
   phoneNumber?: string;
   adress?: string;
+  postalCode?: string;
+  deliveryInstructions?: string;
+  receptionHours?: string;
   // Datos populated del backend
   cityData?: {
     _id: string;

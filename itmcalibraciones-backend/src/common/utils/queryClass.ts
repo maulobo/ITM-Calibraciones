@@ -1,29 +1,29 @@
-import { Model, Types } from 'mongoose';
-import { MatchDTO } from '../dto/query.dto';
-import { convertToObjectId } from './common-functions';
+import { Model, Types } from "mongoose";
+import { MatchDTO } from "../dto/query.dto";
+import { convertToObjectId } from "./common-functions";
 
 export interface QueryOptions<T> {
-  find?:Record<string, any>
+  find?: Record<string, any>;
   select?: string[];
   populate?: string[];
-  limit?: number,
-  offset?: number
+  limit?: number;
+  offset?: number;
   orWhere?: { field: keyof T; values: any[] }[];
 }
-
 
 export class QueryBuilder<T> {
   private query: any;
 
   constructor(
-    private readonly model: Model<T>, 
-    private readonly options: QueryOptions<T> = {}) {
+    private readonly model: Model<T>,
+    private readonly options: QueryOptions<T> = {},
+  ) {
     this.query = this.model.find();
   }
 
   public find(fields: Partial<T>): QueryBuilder<T> {
     const findableFields = fields as { find?: Record<string, string> };
-    
+
     if (findableFields.find) {
       const findObject = findableFields.find;
       for (const key in findObject) {
@@ -34,21 +34,26 @@ export class QueryBuilder<T> {
     }
 
     for (const key in fields) {
-      if(key !== "limit"){
-        fields[key] = convertToObjectId(fields[key])
-        this.query = this.query.find({[key]: fields[key]});
+      if (
+        key !== "limit" &&
+        key !== "offset" &&
+        key !== "populate" &&
+        key !== "select" &&
+        key !== "sort"
+      ) {
+        fields[key] = convertToObjectId(fields[key]);
+        this.query = this.query.find({ [key]: fields[key] });
       }
-      
     }
 
     return this;
   }
 
-  public match(matchQuery:MatchDTO): QueryBuilder<T> {
-    const { field, searchText } = matchQuery
+  public match(matchQuery: MatchDTO): QueryBuilder<T> {
+    const { field, searchText } = matchQuery;
     if (field && searchText) {
       const queryObject = {};
-      queryObject[field as string] = { $regex: searchText, $options: 'i' };
+      queryObject[field as string] = { $regex: searchText, $options: "i" };
       this.query = this.query.find(queryObject);
     }
     return this;
@@ -57,9 +62,9 @@ export class QueryBuilder<T> {
   public select(fields?: string[]): QueryBuilder<T> {
     const selectFields = fields || this.options.select;
     if (selectFields) {
-      this.query = this.query.select(selectFields.join(' '));
+      this.query = this.query.select(selectFields.join(" "));
     }
-    
+
     return this;
   }
 
@@ -67,16 +72,19 @@ export class QueryBuilder<T> {
     const populateFields = fields || this.options.populate;
     if (populateFields) {
       populateFields.forEach((field) => {
-        const nestedFields = field.split('.');
+        const nestedFields = field.split(".");
         let populateObject = null;
-        
+
         // Construir el objeto de populación anidada con varios niveles
         for (let i = nestedFields.length - 1; i >= 0; i--) {
           const nestedField = nestedFields[i];
-          const currentPopulateObject = { path: nestedField, populate: populateObject };
+          const currentPopulateObject = {
+            path: nestedField,
+            populate: populateObject,
+          };
           populateObject = currentPopulateObject;
         }
-        
+
         // Realizar la populación utilizando el objeto de populación anidada
         this.query = this.query.populate(populateObject);
       });
@@ -102,19 +110,19 @@ export class QueryBuilder<T> {
   }
 
   public gt(field: keyof T, value: any): QueryBuilder<T> {
-    return this.where(field, '>', value);
+    return this.where(field, ">", value);
   }
 
   public lt(field: keyof T, value: any): QueryBuilder<T> {
-    return this.where(field, '<', value);
+    return this.where(field, "<", value);
   }
 
   public gte(field: keyof T, value: any): QueryBuilder<T> {
-    return this.where(field, '>=', value);
+    return this.where(field, ">=", value);
   }
 
   public lte(field: keyof T, value: any): QueryBuilder<T> {
-    return this.where(field, '<=', value);
+    return this.where(field, "<=", value);
   }
 
   public limit(limit: number): QueryBuilder<T> {
@@ -127,7 +135,7 @@ export class QueryBuilder<T> {
     return this;
   }
 
-  public async exec(): Promise<T[]> {  
+  public async exec(): Promise<T[]> {
     return this.query.exec() as unknown as (T & { _id: Types.ObjectId })[];
   }
 }

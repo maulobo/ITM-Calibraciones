@@ -21,7 +21,7 @@ export class FindAllClientsQueryHandler
 
   public async execute(query: FindAllClientsQuery) {
     const { params = {}, options } = query;
-    const { populate, select, search, ...find } = params as any;
+    const { populate, select, search, limit, offset, ...find } = params as any;
 
     // Support text search by Search Query
     const filter = { ...find };
@@ -39,6 +39,13 @@ export class FindAllClientsQueryHandler
       .find(filter)
       .select(select)
       .populate(populate);
+
+    if (limit) {
+      queryBuilder.limit(Number(limit));
+    }
+    if (offset) {
+      queryBuilder.offset(Number(offset));
+    }
 
     return queryBuilder.exec();
   }

@@ -33,6 +33,8 @@ export class ServiceOrderEntity extends Document {
       email: { type: String },
       phone: { type: String },
       role: { type: String },
+      area: { type: String },
+      office: { type: Types.ObjectId, ref: "Office" },
     },
     _id: false, // No necesitamos ID para este sub-objeto
   })
@@ -41,6 +43,8 @@ export class ServiceOrderEntity extends Document {
     email?: string;
     phone?: string;
     role?: string;
+    area?: string;
+    office?: Types.ObjectId;
   };
 
   // 5. Fecha de Ingreso (Puede ser distinta al createdAt si cargan cosas viejas)

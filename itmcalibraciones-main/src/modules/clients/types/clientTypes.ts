@@ -5,6 +5,8 @@ export const contactSchema = z.object({
   email: z.string().email("Email inválido").min(1, "El email es obligatorio"),
   phone: z.string().optional(),
   role: z.string().optional(),
+  office: z.string().min(1, "La sucursal es obligatoria"),
+  area: z.string().optional(),
 });
 
 export const clientSchema = z.object({

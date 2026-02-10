@@ -1,11 +1,11 @@
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { AddModelDTO } from "../dto/add-model.dto";
+import { UpdateModelDTO } from "../dto/update-model.dto";
 import { IModel } from "../interfaces/model.interface";
 
 export class UpdateModelCommand implements ICommand {
-  constructor(public readonly addModelDTO: AddModelDTO) {}
+  constructor(public readonly updateModelDTO: UpdateModelDTO) {}
 }
 
 @CommandHandler(UpdateModelCommand)
@@ -17,8 +17,8 @@ export class UpdateModelCommandHandler
   ) {}
 
   async execute(command: UpdateModelCommand): Promise<any> {
-    const { addModelDTO } = command;
-    const { id, ...updateData } = addModelDTO;
+    const { updateModelDTO } = command;
+    const { id, ...updateData } = updateModelDTO;
 
     return await this.modelModel.findByIdAndUpdate(id, updateData, {
       new: true,

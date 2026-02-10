@@ -6,6 +6,7 @@ import { ImageUploadService } from "src/image-upload/image-upload.service";
 import { AddBrandCommand } from "./commands/add-brand.command";
 import { UpdateBrandCommand } from "./commands/update-brand.command";
 import { AddBrandDTO } from "./dto/add-brand.dto";
+import { GetBrandsDTO } from "./dto/get-brands.dto";
 import { UpdateBrandDto } from "./dto/update-brand.dto";
 import { IBrand } from "./interfaces/brand.interface";
 import { FindAllBrandsQuery } from "./queries/get-all-brands.query";
@@ -37,8 +38,8 @@ export class BrandService {
     }
   }
 
-  async getAllBrands() {
-    return this.queryBus.execute(new FindAllBrandsQuery());
+  async getAllBrands(query: GetBrandsDTO = {}) {
+    return this.queryBus.execute(new FindAllBrandsQuery(query));
   }
 
   async deleteBrand(id: Types.ObjectId): Promise<{ deleted: boolean }> {

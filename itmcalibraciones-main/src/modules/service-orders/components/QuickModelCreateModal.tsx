@@ -1,12 +1,26 @@
-import {  } from "react";
-import { 
-  Dialog, DialogContent, Box, Typography, TextField, 
-  Button, IconButton, FormControl, InputLabel, Select, MenuItem,
-  FormHelperText, CircularProgress
+import {} from "react";
+import {
+  Dialog,
+  DialogContent,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  CircularProgress,
 } from "@mui/material";
 import { X } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
-import { useCreateModel, useBrands, useEquipmentTypes } from "../../catalog/hooks/useCatalog";
+import {
+  useCreateModel,
+  useBrands,
+  useEquipmentTypes,
+} from "../../catalog/hooks/useCatalog";
 import type { CreateModelDTO } from "../../catalog/types";
 
 interface QuickModelCreateModalProps {
@@ -17,22 +31,30 @@ interface QuickModelCreateModalProps {
   preSelectedType?: string;
 }
 
-export const QuickModelCreateModal = ({ 
-  open, 
-  onClose, 
+export const QuickModelCreateModal = ({
+  open,
+  onClose,
   onSuccess,
   preSelectedBrand,
-  preSelectedType 
+  preSelectedType,
 }: QuickModelCreateModalProps) => {
-  const { data: brands } = useBrands();
-  const { data: types } = useEquipmentTypes();
+  const { data: brandsResponse } = useBrands();
+  const brands = brandsResponse?.data || [];
+  const { data: typesResponse } = useEquipmentTypes();
+  const types = typesResponse?.data || [];
   const createMutation = useCreateModel();
 
-  const { control, register, handleSubmit, formState: { errors }, reset } = useForm<CreateModelDTO>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CreateModelDTO>({
     defaultValues: {
       brand: preSelectedBrand || "",
-      equipmentType: preSelectedType || ""
-    }
+      equipmentType: preSelectedType || "",
+    },
   });
 
   const onSubmit = (data: CreateModelDTO) => {
@@ -41,15 +63,32 @@ export const QuickModelCreateModal = ({
         onSuccess(newModel._id);
         reset();
         onClose();
-      }
+      },
     });
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 3 } }}>
-      <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h6" fontWeight="bold">Nuevo Modelo Rápido</Typography>
-        <IconButton onClick={onClose} size="small"><X size={20} /></IconButton>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{ sx: { borderRadius: 3 } }}
+    >
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h6" fontWeight="bold">
+          Nuevo Modelo Rápido
+        </Typography>
+        <IconButton onClick={onClose} size="small">
+          <X size={20} />
+        </IconButton>
       </Box>
       <DialogContent sx={{ pt: 1 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -72,8 +111,10 @@ export const QuickModelCreateModal = ({
                 <FormControl fullWidth error={!!errors.brand}>
                   <InputLabel>Marca</InputLabel>
                   <Select {...field} label="Marca">
-                    {brands?.map(b => (
-                      <MenuItem key={b._id} value={b._id}>{b.name}</MenuItem>
+                    {brands?.map((b) => (
+                      <MenuItem key={b._id} value={b._id}>
+                        {b.name}
+                      </MenuItem>
                     ))}
                   </Select>
                   <FormHelperText>{errors.brand?.message}</FormHelperText>
@@ -89,23 +130,31 @@ export const QuickModelCreateModal = ({
                 <FormControl fullWidth error={!!errors.equipmentType}>
                   <InputLabel>Tipo de Equipo</InputLabel>
                   <Select {...field} label="Tipo de Equipo">
-                    {types?.map(t => (
-                      <MenuItem key={t._id} value={t._id}>{t.type}</MenuItem>
+                    {types?.map((t) => (
+                      <MenuItem key={t._id} value={t._id}>
+                        {t.type}
+                      </MenuItem>
                     ))}
                   </Select>
-                  <FormHelperText>{errors.equipmentType?.message}</FormHelperText>
+                  <FormHelperText>
+                    {errors.equipmentType?.message}
+                  </FormHelperText>
                 </FormControl>
               )}
             />
 
-            <Button 
-              type="submit" 
-              variant="contained" 
-              fullWidth 
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
               size="large"
               disabled={createMutation.isPending}
             >
-              {createMutation.isPending ? <CircularProgress size={24} /> : "Crear y Seleccionar"}
+              {createMutation.isPending ? (
+                <CircularProgress size={24} />
+              ) : (
+                "Crear y Seleccionar"
+              )}
             </Button>
           </Box>
         </form>

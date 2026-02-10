@@ -1,11 +1,15 @@
 import { IQuery, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
+import { QueryBuilder, QueryOptions } from "src/common/utils/queryClass";
 import { GetModelsDTO } from "../dto/get-model.dto";
 import { IModel } from "../interfaces/model.interface";
 
 export class FindAllModelsQuery implements IQuery {
-  constructor(public filter: GetModelsDTO) {}
+  constructor(
+    public params: GetModelsDTO,
+    public options: QueryOptions<IModel> = {},
+  ) {}
 }
 
 @QueryHandler(FindAllModelsQuery)
@@ -17,17 +21,22 @@ export class FindAllModelsQueryHandler
   ) {}
 
   public async execute(query: FindAllModelsQuery) {
-    const filter = {};
-    if (query.filter?.brand) {
-      filter["brand"] = query.filter.brand;
+    const { params, options } = query;
+    // Extraer paginación y otros campos de QueryDTO
+    const { limit, offset, populate, select, ...find } = params;
+
+    const queryBuilder = new QueryBuilder<IModel>(this.modelModel, options)
+      .find(find)
+      .select(select)
+      .populate(populate || ["brand", "equipmentType"]); // Default populate if not provided
+
+    if (limit) {
+      queryBuilder.limit(Number(limit));
     }
-    if (query.filter?.equipmentType) {
-      filter["equipmentType"] = query.filter.equipmentType;
+    if (offset) {
+      queryBuilder.offset(Number(offset));
     }
-    return this.modelModel
-      .find(filter)
-      .populate("brand")
-      .populate("equipmentType")
-      .exec();
+
+    return queryBuilder.exec();
   }
 }

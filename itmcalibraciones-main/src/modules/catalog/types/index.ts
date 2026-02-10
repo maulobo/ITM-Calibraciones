@@ -14,12 +14,21 @@ export interface Model {
   name: string;
   brand: string | Brand; // Can be ID or populated object
   equipmentType: string | EquipmentType; // Can be ID or populated object
+  description?: string;
 }
 
 export interface CreateModelDTO {
   name: string;
   brand: string; // ID
   equipmentType: string; // ID
+  description?: string;
+}
+
+export interface UpdateModelDTO {
+  name?: string;
+  brand?: string;
+  equipmentType?: string;
+  description?: string;
 }
 
 export interface CreateBrandDTO {

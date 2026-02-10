@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { CertificateModule } from 'src/certificates/certificate.module';
 import { EmailModule } from 'src/email/email.module';
+import { ImageUploadModule } from 'src/image-upload/image-upload.module';
 import { QRModule } from 'src/qr/qr.module';
 import { UsersModule } from 'src/users/users.module';
 import { AddEquipmentCommandHandler } from './commands/add-equipment.command';
@@ -27,6 +28,7 @@ const CommandHandlers = [
 @Module({
   imports: [
     CqrsModule,
+    ImageUploadModule,
     MongooseModule.forFeature([
       { name: 'Equipment', schema: EquipmentSchema },
       { name: 'EquipmentStateLogSchema', schema: EquipmentStateLogSchema },

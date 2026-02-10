@@ -97,6 +97,10 @@ export class AddEquipmentDTO {
 
   @IsOptional()
   @ApiProperty()
+  datasheet?: string;
+
+  @IsOptional()
+  @ApiProperty()
   @IsBoolean()
   outOfService?: boolean;
 

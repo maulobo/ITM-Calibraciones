@@ -53,6 +53,11 @@ export class CreateUserDTO {
 
   @ApiProperty()
   @IsOptional()
+  @IsMongoId()
+  client?: Types.ObjectId;
+
+  @ApiProperty()
+  @IsOptional()
   @IsString()
   area: string;
 }

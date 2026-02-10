@@ -6,6 +6,7 @@ import { AddModelCommand } from "./commands/add-model.command";
 import { UpdateModelCommand } from "./commands/update-model.command";
 import { AddModelDTO } from "./dto/add-model.dto";
 import { GetModelsDTO } from "./dto/get-model.dto";
+import { UpdateModelDTO } from "./dto/update-model.dto";
 import { IModel } from "./interfaces/model.interface";
 import { FindAllModelsQuery } from "./queries/get-all-models.query";
 
@@ -21,12 +22,12 @@ export class ModelService {
     return this.commandBus.execute(new AddModelCommand(addModelDTO));
   }
 
-  async getAllModels(query: GetModelsDTO) {
+  async getAllModels(query: GetModelsDTO = {} as GetModelsDTO) {
     return this.queryBus.execute(new FindAllModelsQuery(query));
   }
 
-  async updateModel(addModelDTO: AddModelDTO) {
-    return this.commandBus.execute(new UpdateModelCommand(addModelDTO));
+  async updateModel(updateModelDTO: UpdateModelDTO) {
+    return this.commandBus.execute(new UpdateModelCommand(updateModelDTO));
   }
 
   async deleteModel(id: Types.ObjectId): Promise<{ deleted: boolean }> {

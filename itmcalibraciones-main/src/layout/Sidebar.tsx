@@ -35,6 +35,8 @@ import {
   List as ListIcon,
   ShieldCheck,
   FlaskConical,
+  Building2,
+  User,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -70,8 +72,15 @@ const menuItems: MenuItem[] = [
     icon: <FlaskConical size={22} />,
     path: "/equipments",
   },
-  { text: "Clientes", icon: <Users size={22} />, path: "/clients" },
-  { text: "Oficinas", icon: <MapPinned size={22} />, path: "/offices" },
+  {
+    text: "Clientes",
+    icon: <Users size={22} />,
+    children: [
+      { text: "Empresas", icon: <Building2 size={20} />, path: "/clients" },
+      { text: "Oficinas", icon: <MapPinned size={20} />, path: "/offices" },
+      { text: "Contactos", icon: <User size={20} />, path: "/contacts" },
+    ],
+  },
   { text: "Técnicos", icon: <Wrench size={22} />, path: "/technicians" },
   {
     text: "Patrones",
@@ -98,7 +107,7 @@ export const Sidebar = ({ open, onToggle }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>("Catálogo");
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>("Clientes");
 
   const handleSubmenuToggle = (text: string) => {
     setOpenSubmenu(openSubmenu === text ? null : text);

@@ -3,8 +3,9 @@ import {
   Controller, Get,
   Param,
   Patch,
-  Post, Query, Res
+  Post, Query, Res, UploadedFile, UseInterceptors, BadRequestException
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import axios, { AxiosResponse } from 'axios';
 import { Response } from 'express';
 import { basename } from 'path';
@@ -21,12 +22,14 @@ import { UpdateInstrumentReceivedDTO } from './dto/update-instrument-received.dt
 import { UpdateInstrumentDTO } from './dto/update-instrument.dto';
 import { EquipmentService } from './equipment.service';
 import { IEquipment } from './interfaces/equipment.interface';
+import { ImageUploadService } from 'src/image-upload/image-upload.service';
   
               
   @Controller('equipments')
   export class EquipmentController {
     constructor(
       private equipmentService: EquipmentService,
+      private imageUploadService: ImageUploadService,
     ) {}
 
     @Auth()
@@ -42,6 +45,26 @@ import { IEquipment } from './interfaces/equipment.interface';
       }
       
       return await this.equipmentService.addEquipment(addEquipmentDTO);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Post(':id/datasheet-upload')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadDatasheet(@Param('id') id: string, @UploadedFile() file: any) {
+        if (!file) {
+            throw new BadRequestException("No se ha enviado ningún archivo");
+        }
+
+        const req = { files: [file] };
+        // Subir a R2 usando el servicio
+        const url = await this.imageUploadService.uploadDatasheet(req);
+        
+        // Actualizar el equipo con la URL
+        const updateDTO = new UpdateInstrumentDTO();
+        updateDTO.id = convertMongoId(id);
+        updateDTO.datasheet = url;
+        
+        return await this.equipmentService.updateInstrument(updateDTO);
     }
 
     @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)

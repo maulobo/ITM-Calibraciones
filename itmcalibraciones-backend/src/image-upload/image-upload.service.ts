@@ -6,11 +6,19 @@ import multerS3 from "multer-s3";
 import * as path from "path";
 import { Color, PDFDocument, PDFPage, degrees, grayscale } from "pdf-lib";
 
-const AWS_S3_BUCKET_NAME = "img2.itmcalibraciones.com";
+const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "img2.itmcalibraciones.com";
 const s3 = new AWS.S3({
   region: "us-east-2",
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
+const r3 = new AWS.S3({
+    endpoint: process.env.R2_ENDPOINT,
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    signatureVersion: 'v4',
 });
 
 @Injectable()
@@ -41,6 +49,29 @@ export class ImageUploadService {
     }
   }
 
+  async uploadDatasheet(@Req() req) {
+    try {
+      const uploadMiddleware = this.uploadR2("datasheets");
+
+      await new Promise<void>((resolve, reject) => {
+        uploadMiddleware(req, null, (error: any) => {
+          if (error) {
+            console.log(error);
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+      // R2 usually returns the location, but if not we might construct it. 
+      // multer-s3 should populate `location`.
+      return req.files[0].location;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   upload = (path: string) =>
     multer({
       storage: multerS3({
@@ -53,6 +84,20 @@ export class ImageUploadService {
         },
       }),
     }).array("upload", 1);
+
+  uploadR2 = (path: string) =>
+    multer({
+      storage: multerS3({
+        s3: r3,
+        bucket: R2_BUCKET_NAME,
+        // acl: "public-read", // R2 doesn't support ACLs like S3. Ensure bucket is public or use presigned.
+        key: (req, file, cb) => {
+          const key = `${path}/${Date.now().toString()}-${file.originalname}`;
+          cb(null, key);
+        },
+      }),
+    }).array("file", 1); // Expecting field name 'file' for R2 uploads
+
 
   async uploadToS3(filePath: string, destinationPath: string): Promise<string> {
     try {

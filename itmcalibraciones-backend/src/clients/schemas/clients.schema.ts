@@ -37,10 +37,12 @@ export class ClientsEntity extends Document {
   @Prop({
     type: [
       {
-        name: String,
-        email: String,
+        name: { type: String, required: true },
+        email: { type: String, required: true },
         phone: String,
         role: String,
+        area: String,
+        office: { type: Types.ObjectId, ref: "Office" },
       },
     ],
   })
@@ -49,6 +51,8 @@ export class ClientsEntity extends Document {
     email: string;
     phone?: string;
     role?: string;
+    area?: string;
+    office?: Types.ObjectId;
   }[];
   // -------------------------------------
 }

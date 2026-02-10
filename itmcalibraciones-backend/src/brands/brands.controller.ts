@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
 } from "@nestjs/common";
 import { Types } from "mongoose";
@@ -13,6 +14,7 @@ import { Auth } from "src/auth/decorators/auth.decorator";
 import { UserRoles } from "src/common/enums/role.enum";
 import { BrandService } from "./brands.service";
 import { AddBrandDTO } from "./dto/add-brand.dto";
+import { GetBrandsDTO } from "./dto/get-brands.dto";
 import { UpdateBrandDto } from "./dto/update-brand.dto";
 import { IBrand } from "./interfaces/brand.interface";
 
@@ -60,8 +62,8 @@ export class BrandController {
 
   @Auth()
   @Get("/")
-  async getAllBrands(): Promise<IBrand[]> {
-    return await this.brandService.getAllBrands();
+  async getAllBrands(@Query() query: GetBrandsDTO): Promise<IBrand[]> {
+    return await this.brandService.getAllBrands(query);
   }
 
   @Auth(UserRoles.ADMIN)

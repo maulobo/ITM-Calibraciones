@@ -1,26 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  getEquipmentTypes, 
-  createEquipmentType, 
-  getBrands, 
+import {
+  getEquipmentTypes,
+  createEquipmentType,
+  getBrands,
   createBrand,
   getModels,
   createModel,
+  getModelById,
+  updateModel,
+  deleteModel,
 } from "../api";
-import type { 
-  ModelFilters // imported as type
+import type {
+  ModelFilters, // imported as type
 } from "../api";
-import type { 
-  CreateEquipmentTypeDTO, 
+import type {
+  CreateEquipmentTypeDTO,
   CreateBrandDTO,
-  CreateModelDTO 
+  CreateModelDTO,
 } from "../types";
+import type { PaginationParams } from "../../../utils/pagination.types";
 
 // Equipment Types
-export const useEquipmentTypes = () => {
+export const useEquipmentTypes = (params?: PaginationParams) => {
   return useQuery({
-    queryKey: ["equipmentTypes"],
-    queryFn: getEquipmentTypes,
+    queryKey: ["equipmentTypes", params],
+    queryFn: () => getEquipmentTypes(params),
   });
 };
 
@@ -35,10 +39,10 @@ export const useCreateEquipmentType = () => {
 };
 
 // Brands
-export const useBrands = () => {
+export const useBrands = (params?: PaginationParams) => {
   return useQuery({
-    queryKey: ["brands"],
-    queryFn: getBrands,
+    queryKey: ["brands", params],
+    queryFn: () => getBrands(params),
   });
 };
 
@@ -64,6 +68,36 @@ export const useCreateModel = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateModelDTO) => createModel(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["models"] });
+    },
+  });
+};
+
+export const useModel = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ["model", id],
+    queryFn: () => getModelById(id!),
+    enabled: !!id,
+  });
+};
+
+export const useUpdateModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateModelDTO }) =>
+      updateModel(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["models"] });
+      queryClient.invalidateQueries({ queryKey: ["model", variables.id] });
+    },
+  });
+};
+
+export const useDeleteModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteModel(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["models"] });
     },

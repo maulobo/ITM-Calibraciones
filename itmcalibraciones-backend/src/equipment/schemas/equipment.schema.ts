@@ -123,6 +123,9 @@ export class EquipmentEntity extends Document {
   qr?: string;
 
   @Prop()
+  datasheet?: string;
+
+  @Prop()
   outOfService?: boolean;
 }
 

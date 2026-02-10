@@ -13,6 +13,15 @@ export class OfficeEntity extends Document {
   name: string;
 
   @Prop()
+  address?: string;
+
+  @Prop()
+  state?: string;
+
+  @Prop()
+  zipCode?: string;
+
+  @Prop()
   phoneNumber?: string;
 
   @Prop()

@@ -35,10 +35,14 @@ export class UserEntity extends Document {
   @Prop({ default: null })
   lastLogin: Date;
 
+  // Vinculación con Sucursal (Scope de visibilidad principal)
+  // Un usuario "Cliente" (TGS) solo ve órdenes de SU sucursal (Neuquén).
   @Prop({ required: true, ref: "Office", type: Types.ObjectId })
   office: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: "ClientsEntity", required: false })
+  // Vinculación con Cliente (Organizacional)
+  // Si está definido, el usuario es externo (pertenece a esa empresa).
+  @Prop({ type: Types.ObjectId, ref: "Client", required: false })
   client?: Types.ObjectId;
 }
 

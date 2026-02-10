@@ -31,12 +31,26 @@ import {
   Wrench,
   Search,
   Settings,
+  Users,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 import { useClients } from "../hooks/useClients";
 import { useOfficesByClient } from "../hooks/useOffices";
+import { useClientUsers } from "../hooks/useClientUsers";
 import { OfficeFormDialog } from "../components/OfficeFormDialog";
 import type { Office } from "../types/officeTypes";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  CircularProgress,
+} from "@mui/material";
 
 // Mock Data for Instruments
 const MOCK_INSTRUMENTS = [
@@ -156,16 +170,22 @@ const StatusChip = ({ status }: { status: string }) => {
 export const ClientDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const handleOpenOfficeDetails = (office: Office) => {
+    navigate(`/offices/${office.id || office._id}`);
+  };
+
   const { data: clients } = useClients();
   const [tabValue, setTabValue] = useState(0);
   const [officeDialogOpen, setOfficeDialogOpen] = useState(false);
   const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
 
   const client = clients?.find((c) => c.id === id || c._id === id);
-  
+
   // Fetch offices for this client
   const clientId = client?._id || client?.id || "";
-  const { data: offices = [], isLoading: isLoadingOffices } = useOfficesByClient(clientId);
+  const { data: offices = [], isLoading: isLoadingOffices } =
+    useOfficesByClient(clientId);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -193,493 +213,470 @@ export const ClientDetailsPage = () => {
   }
 
   if (!client) {
-    return <Typography>Cargando...</Typography>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
-    <Box>
-      <Box sx={{ mb: 4, display: "flex", alignItems: "center", gap: 2 }}>
-        <Button
-          startIcon={<ArrowLeft />}
-          onClick={() => navigate("/clients")}
-          color="inherit"
-        >
-          Volver
-        </Button>
-        <Box>
-          <Typography variant="h4" fontWeight="bold">
-            {client.socialReason}
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <Chip label={client.cuit} size="small" variant="outlined" />
-            <Typography variant="caption" color="text.secondary">
-              ID: {client.id || client._id}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-
-      <Grid container spacing={3}>
-        {/* Left Column: Client Info */}
-        <Grid size={{ xs: 12, md: 4, lg: 3 }}>
-          <Paper
-            elevation={0}
+    <Box sx={{ pb: 4 }}>
+      {/* Header Section */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          mb: 3,
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 2,
+          background: "linear-gradient(to right, #ffffff, #f8fafc)",
+        }}
+      >
+        <Box sx={{ mb: 2 }}>
+          <Button
+            startIcon={<ArrowLeft size={16} />}
+            onClick={() => navigate("/clients")}
+            color="inherit"
             sx={{
+              textTransform: "none",
+              color: "text.secondary",
+              mb: 1,
               p: 0,
-              overflow: "hidden",
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 3,
+              minWidth: "auto",
+              "&:hover": { bgcolor: "transparent", color: "text.primary" },
             }}
+            disableRipple
           >
-            <Box
+            Volver a Clientes
+          </Button>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Avatar
               sx={{
-                p: 3,
+                width: 64,
+                height: 64,
                 bgcolor: "primary.main",
-                color: "primary.contrastText",
+                fontSize: "1.75rem",
+                fontWeight: "bold",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                <Avatar
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    bgcolor: "white",
-                    color: "primary.main",
-                    fontSize: "2rem",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {client.socialReason.charAt(0)}
-                </Avatar>
-              </Box>
-              <Typography variant="h6" align="center" fontWeight="bold">
+              {client.socialReason.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight="800" letterSpacing="-0.5px">
                 {client.socialReason}
               </Typography>
-              <Typography variant="body2" align="center" sx={{ opacity: 0.9 }}>
-                {client.cityData?.name || client.cityName},{" "}
-                {client.stateData?.nombre || client.stateName}
-              </Typography>
-            </Box>
-
-            <Box sx={{ p: 3 }}>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight="bold"
-                  >
-                    EMAIL
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mt: 0.5,
-                    }}
-                  >
-                    <Mail size={16} className="text-gray-500" />
-                    <Typography variant="body2">
-                      {client.email || "No registrado"}
-                    </Typography>
-                  </Box>
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ mt: 0.5, color: "text.secondary" }}
+              >
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <FileText size={14} />
+                  <Typography variant="body2">{client.cuit}</Typography>
                 </Box>
-                <Divider />
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight="bold"
-                  >
-                    TELÉFONO
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{ height: 16, alignSelf: "center" }}
+                />
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <MapPin size={14} />
+                  <Typography variant="body2">
+                    {client.cityData?.name || client.cityName || "Global"},{" "}
+                    {client.stateData?.nombre || client.stateName || ""}
                   </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mt: 0.5,
-                    }}
-                  >
-                    <Phone size={16} className="text-gray-500" />
-                    <Typography variant="body2">
-                      {client.phoneNumber || "No registrado"}
-                    </Typography>
-                  </Box>
                 </Box>
-                <Divider />
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight="bold"
-                  >
-                    DIRECCIÓN
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mt: 0.5,
-                    }}
-                  >
-                    <MapPin size={16} className="text-gray-500" />
-                    <Typography variant="body2">
-                      {client.adress || "No registrada"}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Divider />
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    fontWeight="bold"
-                  >
-                    RESPONSABLE
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mt: 0.5,
-                    }}
-                  >
-                    <Building2 size={16} className="text-gray-500" />
-                    <Typography variant="body2">
-                      {client.responsable || "No registrado"}
-                    </Typography>
-                  </Box>
-                </Box>
+                {client.email && (
+                  <>
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ height: 16, alignSelf: "center" }}
+                    />
+                    <Box display="flex" alignItems="center" gap={0.5}>
+                      <Mail size={14} />
+                      <Typography variant="body2">{client.email}</Typography>
+                    </Box>
+                  </>
+                )}
               </Stack>
             </Box>
-          </Paper>
+          </Box>
 
-          {/* Contacts Card */}
-          <Paper
-            elevation={0}
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                bgcolor: "background.paper",
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
+                minWidth: 120,
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight="600"
+                textTransform="uppercase"
+              >
+                Instrumentos
+              </Typography>
+              <Typography variant="h4" fontWeight=" bold" color="primary.main">
+                {MOCK_INSTRUMENTS.length}
+              </Typography>
+            </Paper>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                bgcolor: "background.paper",
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
+                minWidth: 120,
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight="600"
+                textTransform="uppercase"
+              >
+                Oficinas
+              </Typography>
+              <Typography variant="h4" fontWeight=" bold" color="primary.main">
+                {offices.length}
+              </Typography>
+            </Paper>
+          </Box>
+        </Box>
+      </Paper>
+
+      <Paper
+        elevation={0}
+        sx={{
+          border: 1,
+          borderColor: "divider",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            px: 2,
+            bgcolor: "background.paper",
+          }}
+        >
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            textColor="primary"
+            indicatorColor="primary"
             sx={{
-              p: 3,
-              mt: 3,
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 3,
+              "& .MuiTab-root": {
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                minHeight: 56,
+              },
             }}
           >
-            <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
-              Contactos Adicionales
-            </Typography>
-            {client.contacts && client.contacts.length > 0 ? (
-              <Stack spacing={2}>
-                {client.contacts.map((contact, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      p: 1.5,
-                      bgcolor: "background.default",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle2" fontWeight="bold">
-                      {contact.name}
-                    </Typography>
-                    {contact.role && (
+            <Tab
+              icon={<Wrench size={18} />}
+              iconPosition="start"
+              label="Instrumentos"
+            />
+            <Tab
+              icon={<Building2 size={18} />}
+              iconPosition="start"
+              label="Oficinas"
+            />
+            <Tab
+              icon={<Clock size={18} />}
+              iconPosition="start"
+              label="Historial de Servicios"
+            />
+          </Tabs>
+        </Box>
+
+        {/* Instruments Tab */}
+        <CustomTabPanel value={tabValue} index={0}>
+          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+            <Button variant="contained" startIcon={<Wrench size={16} />}>
+              Nuevo Instrumento
+            </Button>
+          </Box>
+          <TableContainer component={Paper} elevation={0} variant="outlined">
+            <Table>
+              <TableHead sx={{ bgcolor: "background.default" }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>Tag</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Equipo</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Marca/Modelo</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Serie</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Última Cal.</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Vencimiento</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>
+                    Acciones
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {MOCK_INSTRUMENTS.map((instrument) => (
+                  <TableRow key={instrument.id} hover>
+                    <TableCell>
+                      <Chip
+                        label={instrument.tag}
+                        size="small"
+                        sx={{
+                          borderRadius: 1,
+                          height: 24,
+                          bgcolor: "grey.100",
+                          fontWeight: 500,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>
+                      {instrument.name}
+                    </TableCell>
+                    <TableCell>
+                      {instrument.brand}{" "}
                       <Typography
-                        variant="caption"
+                        component="span"
                         color="text.secondary"
-                        display="block"
+                        variant="body2"
                       >
-                        {contact.role}
+                        {instrument.model}
                       </Typography>
-                    )}
-                    <Box
-                      sx={{
-                        mt: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.5,
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Mail size={14} className="text-gray-400" />
-                        <Typography variant="caption">
-                          {contact.email}
-                        </Typography>
-                      </Box>
-                      {contact.phone && (
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <Phone size={14} className="text-gray-400" />
-                          <Typography variant="caption">
-                            {contact.phone}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
+                    </TableCell>
+                    <TableCell sx={{ color: "text.secondary" }}>
+                      {instrument.serial}
+                    </TableCell>
+                    <TableCell>{instrument.lastCalibration}</TableCell>
+                    <TableCell>{instrument.nextCalibration}</TableCell>
+                    <TableCell>
+                      <StatusChip status={instrument.status} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button size="small">Ver</Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Stack>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                No hay contactos adicionales.
-              </Typography>
-            )}
-          </Paper>
-        </Grid>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CustomTabPanel>
 
-        {/* Right Column: Details Tabs */}
-        <Grid size={{ xs: 12, md: 8, lg: 9 }}>
-          <Paper
-            elevation={0}
-            sx={{ border: 1, borderColor: "divider", borderRadius: 3 }}
+        {/* Offices Tab */}
+        <CustomTabPanel value={tabValue} index={1}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              mb: 3,
+            }}
           >
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                aria-label="client details tabs"
-              >
-                <Tab
-                  label="Instrumentos"
-                  icon={<Wrench size={18} />}
-                  iconPosition="start"
-                />
-                <Tab
-                  label="Oficinas"
-                  icon={<Building2 size={18} />}
-                  iconPosition="start"
-                />
-                <Tab
-                  label="Historial de Servicios"
-                  icon={<FileText size={18} />}
-                  iconPosition="start"
-                />
-                <Tab
-                  label="Configuración"
-                  icon={<Settings size={18} />}
-                  iconPosition="start"
-                />
-              </Tabs>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<Building2 size={16} />}
+              onClick={handleCreateOffice}
+            >
+              Nueva Oficina
+            </Button>
+          </Box>
+
+          {isLoadingOffices ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress size={32} />
             </Box>
-
-            {/* Instruments Tab */}
-            <CustomTabPanel value={tabValue} index={0}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 3,
-                  px: 3,
-                }}
+          ) : offices.length === 0 ? (
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 8,
+                bgcolor: "background.default",
+                borderRadius: 2,
+                border: "1px dashed",
+                borderColor: "divider",
+              }}
+            >
+              <Building2 size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
+              <Typography variant="h6" color="text.secondary">
+                No hay oficinas registradas
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 1, mb: 3 }}
               >
-                <Typography variant="h6" fontWeight="bold">
-                  Instrumentos Registrados
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<Wrench size={16} />}
-                >
-                  Registrar Instrumento
-                </Button>
-              </Box>
-
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Tag</TableCell>
-                      <TableCell>Instrumento</TableCell>
-                      <TableCell>Marca / Modelo</TableCell>
-                      <TableCell>Nº Serie</TableCell>
-                      <TableCell>Próx. Calibración</TableCell>
-                      <TableCell align="right">Estado</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {MOCK_INSTRUMENTS.map((inst) => (
-                      <TableRow key={inst.id} hover>
-                        <TableCell
-                          sx={{ fontWeight: "medium", color: "primary.main" }}
+                Comienza agregando sucursales para gestionar este cliente.
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<Building2 size={16} />}
+                onClick={handleCreateOffice}
+              >
+                Crear Primera Oficina
+              </Button>
+            </Box>
+          ) : (
+            <TableContainer component={Paper} elevation={0} variant="outlined">
+              <Table>
+                <TableHead sx={{ bgcolor: "background.default" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Ubicación</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Dirección</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Responsable</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Teléfono</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                      Acciones
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {offices.map((office) => (
+                    <TableRow key={office._id || office.id} hover>
+                      <TableCell
+                        sx={{ fontWeight: 600, color: "primary.main" }}
+                      >
+                        {office.name}
+                      </TableCell>
+                      <TableCell>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
                         >
-                          {inst.tag}
-                        </TableCell>
-                        <TableCell>{inst.name}</TableCell>
-                        <TableCell>
-                          <Typography variant="body2">{inst.brand}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {inst.model}
+                          <Typography variant="body2">
+                            {office.cityName || "-"}
                           </Typography>
-                        </TableCell>
-                        <TableCell>{inst.serial}</TableCell>
-                        <TableCell>{inst.nextCalibration}</TableCell>
-                        <TableCell align="right">
-                          <StatusChip status={inst.status} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CustomTabPanel>
-
-            {/* Offices Tab - NEW */}
-            <CustomTabPanel value={tabValue} index={1}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 3,
-                  px: 3,
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  Oficinas del Cliente
-                </Typography>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<Building2 size={16} />}
-                  onClick={handleCreateOffice}
-                >
-                  Nueva Oficina
-                </Button>
-              </Box>
-
-              {isLoadingOffices ? (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-                  <Typography>Cargando oficinas...</Typography>
-                </Box>
-              ) : offices.length === 0 ? (
-                <Box sx={{ px: 3, textAlign: "center", py: 8 }}>
-                  <Building2 size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
-                  <Typography variant="h6" color="text.secondary">
-                    No hay oficinas registradas
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Agregá la primera oficina para este cliente
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Building2 size={16} />}
-                    onClick={handleCreateOffice}
-                    sx={{ mt: 3 }}
-                  >
-                    Nueva Oficina
-                  </Button>
-                </Box>
-              ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Nombre</TableCell>
-                        <TableCell>Ubicación</TableCell>
-                        <TableCell>Dirección</TableCell>
-                        <TableCell>Responsable</TableCell>
-                        <TableCell>Teléfono</TableCell>
-                        <TableCell align="right">Acciones</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {offices.map((office) => (
-                        <TableRow key={office._id || office.id} hover>
-                          <TableCell sx={{ fontWeight: "medium" }}>
-                            {office.name}
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                              <MapPin size={14} />
-                              {office.cityName || "-"}, {office.stateName || "-"}
-                            </Box>
-                          </TableCell>
-                          <TableCell>{office.adress || "-"}</TableCell>
-                          <TableCell>{office.responsable || "-"}</TableCell>
-                          <TableCell>{office.phoneNumber || "-"}</TableCell>
-                          <TableCell align="right">
-                            <Button
-                              size="small"
-                              onClick={() => handleEditOffice(office)}
+                          {office.stateName && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
                             >
-                              Editar
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </CustomTabPanel>
+                              ({office.stateName})
+                            </Typography>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>{office.adress || "-"}</TableCell>
+                      <TableCell>{office.responsable || "-"}</TableCell>
+                      <TableCell>{office.phoneNumber || "-"}</TableCell>
+                      <TableCell align="right">
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          justifyContent="flex-end"
+                        >
+                          <Button
+                            size="small"
+                            startIcon={<Eye size={14} />}
+                            onClick={() => handleOpenOfficeDetails(office)}
+                            variant="outlined"
+                            sx={{
+                              borderColor: "divider",
+                              color: "text.primary",
+                            }}
+                          >
+                            Detalles
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() => handleEditOffice(office)}
+                            sx={{ minWidth: "auto", p: 1 }}
+                          >
+                            <Settings size={16} />
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </CustomTabPanel>
 
-            {/* Services History Tab */}
-            <CustomTabPanel value={tabValue} index={2}>
-              <Box sx={{ px: 3 }}>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-                  Historial de Servicios
-                </Typography>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Nº Orden</TableCell>
-                        <TableCell>Fecha</TableCell>
-                        <TableCell>Instrumento</TableCell>
-                        <TableCell>Tipo</TableCell>
-                        <TableCell>Técnico</TableCell>
-                        <TableCell align="right">Estado</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {MOCK_HISTORY.map((order) => (
-                        <TableRow key={order.id} hover>
-                          <TableCell sx={{ fontWeight: "medium" }}>
-                            {order.id}
-                          </TableCell>
-                          <TableCell>{order.date}</TableCell>
-                          <TableCell>{order.instrument}</TableCell>
-                          <TableCell>{order.type}</TableCell>
-                          <TableCell>{order.technician}</TableCell>
-                          <TableCell align="right">
-                            <Chip
-                              label={order.status}
-                              size="small"
-                              color="success"
-                              variant="outlined"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            </CustomTabPanel>
+        {/* History Tab */}
+        <CustomTabPanel value={tabValue} index={2}>
+          <TableContainer component={Paper} elevation={0} variant="outlined">
+            <Table>
+              <TableHead sx={{ bgcolor: "background.default" }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>ID Orden</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Fecha</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Equipo</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Tipo Servicio</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Técnico</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>
+                    Acciones
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {MOCK_HISTORY.map((item) => (
+                  <TableRow key={item.id} hover>
+                    <TableCell sx={{ fontFamily: "monospace" }}>
+                      {item.id}
+                    </TableCell>
+                    <TableCell>{item.date}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>
+                      {item.instrument}
+                    </TableCell>
+                    <TableCell>{item.type}</TableCell>
+                    <TableCell>{item.technician}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={item.status}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button size="small">Ver Reporte</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CustomTabPanel>
+      </Paper>
 
-            {/* Settings Tab */}
-            <CustomTabPanel value={tabValue} index={3}>
-              <Box sx={{ px: 3 }}>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-                  Configuración del Cliente
-                </Typography>
-                <Typography color="text.secondary">
-                  Opciones de configuración específicas para{" "}
-                  {client.socialReason}.
-                </Typography>
-              </Box>
-            </CustomTabPanel>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Office Form Dialog */}
       <OfficeFormDialog
         open={officeDialogOpen}
         onClose={() => setOfficeDialogOpen(false)}

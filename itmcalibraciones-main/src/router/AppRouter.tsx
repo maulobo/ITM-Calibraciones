@@ -5,6 +5,9 @@ import { ServiceOrdersPage } from "../modules/service-orders/pages/ServiceOrders
 import { ClientsPage } from "../modules/clients/pages/ClientsPage";
 import { ClientDetailsPage } from "../modules/clients/pages/ClientDetailsPage";
 import { OfficesPage } from "../modules/clients/pages/OfficesPage";
+import { OfficeDetailsPage } from "../modules/clients/pages/OfficeDetailsPage";
+import { ContactsPage } from "../modules/clients/pages/ContactsPage";
+import { ContactDetailsPage } from "../modules/clients/pages/ContactDetailsPage";
 import { TechniciansPage } from "../modules/technicians/pages/TechniciansPage";
 import { MainLayout } from "../layout/MainLayout";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
@@ -14,6 +17,8 @@ import { ClientDashboardPage } from "../modules/client-portal/pages/ClientDashbo
 import { EquipmentTypesPage } from "../modules/catalog/pages/EquipmentTypesPage";
 import { BrandsPage } from "../modules/catalog/pages/BrandsPage";
 import { ModelsPage } from "../modules/catalog/pages/ModelsPage";
+import { BrandModelsPage } from "../modules/catalog/pages/BrandModelsPage";
+import { ModelDetailPage } from "../modules/catalog/pages/ModelDetailPage";
 import { StandardEquipmentPage } from "../modules/standard-equipment/pages/StandardEquipmentPage";
 import { StandardEquipmentDetailPage } from "../modules/standard-equipment/pages/StandardEquipmentDetailPage";
 import { CreateServiceOrderPage } from "../modules/service-orders/pages/CreateServiceOrderPage";
@@ -84,6 +89,9 @@ export const router = createBrowserRouter([
           },
           { path: "clients/:id", element: <ClientDetailsPage /> },
           { path: "/offices", element: <OfficesPage /> },
+          { path: "/offices/:id", element: <OfficeDetailsPage /> },
+          { path: "/contacts", element: <ContactsPage /> },
+          { path: "/contacts/:id", element: <ContactDetailsPage /> },
           {
             path: "/technicians",
             element: <TechniciansPage />,
@@ -121,8 +129,16 @@ export const router = createBrowserRouter([
             element: <BrandsPage />,
           },
           {
+            path: "/params/brands/:brandId/models",
+            element: <BrandModelsPage />,
+          },
+          {
             path: "/params/models",
             element: <ModelsPage />,
+          },
+          {
+            path: "/params/models/:id",
+            element: <ModelDetailPage />,
           },
         ],
       },

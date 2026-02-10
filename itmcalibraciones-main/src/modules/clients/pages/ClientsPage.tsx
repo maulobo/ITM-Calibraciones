@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -21,12 +21,49 @@ import {
 import { Plus, Edit, Trash2, Search, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClients, useDeleteClientMutation } from "../hooks/useClients";
+import { usePagination } from "../../../hooks/usePagination";
+import { PaginationControls } from "../../../components/ui/PaginationControls";
 import { ClientFormDialog } from "../components/ClientFormDialog";
 import type { CreateOrUpdateClientDTO, Client } from "../types/clientTypes";
 
 export const ClientsPage = () => {
   const navigate = useNavigate();
-  const { data: clients, isLoading, error } = useClients();
+
+  // Configurar paginación
+  const pagination = usePagination({
+    initialPageSize: 10,
+    initialPage: 1,
+  });
+
+  // Obtener datos SIN paginación (backend valida DTOs estrictamente)
+  // TODO: Activar cuando el backend haga campos opcionales con @IsOptional()
+  const { data: clientsResponse, isLoading, error } = useClients();
+  // { limit: pagination.pageSize, offset: pagination.offset }
+
+  // Actualizar total cuando lleguen los datos
+  useEffect(() => {
+    if (clientsResponse?.pagination?.total !== undefined) {
+      const currentTotal = clientsResponse.pagination.total;
+      if (currentTotal !== pagination.total) {
+        pagination.goToPage(1);
+      }
+    }
+  }, [clientsResponse?.pagination?.total]);
+
+  const clients = clientsResponse?.data || [];
+
+  // Calcular qué items mostrar en esta página
+  const paginatedClients = useMemo(() => {
+    const start = pagination.offset;
+    const end = start + pagination.pageSize;
+    return clients.slice(start, end);
+  }, [clients, pagination.offset, pagination.pageSize]);
+
+  // Actualizar el total cuando cambien los datos
+  useEffect(() => {
+    pagination.setTotal(clients.length);
+  }, [clients.length, pagination]);
+
   const { mutate: deleteClient, isPending: isDeleting } =
     useDeleteClientMutation();
   const [openDialog, setOpenDialog] = useState(false);
@@ -148,7 +185,7 @@ export const ClientsPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {clients?.map((row) => (
+              {paginatedClients?.map((row) => (
                 <TableRow key={row.id || row._id} hover>
                   <TableCell fontWeight="bold">{row.socialReason}</TableCell>
                   <TableCell>
@@ -213,6 +250,16 @@ export const ClientsPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Controles de paginación */}
+        {clientsResponse?.pagination && (
+          <PaginationControls
+            pagination={{
+              ...pagination,
+              total: clientsResponse.pagination.total,
+            }}
+          />
+        )}
       </Paper>
 
       <ClientFormDialog

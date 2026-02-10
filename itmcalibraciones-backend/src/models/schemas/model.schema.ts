@@ -11,6 +11,9 @@ export class ModelEntity extends Document {
 
   @Prop({ required: true })
   name: string;
+
+  @Prop()
+  datasheet?: string;
 }
 
 // TODO: brand and name unique as Key compose

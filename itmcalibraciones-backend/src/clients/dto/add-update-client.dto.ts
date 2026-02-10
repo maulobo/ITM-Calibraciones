@@ -30,6 +30,16 @@ class ContactDTO {
   @IsOptional()
   @ApiProperty()
   role?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  area?: string;
+
+  @IsMongoId()
+  @IsOptional()
+  @ApiProperty()
+  office?: Types.ObjectId;
 }
 
 export class AddOrUpdateClientDTO {

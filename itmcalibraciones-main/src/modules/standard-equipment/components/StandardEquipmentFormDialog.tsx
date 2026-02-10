@@ -38,8 +38,12 @@ export const StandardEquipmentFormDialog = ({
   const [selectedBrand, setSelectedBrand] = useState("");
   const isEdit = !!equipment;
 
-  const { data: brands } = useBrands();
-  const { data: models } = useModels({ brand: selectedBrand || undefined });
+  const { data: brandsResponse } = useBrands();
+  const brands = brandsResponse?.data || [];
+  const { data: modelsResponse } = useModels({
+    brand: selectedBrand || undefined,
+  });
+  const models = modelsResponse?.data || [];
 
   const createMutation = useCreateStandardEquipment();
   const updateMutation = useUpdateStandardEquipment();

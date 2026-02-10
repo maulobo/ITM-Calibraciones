@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ImageUploadModule } from "src/image-upload/image-upload.module";
 
 import { AddModelCommandHandler } from "./commands/add-model.command";
 import { UpdateModelCommandHandler } from "./commands/update-model.command";
@@ -15,6 +16,7 @@ const CommandHandlers = [AddModelCommandHandler, UpdateModelCommandHandler];
 @Module({
   imports: [
     CqrsModule,
+    ImageUploadModule,
     MongooseModule.forFeature([{ name: "Model", schema: ModelSchema }]),
   ],
   providers: [ModelService, ...QueriesHandler, ...CommandHandlers],
