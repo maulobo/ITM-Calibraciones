@@ -60,4 +60,9 @@ export class CreateUserDTO {
   @IsOptional()
   @IsString()
   area: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  specialty?: string;
 }

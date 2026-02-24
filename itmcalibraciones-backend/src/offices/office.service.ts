@@ -25,7 +25,10 @@ export class OfficeService {
   }
 
   async deleteOffice(id: Types.ObjectId): Promise<{ deleted: boolean }> {
-    const result = await this.officeModel.deleteOne({ _id: id });
-    return { deleted: result.deletedCount > 0 };
+    const result = await this.officeModel.updateOne(
+      { _id: id },
+      { $set: { isActive: false } },
+    );
+    return { deleted: result.modifiedCount > 0 };
   }
 }

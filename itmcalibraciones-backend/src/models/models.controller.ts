@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
@@ -58,20 +59,47 @@ export class ModelController {
 
   @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
   @Post("/:id/datasheet-upload")
-  @UseInterceptors(FileInterceptor("file"))
-  async uploadDatasheet(@Param("id") id: string, @UploadedFile() file: any) {
-    if (!file) {
-      throw new BadRequestException("No se ha enviado ningún archivo");
+  async uploadDatasheet(@Param("id") id: string, @Req() req: any) {
+    if (!req.headers["content-type"]?.includes("multipart/form-data")) {
+      throw new BadRequestException(
+        "El archivo debe ser enviado como multipart/form-data",
+      );
     }
 
-    const req = { files: [file] };
-    // Subir a R2 usando el servicio
+    // Subir a R2 usando el servicio (delegamos el streaming directo a multer-s3)
+    // El servicio espera el request completo para procesarlo
     const url = await this.imageUploadService.uploadDatasheet(req);
+
+    if (!url) {
+      throw new BadRequestException(
+        "Error al subir el archivo, no se generó URL",
+      );
+    }
 
     // Actualizar el modelo con la URL
     const updateDTO = new UpdateModelDTO();
     updateDTO.id = new Types.ObjectId(id);
     updateDTO.datasheet = url;
+
+    return await this.modelService.updateModel(updateDTO);
+  }
+
+  @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+  @Delete("/:id/datasheet-remove")
+  async deleteDatasheet(@Param("id") id: string) {
+    // 1. Obtener el modelo para saber la URL del archivo
+    const model = await this.modelService.getModelById(id);
+    if (!model || !model.datasheet) {
+      throw new BadRequestException("El modelo no tiene datasheet o no existe");
+    }
+
+    // 2. Eliminar de R2 Cloudflare
+    await this.imageUploadService.deleteFileR2(model.datasheet);
+
+    // 3. Actualizar base de datos (poner datasheet a null o string vacío)
+    const updateDTO = new UpdateModelDTO();
+    updateDTO.id = new Types.ObjectId(id);
+    updateDTO.datasheet = null; // Mongoose update should handle null if schema allows, or use empty string
 
     return await this.modelService.updateModel(updateDTO);
   }

@@ -130,6 +130,14 @@ export const TechnicianFormDialog = ({
               helperText={errors.phoneNumber?.message}
               fullWidth
             />
+
+            <TextField
+              label="Especialidad"
+              {...register("specialty")}
+              error={!!errors.specialty}
+              helperText={errors.specialty?.message ?? "Ej: Metrología dimensional, Presión, Temperatura"}
+              fullWidth
+            />
           </Box>
         </DialogContent>
 

@@ -3,22 +3,26 @@ import {
   Box,
   Typography,
   Button,
+  TextField,
+  InputAdornment,
   Paper,
+  Avatar,
+  IconButton,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tooltip,
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
-import { Plus, Edit, Trash2, Search, Eye } from "lucide-react";
+import { Plus, Search, Eye, Edit, Archive, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClients, useDeleteClientMutation } from "../hooks/useClients";
 import { usePagination } from "../../../hooks/usePagination";
@@ -26,62 +30,41 @@ import { PaginationControls } from "../../../components/ui/PaginationControls";
 import { ClientFormDialog } from "../components/ClientFormDialog";
 import type { CreateOrUpdateClientDTO, Client } from "../types/clientTypes";
 
+const AVATAR_COLORS = [
+  "#2563eb", "#7c3aed", "#db2777", "#dc2626",
+  "#d97706", "#059669", "#0891b2", "#4f46e5",
+];
+const avatarColor = (name: string) =>
+  AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+
 export const ClientsPage = () => {
   const navigate = useNavigate();
-
-  // Configurar paginación
-  const pagination = usePagination({
-    initialPageSize: 10,
-    initialPage: 1,
-  });
-
-  // Obtener datos SIN paginación (backend valida DTOs estrictamente)
-  // TODO: Activar cuando el backend haga campos opcionales con @IsOptional()
-  const { data: clientsResponse, isLoading, error } = useClients();
-  // { limit: pagination.pageSize, offset: pagination.offset }
-
-  // Actualizar total cuando lleguen los datos
-  useEffect(() => {
-    if (clientsResponse?.pagination?.total !== undefined) {
-      const currentTotal = clientsResponse.pagination.total;
-      if (currentTotal !== pagination.total) {
-        pagination.goToPage(1);
-      }
-    }
-  }, [clientsResponse?.pagination?.total]);
-
-  const clients = clientsResponse?.data || [];
-
-  // Calcular qué items mostrar en esta página
-  const paginatedClients = useMemo(() => {
-    const start = pagination.offset;
-    const end = start + pagination.pageSize;
-    return clients.slice(start, end);
-  }, [clients, pagination.offset, pagination.pageSize]);
-
-  // Actualizar el total cuando cambien los datos
-  useEffect(() => {
-    pagination.setTotal(clients.length);
-  }, [clients.length, pagination]);
-
-  const { mutate: deleteClient, isPending: isDeleting } =
-    useDeleteClientMutation();
+  const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedClient, setSelectedClient] =
-    useState<CreateOrUpdateClientDTO | null>(null);
-
-  // Estados para eliminación
+  const [selectedClient, setSelectedClient] = useState<CreateOrUpdateClientDTO | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
 
-  const handleOpenNew = () => {
-    setSelectedClient(null);
-    setOpenDialog(true);
-  };
+  const pagination = usePagination({ initialPageSize: 10, initialPage: 1 });
+
+  const { data: clientsResponse, isLoading, isFetching } = useClients({ search: searchTerm });
+  const clients = clientsResponse?.data || [];
+
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClientMutation();
+
+  useEffect(() => { pagination.setTotal(clients.length); }, [clients.length]);
+  useEffect(() => { pagination.goToPage(1); }, [searchTerm]);
+
+  const paginatedClients = useMemo(() => {
+    const start = pagination.offset;
+    return clients.slice(start, start + pagination.pageSize);
+  }, [clients, pagination.offset, pagination.pageSize]);
+
+  const handleOpenNew = () => { setSelectedClient(null); setOpenDialog(true); };
 
   const handleEdit = (client: Client) => {
-    // Map Client to DTO
-    const dto: CreateOrUpdateClientDTO = {
+    setSelectedClient({
       id: client.id || client._id,
       socialReason: client.socialReason,
       cuit: client.cuit,
@@ -90,217 +73,204 @@ export const ClientsPage = () => {
       responsable: client.responsable || "",
       phoneNumber: client.phoneNumber || "",
       adress: client.adress || "",
-    };
-    setSelectedClient(dto);
+      contacts: [],
+    });
     setOpenDialog(true);
   };
 
-  const handleDeleteClick = (client: Client) => {
-    setClientToDelete(client);
-    setDeleteDialogOpen(true);
-  };
+  const handleDeleteClick = (client: Client) => { setClientToDelete(client); setDeleteDialogOpen(true); setArchiveError(null); };
 
   const handleConfirmDelete = () => {
     if (clientToDelete) {
       deleteClient(clientToDelete.id || clientToDelete._id!, {
-        onSuccess: () => {
-          setDeleteDialogOpen(false);
-          setClientToDelete(null);
+        onSuccess: () => { setDeleteDialogOpen(false); setClientToDelete(null); setArchiveError(null); },
+        onError: (error: any) => {
+          setArchiveError(error?.response?.data?.error?.message ?? "Error al archivar el cliente.");
         },
       });
     }
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedClient(null);
-  };
-
-  if (isLoading)
-    return (
-      <Box sx={{ p: 4, display: "flex", justifyContent: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
-  if (error)
-    return (
-      <Box
-        sx={{
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <Typography color="error" variant="h6">
-          Error al cargar clientes
-        </Typography>
-        <Paper
-          sx={{ p: 2, bgcolor: "grey.100", maxWidth: "100%", overflow: "auto" }}
-        >
-          <code style={{ fontSize: "0.8rem", color: "#d32f2f" }}>
-            {/* @ts-ignore - Axios error typing */}
-            {JSON.stringify(error?.response?.data || error.message, null, 2)}
-          </code>
-        </Paper>
-        <Typography variant="caption" color="text.secondary">
-          Verifique que el backend esté corriendo y la ruta sea correcta. (Error
-          500 = Ruta no existe en backend)
-        </Typography>
-      </Box>
-    );
-
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h4" fontWeight="bold">
             Clientes
           </Typography>
           <Typography color="text.secondary">
-            Gestión de base de datos de clientes
+            Gestioná los clientes y sus sucursales
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={20} />}
-          onClick={handleOpenNew}
-        >
+        <Button variant="contained" startIcon={<Plus size={18} />} onClick={handleOpenNew}>
           Nuevo Cliente
         </Button>
       </Box>
 
-      <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 3 }}>
-        <TableContainer>
-          <Table>
-            <TableHead sx={{ bgcolor: "background.default" }}>
-              <TableRow>
-                <TableCell>Razón Social</TableCell>
-                <TableCell>CUIT</TableCell>
-                <TableCell>Contacto</TableCell>
-                <TableCell>Ubicación</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell align="right">Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedClients?.map((row) => (
-                <TableRow key={row.id || row._id} hover>
-                  <TableCell fontWeight="bold">{row.socialReason}</TableCell>
-                  <TableCell>
-                    <Chip label={row.cuit} size="small" variant="outlined" />
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
-                        {row.responsable || "N/A"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {row.phoneNumber}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body2">
-                        {row.cityData?.name || "N/A"}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {row.stateData?.nombre || ""}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => navigate(`/clients/${row.id || row._id}`)}
-                      sx={{ mr: 1, color: "info.main" }}
-                      title="Ver Detalles"
-                    >
-                      <Eye size={18} />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEdit(row)}
-                      sx={{ mr: 1 }}
-                    >
-                      <Edit size={18} />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteClick(row)}
-                      color="error"
-                    >
-                      <Trash2 size={18} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(!clients || clients.length === 0) && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">
-                      No hay clientes registrados.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* Controles de paginación */}
-        {clientsResponse?.pagination && (
-          <PaginationControls
-            pagination={{
-              ...pagination,
-              total: clientsResponse.pagination.total,
-            }}
-          />
-        )}
+      {/* Buscador */}
+      <Paper elevation={0} sx={{ p: 2, mb: 3, border: 1, borderColor: "divider", borderRadius: 2 }}>
+        <TextField
+          fullWidth
+          placeholder="Buscar por razón social, CUIT, email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          size="small"
+          sx={{ bgcolor: "background.paper" }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                {isFetching
+                  ? <CircularProgress size={20} sx={{ mr: 1, opacity: 0.5 }} />
+                  : <Search size={20} style={{ marginRight: 8, opacity: 0.5 }} />}
+              </InputAdornment>
+            ),
+          }}
+        />
       </Paper>
 
+      {/* Tabla */}
+      <TableContainer component={Paper} variant="outlined" elevation={0} sx={{ borderRadius: 2 }}>
+        <Table>
+          <TableHead sx={{ bgcolor: "background.default" }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Razón Social</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>CUIT</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Ubicación</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Teléfono</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            ) : paginatedClients.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5 }}>
+                    <Building2 size={40} style={{ opacity: 0.2 }} />
+                    <Typography color="text.secondary">
+                      {searchTerm ? "No se encontraron clientes" : "No hay clientes registrados"}
+                    </Typography>
+                    {!searchTerm && (
+                      <Button size="small" variant="outlined" startIcon={<Plus size={14} />} onClick={handleOpenNew}>
+                        Agregar primer cliente
+                      </Button>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedClients.map((client) => {
+                const name = client.socialReason;
+                const color = avatarColor(name);
+                const clientId = client.id || client._id;
+                const location = [
+                  client.cityData?.name || client.cityName,
+                  client.stateData?.nombre || client.stateName,
+                ].filter(Boolean).join(", ");
+
+                return (
+                  <TableRow key={clientId} hover>
+                    <TableCell>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Avatar sx={{ bgcolor: color, color: "#fff", fontWeight: "bold", width: 36, height: 36, fontSize: "0.95rem" }}>
+                          {name.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Typography fontWeight="500">{name}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary" fontFamily="monospace">
+                        {client.cuit || "—"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {location || "—"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {client.email || "—"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {client.phoneNumber || "—"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 0.5 }}>
+                        <Button
+                          size="small"
+                          startIcon={<Eye size={16} />}
+                          onClick={() => navigate(`/clients/${clientId}`)}
+                          variant="outlined"
+                          color="inherit"
+                          sx={{ borderColor: "divider" }}
+                        >
+                          Ver
+                        </Button>
+                        <Tooltip title="Editar">
+                          <IconButton size="small" onClick={() => handleEdit(client)}>
+                            <Edit size={15} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Archivar">
+                          <IconButton size="small" color="warning" onClick={() => handleDeleteClick(client)}>
+                            <Archive size={15} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Paginación */}
+      {!isLoading && clients.length > 0 && (
+        <Paper elevation={0} sx={{ mt: 2, p: 2, border: 1, borderColor: "divider", borderRadius: 2 }}>
+          <PaginationControls pagination={{ ...pagination, total: clients.length }} />
+        </Paper>
+      )}
+
+      {/* Dialogs */}
       <ClientFormDialog
         open={openDialog}
-        onClose={handleCloseDialog}
+        onClose={() => { setOpenDialog(false); setSelectedClient(null); }}
         clientToEdit={selectedClient}
         isNewClient={!selectedClient}
       />
 
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+      <Dialog open={deleteDialogOpen} onClose={() => { setDeleteDialogOpen(false); setArchiveError(null); }} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Archivar cliente</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Está seguro que desea eliminar al cliente{" "}
-            <strong>{clientToDelete?.socialReason}</strong>?
+            ¿Estás seguro que querés archivar a <strong>{clientToDelete?.socialReason}</strong>?
           </Typography>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1, display: "block" }}
-          >
-            Esta acción no se puede deshacer.
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+            El cliente dejará de aparecer en las listas pero sus datos y registros históricos quedarán guardados.
           </Typography>
+          {archiveError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {archiveError}
+            </Alert>
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setDeleteDialogOpen(false)}
-            disabled={isDeleting}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color="error"
-            variant="contained"
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Eliminando..." : "Eliminar"}
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => { setDeleteDialogOpen(false); setArchiveError(null); }} disabled={isDeleting}>Cancelar</Button>
+          <Button onClick={handleConfirmDelete} color="warning" variant="contained" disabled={isDeleting}>
+            {isDeleting ? "Archivando..." : "Archivar"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -28,7 +28,8 @@ export class LoginHandler implements ICommandHandler {
         phoneNumber: user._doc.phoneNumber,
         id: user._doc._id,
         roles: user._doc.roles,
-        office: user._doc.office
+        office: user._doc.office,
+        client: user._doc.client ?? null,
       };
     }else{
       payload = {
@@ -38,7 +39,8 @@ export class LoginHandler implements ICommandHandler {
         id: user._id,
         roles: user.roles,
         phoneNumber: user.phoneNumber,
-        office: user.office
+        office: user.office,
+        client: user.client ?? null,
       };
 
     }

@@ -5,6 +5,7 @@ import {
   Patch,
   Post, Query, Res, UploadedFile, UseInterceptors, BadRequestException
 } from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 import axios, { AxiosResponse } from 'axios';
 import { Response } from 'express';
@@ -18,6 +19,8 @@ import { StatusEnum } from 'src/errors-handler/enums/status.enum';
 import { throwException } from 'src/errors-handler/throw-exception';
 import { AddEquipmentDTO } from './dto/add-equipment.dto';
 import { GetInstrumentsDTO } from './dto/get-instruments.dto';
+import { RegisterCalibrationDto } from './dto/register-calibration.dto';
+import { RegisterTechnicalResultDto } from './dto/register-technical-result.dto';
 import { UpdateInstrumentReceivedDTO } from './dto/update-instrument-received.dto';
 import { UpdateInstrumentDTO } from './dto/update-instrument.dto';
 import { EquipmentService } from './equipment.service';
@@ -109,15 +112,58 @@ import { ImageUploadService } from 'src/image-upload/image-upload.service';
       @Query() params: GetInstrumentsDTO,
       @User() user: JwtPayload,
     ): Promise<IEquipment[]> {
-      
+
       const { isAdmin, isTechnical } = isAdminOrTechnical(user)
       const query = convertToObjectId(params)
-      
+      // Popular office para mostrar nombre de sucursal en la lista.
+      // No populamos 'model' porque hay documentos históricos con model almacenado como
+      // string (ej: "Manómetro Digital") en lugar de ObjectId, lo que causa CastError.
+      query.populate = ['office'];
+
       const instrumentes = await this.equipmentService.getAllEquipments(query);
-      
+
       if(isAdmin || isTechnical) return instrumentes
-      
+
       return await this.equipmentService.cleanInstrumentUserAccess(user,instrumentes)
+    }
+
+    @Auth()
+    @Get("/search")
+    async searchEquipments(
+      @Query("q") q: string,
+      @Query("client") client?: string,
+      @Query("tag") tag?: string,
+    ): Promise<IEquipment[]> {
+      if ((!q || q.length < 2) && (!tag || tag.length < 1)) return [];
+      return this.equipmentService.searchBySerial(q ?? "", client, tag);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Patch("/:id/calibration")
+    async registerCalibration(
+      @Param("id") id: string,
+      @Body() dto: RegisterCalibrationDto,
+      @User() user: JwtPayload,
+    ): Promise<IEquipment> {
+      return this.equipmentService.registerCalibration(id, dto, user);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Patch("/:id/result")
+    async registerTechnicalResult(
+      @Param("id") id: string,
+      @Body() dto: RegisterTechnicalResultDto,
+      @User() user: JwtPayload,
+    ): Promise<IEquipment> {
+      return this.equipmentService.registerTechnicalResult(id, dto, user);
+    }
+
+    @Auth()
+    @Get("/:id")
+    async getEquipmentById(
+      @Param("id") id: string,
+    ): Promise<IEquipment> {
+      return this.equipmentService.findById(id);
     }
 
     @Get("/qr/:id")

@@ -1,36 +1,39 @@
 export enum EquipmentTechnicalStateEnum {
-  TO_CALIBRATE = "TO_CALIBRATE", // Para calibrar
-  TO_REPAIR = "TO_REPAIR", // A Reparar
-  CALIBRATED = "CALIBRATED", // Calibrado
-  VERIFIED = "VERIFIED", // Verificado
-  OUT_OF_SERVICE = "OUT_OF_SERVICE", // Fuera de Servicio
-  RETURN_WITHOUT_CALIBRATION = "RETURN_WITHOUT_CALIBRATION", // Devolución sin calibrar
+    PENDING = 'PENDING',                               // A calibrar / A reparar (recién ingresó)
+    IN_PROCESS = 'IN_PROCESS',                         // En proceso (técnico lo está trabajando)
+    CALIBRATED = 'CALIBRATED',                         // Calibrado (con certificado)
+    VERIFIED = 'VERIFIED',                             // Verificado (funcional, sin certificado)
+    MAINTENANCE = 'MAINTENANCE',                       // Mantenimiento/Reparación realizado
+    OUT_OF_SERVICE = 'OUT_OF_SERVICE',                 // Fuera de servicio (dado de baja)
+    RETURN_WITHOUT_CALIBRATION = 'RETURN_WITHOUT_CALIBRATION', // Devolución sin calibrar
 }
 
 export enum EquipmentLogisticStateEnum {
-  RECEIVED = "RECEIVED", // Ingreso
-  IN_LABORATORY = "IN_LABORATORY", // En Laboratorio
-  OUTPUT_TRAY = "OUTPUT_TRAY", // Bandeja de Salida (Falta papeles/admin)
-  READY_TO_DELIVER = "READY_TO_DELIVER", // Listo para retirar
-  DELIVERED = "DELIVERED", // Retirado
-  ON_HOLD = "ON_HOLD", // Frenado (Espera)
+    RECEIVED = 'RECEIVED',                   // Ingresado en ITM
+    IN_LABORATORY = 'IN_LABORATORY',         // En laboratorio
+    EXTERNAL = 'EXTERNAL',                   // En proveedor externo
+    ON_HOLD = 'ON_HOLD',                     // En espera (papeles, autorización, piezas)
+    READY_TO_DELIVER = 'READY_TO_DELIVER',   // Listo para retiro
+    DELIVERED = 'DELIVERED',                 // Entregado al cliente
 }
 
 export enum PurchaseOrderRequirementEnum {
-  YES = "YES",
-  NO = "NO",
-  NOT_REQUIRED = "NOT_REQUIRED",
+    YES = 'YES',
+    NO = 'NO',
+    NOT_REQUIRED = 'NOT_REQUIRED'
 }
 
-export enum EquipmentLocationEnum {
-  ITM = "ITM",
-  EXTERNAL = "EXTERNAL",
-}
-
+// Legacy — conservado para compatibilidad con equipment-state-log
 export enum EquipmentStateEnum {
-  CALIBRATED = "CALIBRATED", // Calibrated
-  EXPIRED = "EXPIRED", // Calibrated or maintence expired
-  IN_PROCESS = "IN_PROCESS", // In process of repair or calibrating
-  CREATED = "CREATED", // Created (empty)
-  SENDED = "SENDED", // Sended
+    CALIBRATED = 'CALIBRATED',
+    EXPIRED = 'EXPIRED',
+    IN_PROCESS = 'IN_PROCESS',
+    CREATED = 'CREATED',
+    SENDED = "SENDED",
+}
+
+// EquipmentLocationEnum is deprecated — location is now captured by logisticState (EXTERNAL)
+export enum EquipmentLocationEnum {
+    ITM = 'ITM',
+    EXTERNAL = 'EXTERNAL'
 }

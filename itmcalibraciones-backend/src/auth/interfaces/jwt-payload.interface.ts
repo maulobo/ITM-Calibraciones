@@ -8,8 +8,9 @@ export class JwtPayload {
   email: string;
   id: Types.ObjectId;
   roles: UserRoles[];
-  phoneNumber: string
-  office: string
+  phoneNumber: string;
+  office: string;
+  client?: Types.ObjectId | string;
 }
 
 export const jwtPayload: JwtPayload = {

@@ -253,7 +253,7 @@ export const BrandModelsPage = () => {
                       <Box
                         sx={{
                           p: 2,
-                          bgcolor: "grey.100",
+                          bgcolor: "action.selected",
                           borderRadius: "50%",
                           mb: 1,
                         }}

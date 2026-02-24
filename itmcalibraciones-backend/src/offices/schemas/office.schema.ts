@@ -29,6 +29,9 @@ export class OfficeEntity extends Document {
 
   @Prop()
   adress?: string;
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
 
 export const OfficeSchema = SchemaFactory.createForClass(OfficeEntity);

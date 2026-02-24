@@ -30,6 +30,10 @@ export class ModelService {
     return this.commandBus.execute(new UpdateModelCommand(updateModelDTO));
   }
 
+  async getModelById(id: string): Promise<IModel> {
+    return await this.modelModel.findById(id).exec();
+  }
+
   async deleteModel(id: Types.ObjectId): Promise<{ deleted: boolean }> {
     const result = await this.modelModel.deleteOne({ _id: id });
     return { deleted: result.deletedCount > 0 };

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { ChangeEvent } from "react";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -26,6 +27,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Snackbar,
+  Tooltip,
 } from "@mui/material";
 import {
   ArrowLeft,
@@ -37,6 +40,9 @@ import {
   Settings,
   X,
   Trash2,
+  Upload,
+  Download,
+  CheckCircle,
 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -45,8 +51,13 @@ import {
   useDeleteModel,
   useBrands,
   useEquipmentTypes,
+  useUploadModelDatasheet,
+  useDeleteModelDatasheet,
 } from "../hooks/useCatalog";
 import type { CreateModelDTO } from "../types";
+
+// Constantes
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB en bytes
 
 export const ModelDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,12 +65,22 @@ export const ModelDetailPage = () => {
   const theme = useTheme();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteDatasheetDialogOpen, setDeleteDatasheetDialogOpen] =
+    useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success",
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: model, isLoading, error } = useModel(id);
   const { data: brandsResponse } = useBrands();
   const { data: typesResponse } = useEquipmentTypes();
   const updateMutation = useUpdateModel();
   const deleteMutation = useDeleteModel();
+  const uploadMutation = useUploadModelDatasheet();
+  const deleteDatasheetMutation = useDeleteModelDatasheet();
 
   const brands = brandsResponse?.data || [];
   const types = typesResponse?.data || [];
@@ -109,6 +130,96 @@ export const ModelDetailPage = () => {
       onSuccess: () => {
         setDeleteDialogOpen(false);
         navigate(-1); // Volver a la página anterior
+      },
+    });
+  };
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !id) return;
+
+    // Validar tipo de archivo
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setSnackbarMessage("Solo se permiten archivos PDF o Word");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      // Resetear input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // Validar tamaño de archivo (5MB máximo)
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      setSnackbarMessage(
+        `El archivo es demasiado grande (${sizeMB}MB). El tamaño máximo permitido es 5MB`,
+      );
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      // Resetear input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // Subir archivo
+    uploadMutation.mutate(
+      { modelId: id, file },
+      {
+        onSuccess: () => {
+          setSnackbarMessage("Datasheet subido exitosamente");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+          // Resetear input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
+        onError: (error: unknown) => {
+          const errorMessage =
+            (error as { response?: { data?: { message?: string } } })?.response
+              ?.data?.message || "Error al subir el datasheet";
+          setSnackbarMessage(errorMessage);
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+          // Resetear input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
+      },
+    );
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDeleteDatasheet = () => {
+    if (!id) return;
+    deleteDatasheetMutation.mutate(id, {
+      onSuccess: () => {
+        setSnackbarMessage("Datasheet eliminado exitosamente");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        setDeleteDatasheetDialogOpen(false);
+      },
+      onError: (error: unknown) => {
+        const errorMessage =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "Error al eliminar el datasheet";
+        setSnackbarMessage(errorMessage);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        setDeleteDatasheetDialogOpen(false);
       },
     });
   };
@@ -241,6 +352,16 @@ export const ModelDetailPage = () => {
             >
               Eliminar
             </Button>
+            <Tooltip title="Subir datasheet (PDF o Word, máx. 5MB)" arrow>
+              <Button
+                variant="outlined"
+                startIcon={<Upload size={18} />}
+                onClick={handleUploadClick}
+                disabled={uploadMutation.isPending}
+              >
+                {uploadMutation.isPending ? "Subiendo..." : "Subir Datasheet"}
+              </Button>
+            </Tooltip>
             <Button
               variant="outlined"
               startIcon={<Settings size={18} />}
@@ -301,6 +422,80 @@ export const ModelDetailPage = () => {
                     {model.description || "Sin descripción disponible"}
                   </Typography>
                 </Grid>
+
+                {/* Datasheet Info */}
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    Datasheet
+                  </Typography>
+                  {model.datasheet ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 1,
+                        p: 2,
+                        bgcolor: "success.50",
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "success.200",
+                      }}
+                    >
+                      <CheckCircle size={20} color="green" />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" fontWeight={600}>
+                          {model.datasheet
+                            .split("/")
+                            .pop()
+                            ?.split("-")
+                            .slice(1)
+                            .join("-") || "Datasheet"}
+                        </Typography>
+                        {model.updatedAt && (
+                          <Typography variant="caption" color="text.secondary">
+                            Subido el{" "}
+                            {new Date(model.updatedAt).toLocaleDateString(
+                              "es-ES",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </Typography>
+                        )}
+                      </Box>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => window.open(model.datasheet, "_blank")}
+                        sx={{ ml: 1 }}
+                      >
+                        <Download size={18} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => setDeleteDatasheetDialogOpen(true)}
+                        sx={{ ml: 0.5 }}
+                      >
+                        <Trash2 size={18} />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 1 }}
+                    >
+                      No se ha subido ningún datasheet
+                    </Typography>
+                  )}
+                </Grid>
               </Grid>
             </CardContent>
           </Card>
@@ -337,7 +532,7 @@ export const ModelDetailPage = () => {
                     borderRadius: "12px",
                     cursor: "pointer",
                     "&:hover": {
-                      bgcolor: "grey.100",
+                      bgcolor: "action.selected",
                     },
                   }}
                   onClick={() =>
@@ -605,6 +800,87 @@ export const ModelDetailPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Datasheet Confirmation Dialog */}
+      <Dialog
+        open={deleteDatasheetDialogOpen}
+        onClose={() => setDeleteDatasheetDialogOpen(false)}
+        PaperProps={{
+          sx: { borderRadius: "16px", maxWidth: "400px", width: "100%" },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            pb: 1,
+          }}
+        >
+          <Typography variant="h6" fontWeight="bold">
+            Eliminar Datasheet
+          </Typography>
+          <IconButton
+            onClick={() => setDeleteDatasheetDialogOpen(false)}
+            size="small"
+          >
+            <X size={20} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Esta acción no se puede deshacer
+          </Alert>
+          <Typography variant="body1">
+            ¿Estás seguro de que deseas eliminar el datasheet del modelo{" "}
+            <strong>{model?.name}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button
+            onClick={() => setDeleteDatasheetDialogOpen(false)}
+            color="inherit"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteDatasheet}
+            variant="contained"
+            color="error"
+            disabled={deleteDatasheetMutation.isPending}
+            startIcon={<Trash2 size={18} />}
+          >
+            {deleteDatasheetMutation.isPending
+              ? "Eliminando..."
+              : "Eliminar Datasheet"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        style={{ display: "none" }}
+        onChange={handleFileSelect}
+      />
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

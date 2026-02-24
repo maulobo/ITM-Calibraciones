@@ -55,6 +55,9 @@ export class ClientsEntity extends Document {
     office?: Types.ObjectId;
   }[];
   // -------------------------------------
+
+  @Prop({ default: true })
+  isActive: boolean;
 }
 
 export const ClientsSchema = SchemaFactory.createForClass(ClientsEntity);

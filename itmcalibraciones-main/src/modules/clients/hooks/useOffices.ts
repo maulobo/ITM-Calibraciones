@@ -1,12 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { officesApi } from "../api/officesApi";
 
 const OFFICES_KEY = ["offices"];
 
-export const useAllOffices = () => {
+export const useAllOffices = (search?: string) => {
   return useQuery({
-    queryKey: [...OFFICES_KEY, "all"],
-    queryFn: officesApi.getAll,
+    queryKey: [...OFFICES_KEY, "all", search],
+    queryFn: () => officesApi.getAll(search),
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -35,6 +36,18 @@ export const useOfficeMutation = () => {
       queryClient.invalidateQueries({ 
         queryKey: [...OFFICES_KEY, "all"]
       });
+    },
+  });
+};
+
+export const useDeleteOfficeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: officesApi.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: OFFICES_KEY, exact: false });
+      queryClient.invalidateQueries({ queryKey: [...OFFICES_KEY, "all"] });
     },
   });
 };

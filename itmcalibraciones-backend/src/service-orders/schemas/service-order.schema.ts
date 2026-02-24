@@ -3,12 +3,21 @@ import { Document, Types } from "mongoose";
 
 // Definimos los estados generales de la ORDEN (no del equipo individual)
 export enum ServiceOrderState {
-  PENDING = "PENDING", // Recién creada
+  PENDING = "PENDING",       // Recién creada
   IN_PROCESS = "IN_PROCESS", // Hay equipos trabajándose
-  FINISHED = "FINISHED", // Todos los equipos listos
-  DELIVERED = "DELIVERED", // Entregada al cliente
-  CANCELLED = "CANCELLED", // Anulada
+  FINISHED = "FINISHED",     // Todos los equipos listos (técnicamente)
+  DELIVERED = "DELIVERED",   // Entregada físicamente al cliente
+  CANCELLED = "CANCELLED",   // Anulada
 }
+
+// Transiciones válidas: solo se puede avanzar, no retroceder
+export const VALID_TRANSITIONS: Record<ServiceOrderState, ServiceOrderState[]> = {
+  [ServiceOrderState.PENDING]:    [ServiceOrderState.IN_PROCESS, ServiceOrderState.CANCELLED],
+  [ServiceOrderState.IN_PROCESS]: [ServiceOrderState.FINISHED,  ServiceOrderState.CANCELLED],
+  [ServiceOrderState.FINISHED]:   [ServiceOrderState.DELIVERED,  ServiceOrderState.CANCELLED],
+  [ServiceOrderState.DELIVERED]:  [],
+  [ServiceOrderState.CANCELLED]:  [],
+};
 
 @Schema({ timestamps: true, toJSON: { virtuals: true } })
 export class ServiceOrderEntity extends Document {
@@ -25,27 +34,28 @@ export class ServiceOrderEntity extends Document {
   @Prop({ type: Types.ObjectId, ref: "Office", required: true })
   office: Types.ObjectId;
 
-  // 4. Contacto SNAPSHOT (Guardamos el objeto, no solo el ID)
+  // 4. Contactos SNAPSHOT (Array - múltiples personas que traen los equipos)
   // Esto es vital: Si borras al contacto del cliente, la orden histórica no se rompe.
   @Prop({
-    type: {
-      name: { type: String, required: true },
-      email: { type: String },
-      phone: { type: String },
-      role: { type: String },
-      area: { type: String },
-      office: { type: Types.ObjectId, ref: "Office" },
-    },
-    _id: false, // No necesitamos ID para este sub-objeto
+    type: [
+      {
+        name: { type: String, required: true },
+        email: { type: String },
+        phone: { type: String },
+        role: { type: String },
+        area: { type: String },
+      },
+    ],
+    _id: false,
+    default: [],
   })
-  contact: {
+  contacts: {
     name: string;
     email?: string;
     phone?: string;
     role?: string;
     area?: string;
-    office?: Types.ObjectId;
-  };
+  }[];
 
   // 5. Fecha de Ingreso (Puede ser distinta al createdAt si cargan cosas viejas)
   @Prop({ default: Date.now })
@@ -65,8 +75,32 @@ export class ServiceOrderEntity extends Document {
 
   // OPCIONAL: Array de IDs de equipos para acceso rápido desde la Orden
   // Aunque la relación real está en el Equipo, esto ayuda al frontend.
-  @Prop([{ type: Types.ObjectId, ref: "Equipment" }])
+  @Prop({ type: [{ type: Types.ObjectId, ref: "Equipment" }], default: [] })
   equipments: Types.ObjectId[];
+
+  // Historial de cambios de estado (trazabilidad)
+  @Prop({
+    type: [
+      {
+        from:          { type: String },
+        to:            { type: String, required: true },
+        changedById:   { type: Types.ObjectId },
+        changedByName: { type: String },
+        changedAt:     { type: Date, default: Date.now },
+        note:          { type: String },
+      },
+    ],
+    _id: false,
+    default: [],
+  })
+  statusHistory: {
+    from?: string;
+    to: string;
+    changedById?: Types.ObjectId;
+    changedByName?: string;
+    changedAt: Date;
+    note?: string;
+  }[];
 }
 
 export const ServiceOrderSchema =

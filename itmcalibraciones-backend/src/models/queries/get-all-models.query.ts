@@ -25,6 +25,11 @@ export class FindAllModelsQueryHandler
     // Extraer paginación y otros campos de QueryDTO
     const { limit, offset, populate, select, ...find } = params;
 
+    // Búsqueda por Regex (parcial e insensible a mayúsculas) para 'name'
+    if (find.name) {
+      (find as any).name = { $regex: new RegExp(find.name as string, "i") };
+    }
+
     const queryBuilder = new QueryBuilder<IModel>(this.modelModel, options)
       .find(find)
       .select(select)

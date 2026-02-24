@@ -9,6 +9,8 @@ import {
   getModelById,
   updateModel,
   deleteModel,
+  uploadModelDatasheet,
+  deleteModelDatasheet,
 } from "../api";
 import type {
   ModelFilters, // imported as type
@@ -100,6 +102,29 @@ export const useDeleteModel = () => {
     mutationFn: (id: string) => deleteModel(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["models"] });
+    },
+  });
+};
+
+export const useUploadModelDatasheet = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ modelId, file }: { modelId: string; file: File }) =>
+      uploadModelDatasheet(modelId, file),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["models"] });
+      queryClient.invalidateQueries({ queryKey: ["model", variables.modelId] });
+    },
+  });
+};
+
+export const useDeleteModelDatasheet = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (modelId: string) => deleteModelDatasheet(modelId),
+    onSuccess: (_, modelId) => {
+      queryClient.invalidateQueries({ queryKey: ["models"] });
+      queryClient.invalidateQueries({ queryKey: ["model", modelId] });
     },
   });
 };

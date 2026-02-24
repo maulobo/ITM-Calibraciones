@@ -94,7 +94,8 @@ export const ClientFormDialog = ({
   isNewClient = false,
 }: ClientFormDialogProps) => {
   const theme = useTheme();
-  const { data: allClients = [] } = useClients();
+  const { data: clientsResponse } = useClients();
+  const allClients = clientsResponse?.data || [];
   const { mutateAsync: saveClient, isPending: isSavingClient } =
     useClientMutation();
   const { mutateAsync: createUser } = useCreateUserMutation();
@@ -288,7 +289,7 @@ export const ClientFormDialog = ({
               name: contactData.name,
               lastName: contactData.lastName,
               email: contactData.email,
-              password: "123456", // Default password as discussed
+              password: currentClient.cuit || "123456", // Password is the CUIT of the company
               roles: ["USER"],
               client: currentClient.id || currentClient._id || "",
               office: contactData.office,
@@ -482,6 +483,16 @@ interface StepIdentityProps {
   isSavingClient: boolean;
 }
 
+const formatCuit = (value: string) => {
+  if (!value) return "";
+  const numbers = value.replace(/\D/g, "");
+  const truncated = numbers.slice(0, 11);
+  if (truncated.length <= 2) return truncated;
+  if (truncated.length <= 10)
+    return `${truncated.slice(0, 2)}-${truncated.slice(2)}`;
+  return `${truncated.slice(0, 2)}-${truncated.slice(2, 10)}-${truncated.slice(10)}`;
+};
+
 const StepIdentity = ({
   currentClient,
   allClients,
@@ -531,13 +542,15 @@ const StepIdentity = ({
   const onSubmitIdentity = async (data: CreateOrUpdateClientDTO) => {
     setSubmitError(null);
     try {
+      const cleanCuit = data.cuit.replace(/-/g, "");
+
       // 1. Client-side Validation for Duplicates
       // We check existing clients list to prevent backend errors (which are hard to catch nicely)
       if (allClients && allClients.length > 0) {
         // Check Duplicate CUIT
         const duplicateCuit = allClients.find(
           (c) =>
-            c.cuit === data.cuit &&
+            c.cuit === cleanCuit &&
             (currentClient
               ? c.id !== currentClient.id && c._id !== currentClient._id
               : true),
@@ -570,6 +583,7 @@ const StepIdentity = ({
 
       const payload = {
         ...data,
+        cuit: cleanCuit,
         id: currentClient?.id || currentClient?._id,
       };
 
@@ -746,27 +760,35 @@ const StepIdentity = ({
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="CUIT"
-                  placeholder="30-12345678-9"
-                  fullWidth
-                  {...register("cuit")}
-                  error={!!errors.cuit}
-                  helperText={
-                    errors.cuit?.message || "CUIT único registrado en AFIP"
-                  }
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <FileText size={20} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      bgcolor: "background.paper",
-                    },
-                  }}
+                <Controller
+                  name="cuit"
+                  control={control}
+                  render={({ field: { onChange, value, ...field } }) => (
+                    <TextField
+                      {...field}
+                      label="CUIT"
+                      placeholder="30-12345678-9"
+                      fullWidth
+                      value={formatCuit(value || "")}
+                      onChange={(e) => onChange(formatCuit(e.target.value))}
+                      error={!!errors.cuit}
+                      helperText={
+                        errors.cuit?.message || "CUIT único registrado en AFIP"
+                      }
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <FileText size={20} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          bgcolor: "background.paper",
+                        },
+                      }}
+                    />
+                  )}
                 />
               </Grid>
             </Grid>

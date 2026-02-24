@@ -16,7 +16,7 @@ export class FindOneUserQueryHandler
 
   async execute(query: FindOneUserQuery): Promise<IUser> {
     const { id } = query;
-    const user = await this.userModel.findById(id);
+    const user = await this.userModel.findById(id).populate('client');
 
     return user;
   }

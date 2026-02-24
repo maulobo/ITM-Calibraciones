@@ -152,7 +152,7 @@ describe("ServiceOrdersService", () => {
         { serialNumber: "SN001", office: mockUser.office },
         expect.objectContaining({
           $set: expect.objectContaining({
-            technicalState: EquipmentTechnicalStateEnum.TO_CALIBRATE,
+            technicalState: EquipmentTechnicalStateEnum.PENDING,
             logisticState: EquipmentLogisticStateEnum.RECEIVED,
             serviceOrder: "order_generated_id_123",
           }),

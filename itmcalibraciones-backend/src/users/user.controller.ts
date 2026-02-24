@@ -46,9 +46,12 @@ export class UserController {
     @Body() createUserDto: CreateUserDTO,
     @User() currentUser: JwtPayload,
   ): Promise<UserResponseDTO> {
-    // Convertir office solo si existe
+    // Convertir office y client a ObjectId si existen
     if (createUserDto.office) {
       createUserDto.office = new Types.ObjectId(createUserDto.office);
+    }
+    if (createUserDto.client) {
+      createUserDto.client = new Types.ObjectId(createUserDto.client);
     }
 
     // Si no se envían roles, por defecto USER

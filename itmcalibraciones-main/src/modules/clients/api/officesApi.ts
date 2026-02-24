@@ -8,8 +8,11 @@ export const officesApi = {
     return response.data;
   },
 
-  getAll: async (): Promise<Office[]> => {
-    const response = await axios.get(API_ROUTES.OFFICES.GET_ALL);
+  getAll: async (search?: string): Promise<Office[]> => {
+    const url = search 
+      ? `${API_ROUTES.OFFICES.GET_ALL}?search=${search}` 
+      : API_ROUTES.OFFICES.GET_ALL;
+    const response = await axios.get(url);
     return response.data;
   },
 

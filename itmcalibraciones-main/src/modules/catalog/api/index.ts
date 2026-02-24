@@ -27,6 +27,7 @@ const buildQueryString = (params: PaginationParams): string => {
     params.select.forEach((s) => searchParams.append("select", s));
   if (params.populate)
     params.populate.forEach((p) => searchParams.append("populate", p));
+  if (params.name) searchParams.append("name", params.name);
 
   return searchParams.toString();
 };
@@ -107,6 +108,7 @@ export const createBrand = async (dto: CreateBrandDTO): Promise<Brand> => {
 export interface ModelFilters extends PaginationParams {
   equipmentType?: string;
   brand?: string;
+  name?: string;
 }
 
 export const getModels = async (
@@ -118,6 +120,7 @@ export const getModels = async (
   if (filters?.equipmentType)
     params.append("equipmentType", filters.equipmentType);
   if (filters?.brand) params.append("brand", filters.brand);
+  if (filters?.name) params.append("name", filters.name);
 
   // Parámetros de paginación
   if (filters?.limit !== undefined)
@@ -173,4 +176,28 @@ export const updateModel = async (
 
 export const deleteModel = async (id: string): Promise<void> => {
   await api.delete(`/models/${id}`);
+};
+
+export const uploadModelDatasheet = async (
+  modelId: string,
+  file: File,
+): Promise<Model> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post(
+    `/models/${modelId}/datasheet-upload`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+  return data;
+};
+
+export const deleteModelDatasheet = async (modelId: string): Promise<Model> => {
+  const { data } = await api.delete(`/models/${modelId}/datasheet-remove`);
+  return data;
 };

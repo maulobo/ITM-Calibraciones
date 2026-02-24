@@ -30,8 +30,8 @@ export class ContactDto {
 // DTO para los Equipos que vienen en la lista
 export class EquipmentItemDto {
   @IsString()
-  @IsNotEmpty()
-  brand: string; // ID de Marca o Texto
+  @IsOptional()
+  brand?: string; // ID de Marca (no requerido, el modelo ya contiene la marca)
 
   @IsString()
   @IsNotEmpty()
@@ -48,6 +48,10 @@ export class EquipmentItemDto {
   @IsString()
   @IsOptional()
   tag?: string; // TAG del cliente
+
+  @IsString()
+  @IsOptional()
+  observations?: string; // Observaciones al ingreso del equipo
 }
 
 export class CreateServiceOrderDto {
@@ -61,10 +65,11 @@ export class CreateServiceOrderDto {
   @IsNotEmpty()
   office: string;
 
-  // CONTACTO (snapshot)
-  @ValidateNested()
+  // CONTACTOS (snapshot array - múltiples personas que traen los equipos)
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => ContactDto)
-  contact: ContactDto;
+  contacts: ContactDto[];
 
   // LISTA DE EQUIPOS
   @IsArray()

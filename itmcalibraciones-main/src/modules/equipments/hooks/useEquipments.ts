@@ -1,11 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getEquipments, updateEquipment } from "../api";
+import {
+  getEquipments, getAllEquipments, getEquipmentById,
+  updateEquipment, registerCalibration, registerTechnicalResult,
+  type RegisterCalibrationPayload, type RegisterTechnicalResultPayload,
+} from "../api";
 
-export const useEquipments = (search?: string) => {
+export const useEquipments = (search?: string, clientId?: string, tag?: string) => {
   return useQuery({
-    queryKey: ["equipments", search],
-    queryFn: () => getEquipments(search),
-    enabled: true, // Always enabled, or maybe refine
+    queryKey: ["equipments", "search", search, clientId, tag],
+    queryFn: () => getEquipments(search, clientId, tag),
+    enabled: (!!search && search.length >= 2) || (!!tag && tag.length >= 1),
+  });
+};
+
+export const useAllEquipments = () => {
+  return useQuery({
+    queryKey: ["equipments", "all"],
+    queryFn: getAllEquipments,
   });
 };
 
@@ -16,6 +27,40 @@ export const useUpdateEquipment = () => {
     mutationFn: updateEquipment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["equipments"] });
+      queryClient.invalidateQueries({ queryKey: ["equipment"] });
     },
+  });
+};
+
+export const useRegisterCalibration = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: RegisterCalibrationPayload }) =>
+      registerCalibration(id, dto),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["equipment", id] });
+      queryClient.invalidateQueries({ queryKey: ["equipments"] });
+    },
+  });
+};
+
+export const useRegisterTechnicalResult = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: RegisterTechnicalResultPayload }) =>
+      registerTechnicalResult(id, dto),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["equipment", id] });
+      queryClient.invalidateQueries({ queryKey: ["equipments"] });
+    },
+  });
+};
+
+export const useEquipmentById = (id?: string) => {
+  return useQuery({
+    queryKey: ["equipment", id],
+    queryFn: () => getEquipmentById(id!),
+    enabled: !!id,
   });
 };

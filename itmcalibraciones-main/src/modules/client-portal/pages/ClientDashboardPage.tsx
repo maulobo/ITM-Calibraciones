@@ -5,7 +5,6 @@ import {
   Chip,
   Typography,
   Grid,
-  LinearProgress,
   Paper,
   TableContainer,
   Table,
@@ -19,174 +18,60 @@ import {
   useTheme,
   alpha,
   Container,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Divider,
 } from "@mui/material";
 import {
   CheckCircle,
   Clock,
-  AlertTriangle,
   FileText,
   Activity,
-  Scale,
   Wrench,
-  AlertOctagon,
   ChevronRight,
+  ClipboardList,
+  Eye,
+  Building2,
+  Package,
+  AlertTriangle,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { useMyProfile, extractClientId } from "../../users/hooks/useMyProfile";
+import { useServiceOrdersByClient } from "../../service-orders/hooks/useServiceOrders";
+import { useMemo } from "react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import type { ServiceOrderStatus } from "../../service-orders/types";
 
-// Mock Data
-const MOCK_INSTRUMENTS = [
-  {
-    id: 1,
-    name: "Manómetro Digital",
-    tag: "ITM-001",
-    status: "VALID",
-    nextCalibration: "2026-05-15",
-    lastCalibration: "2025-05-15",
-  },
-  {
-    id: 2,
-    name: "Termómetro IR",
-    tag: "ITM-042",
-    status: "EXPIRING_SOON",
-    nextCalibration: "2026-02-01",
-    lastCalibration: "2025-02-01",
-  },
-  {
-    id: 3,
-    name: "Calibre Pie de Rey",
-    tag: "ITM-105",
-    status: "EXPIRED",
-    nextCalibration: "2026-01-10",
-    lastCalibration: "2025-01-10",
-  },
-  {
-    id: 4,
-    name: "Multímetro Fluke",
-    tag: "ITM-099",
-    status: "IN_PROCESS",
-    nextCalibration: "-",
-    lastCalibration: "2024-11-20",
-  },
-  {
-    id: 5,
-    name: "Balanza Analítica",
-    tag: "ITM-150",
-    status: "VALID",
-    nextCalibration: "2026-06-20",
-    lastCalibration: "2025-06-20",
-  },
-];
-
-const MOCK_HISTORY = [
-  {
-    id: "ORD-001",
-    date: "2025-12-10",
-    instrument: "Manómetro Digital",
-    tag: "ITM-001",
-    type: "Calibración",
-    result: "Aprobado",
-  },
-  {
-    id: "ORD-002",
-    date: "2025-11-05",
-    instrument: "Termómetro IR",
-    tag: "ITM-042",
-    type: "Reparación",
-    result: "Completado",
-  },
-  {
-    id: "ORD-003",
-    date: "2025-10-20",
-    instrument: "Balanza Analítica",
-    tag: "ITM-150",
-    type: "Calibración",
-    result: "Aprobado",
-  },
-];
-
-const StatusChip = ({ status }: { status: string }) => {
-  switch (status) {
-    case "VALID":
-      return (
-        <Chip
-          label="Vigente"
-          color="success"
-          size="small"
-          variant="outlined"
-          sx={{
-            fontWeight: "medium",
-            bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
-            border: "none",
-          }}
-          icon={<CheckCircle size={14} />}
-        />
-      );
-    case "EXPIRING_SOON":
-      return (
-        <Chip
-          label="Por Vencer"
-          color="warning"
-          size="small"
-          variant="outlined"
-          sx={{
-            fontWeight: "medium",
-            bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
-            border: "none",
-          }}
-          icon={<Clock size={14} />}
-        />
-      );
-    case "EXPIRED":
-      return (
-        <Chip
-          label="Vencido"
-          color="error"
-          size="small"
-          variant="outlined"
-          sx={{
-            fontWeight: "medium",
-            bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
-            border: "none",
-          }}
-          icon={<AlertTriangle size={14} />}
-        />
-      );
-    case "IN_PROCESS":
-      return (
-        <Chip
-          label="En Taller"
-          color="info"
-          size="small"
-          variant="outlined"
-          sx={{
-            fontWeight: "medium",
-            bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
-            border: "none",
-          }}
-          icon={<Activity size={14} />}
-        />
-      );
-    default:
-      return <Chip label={status} size="small" />;
-  }
+// ─── Status config ────────────────────────────────────────────────────────────
+const SO_STATUS: Record<ServiceOrderStatus, { label: string; color: "default" | "info" | "success" | "warning" | "error" }> = {
+  PENDING:    { label: "Pendiente",  color: "default" },
+  IN_PROCESS: { label: "En proceso", color: "info"    },
+  FINISHED:   { label: "Terminado",  color: "success" },
+  DELIVERED:  { label: "Entregado",  color: "warning" },
+  CANCELLED:  { label: "Cancelado",  color: "error"   },
 };
 
-const StatCard = ({
-  title,
-  value,
-  total,
-  color,
-  icon: Icon,
-  subtitle,
-}: {
+const StatusChip = ({ status }: { status: ServiceOrderStatus }) => {
+  const s = SO_STATUS[status] ?? { label: status, color: "default" as const };
+  return <Chip label={s.label} color={s.color} size="small" />;
+};
+
+// ─── KPI Card ────────────────────────────────────────────────────────────────
+interface KpiCardProps {
   title: string;
   value: number;
   total: number;
   color: "primary" | "success" | "warning" | "info" | "error";
-  icon: any;
+  icon: React.ElementType;
   subtitle: string;
-}) => {
+}
+
+const KpiCard = ({ title, value, total, color, icon: Icon, subtitle }: KpiCardProps) => {
   const theme = useTheme();
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
 
   return (
     <Card
@@ -194,35 +79,28 @@ const StatCard = ({
       sx={{
         height: "100%",
         border: "1px solid",
-        borderColor: alpha(theme.palette[color].main, 0.2),
+        borderColor: alpha(theme.palette[color].main, 0.25),
         borderRadius: 3,
         background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette[color].main, 0.05)} 100%)`,
-        transition: "transform 0.2s, box-shadow 0.2s",
+        transition: "transform 0.18s, box-shadow 0.18s",
         "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: `0 4px 20px -5px ${alpha(theme.palette[color].main, 0.2)}`,
+          transform: "translateY(-3px)",
+          boxShadow: `0 8px 24px -8px ${alpha(theme.palette[color].main, 0.25)}`,
         },
       }}
     >
-      <CardContent>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          sx={{ mb: 2 }}
-        >
+      <CardContent sx={{ p: 2.5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
           <Box
             sx={{
-              p: 1.5,
+              p: 1.25,
               borderRadius: 2,
-              bgcolor: alpha(theme.palette[color].main, 0.1),
+              bgcolor: alpha(theme.palette[color].main, 0.12),
               color: theme.palette[color].main,
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
-            <Icon size={24} />
+            <Icon size={22} />
           </Box>
           <Chip
             label={subtitle}
@@ -230,25 +108,15 @@ const StatCard = ({
             sx={{
               bgcolor: alpha(theme.palette[color].main, 0.1),
               color: theme.palette[color].dark,
-              fontWeight: 600,
-              fontSize: "0.75rem",
+              fontWeight: 700,
+              fontSize: "0.7rem",
+              height: 22,
             }}
           />
         </Stack>
 
-        <Typography
-          variant="h3"
-          fontWeight="800"
-          sx={{ mb: 0.5, color: theme.palette.text.primary }}
-        >
-          {value}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          fontWeight="500"
-          sx={{ mb: 2 }}
-        >
+        <Typography variant="h3" fontWeight={800} sx={{ mb: 0.25 }}>{value}</Typography>
+        <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 2 }}>
           {title}
         </Typography>
 
@@ -258,25 +126,22 @@ const StatCard = ({
               flexGrow: 1,
               bgcolor: alpha(theme.palette[color].main, 0.1),
               borderRadius: 1,
-              height: 6,
+              height: 5,
               overflow: "hidden",
             }}
           >
             <Box
               sx={{
-                width: `${total > 0 ? (value / total) * 100 : 0}%`,
+                width: `${pct}%`,
                 bgcolor: theme.palette[color].main,
                 height: "100%",
                 borderRadius: 1,
+                transition: "width 0.6s ease",
               }}
             />
           </Box>
-          <Typography
-            variant="caption"
-            fontWeight="bold"
-            color={theme.palette[color].main}
-          >
-            {total > 0 ? Math.round((value / total) * 100) : 0}%
+          <Typography variant="caption" fontWeight={700} color={theme.palette[color].main}>
+            {pct}%
           </Typography>
         </Box>
       </CardContent>
@@ -284,298 +149,349 @@ const StatCard = ({
   );
 };
 
+// ─── Main Component ───────────────────────────────────────────────────────────
 export const ClientDashboardPage = () => {
-  const { user } = useAuthStore();
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
 
-  const stats = {
-    total: MOCK_INSTRUMENTS.length,
-    valid: MOCK_INSTRUMENTS.filter((i) => i.status === "VALID").length,
-    attention: MOCK_INSTRUMENTS.filter((i) =>
-      ["EXPIRED", "EXPIRING_SOON"].includes(i.status),
-    ).length,
-    inWorkshop: MOCK_INSTRUMENTS.filter((i) => i.status === "IN_PROCESS")
-      .length,
+  // Get full profile with client reference
+  const { data: profile, isLoading: isLoadingProfile } = useMyProfile();
+  const clientId = extractClientId(profile);
+
+  // Extract company name
+  const companyName = useMemo(() => {
+    if (!profile) return "";
+    if (typeof profile.client === "object" && profile.client?.socialReason) return profile.client.socialReason;
+    if (typeof profile.office === "object" && typeof profile.office?.client === "object") {
+      return profile.office.client?.socialReason ?? "";
+    }
+    return "";
+  }, [profile]);
+
+  // Fetch real service orders for this client
+  const { data: serviceOrders = [], isLoading: isLoadingOrders } = useServiceOrdersByClient(clientId);
+
+  // Stats derived from real data
+  const stats = useMemo(() => {
+    const total = serviceOrders.length;
+    const inProcess = serviceOrders.filter((o) => o.generalStatus === "IN_PROCESS").length;
+    const finished = serviceOrders.filter((o) => ["FINISHED", "DELIVERED"].includes(o.generalStatus)).length;
+    const pending = serviceOrders.filter((o) => o.generalStatus === "PENDING").length;
+
+    // Equipments in workshop (logisticState === IN_LABORATORY)
+    const inWorkshop = serviceOrders
+      .flatMap((o) => o.equipments ?? [])
+      .filter((eq) => eq.logisticState === "IN_LABORATORY").length;
+
+    return { total, inProcess, finished, pending, inWorkshop };
+  }, [serviceOrders]);
+
+  // Recent orders (last 8)
+  const recentOrders = useMemo(() => serviceOrders.slice(0, 8), [serviceOrders]);
+
+  // Equipment currently in workshop (deduplicated, IN_LABORATORY)
+  const workshopEquipment = useMemo(() => {
+    const seen = new Set<string>();
+    const result = [];
+    for (const order of serviceOrders) {
+      for (const eq of order.equipments ?? []) {
+        if (eq.logisticState !== "IN_LABORATORY") continue;
+        const eqId = eq._id || eq.id;
+        if (eqId && !seen.has(eqId)) {
+          seen.add(eqId);
+          result.push({ ...eq, orderCode: order.code, orderId: order._id });
+        }
+      }
+    }
+    return result;
+  }, [serviceOrders]);
+
+  const formatDate = (d?: string) => {
+    if (!d) return "—";
+    try { return format(new Date(d), "dd MMM yyyy", { locale: es }); } catch { return d; }
   };
+
+  const isLoading = isLoadingProfile || isLoadingOrders;
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Welcome Section */}
-      <Box
-        sx={{
-          mb: 5,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
+
+      {/* ── Welcome ─────────────────────────────────────────────────────── */}
+      <Box sx={{ mb: 5, display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 2 }}>
         <Box>
           <Typography
             variant="h4"
-            fontWeight="800"
+            fontWeight={800}
             sx={{
-              mb: 1,
+              mb: 0.5,
               background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               color: "transparent",
             }}
           >
-            Panel de Control
+            {companyName || "Panel de Control"}
           </Typography>
-          <Typography variant="h6" color="text.secondary" fontWeight="normal">
-            Bienvenido de nuevo,{" "}
-            <Box component="span" fontWeight="bold" color="text.primary">
-              {user?.name}
-            </Box>
+          <Typography variant="body1" color="text.secondary">
+            Bienvenido,{" "}
+            <Box component="span" fontWeight={700} color="text.primary">
+              {user?.name} {user?.lastName}
+            </Box>{" "}
+            · {new Date().toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })}
           </Typography>
         </Box>
         <Button
           variant="contained"
-          startIcon={<Wrench size={18} />}
-          sx={{ borderRadius: 2, px: 3 }}
+          startIcon={<ClipboardList size={17} />}
+          sx={{ borderRadius: 2, px: 3, fontWeight: 600 }}
+          onClick={() => navigate("/portal/orders")}
         >
-          Solicitar Servicio
+          Ver Órdenes
         </Button>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 5 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Equipos"
-            value={stats.total}
-            total={stats.total}
-            color="primary"
-            icon={Scale}
-            subtitle="Inventario"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Equipos Vigentes"
-            value={stats.valid}
-            total={stats.total}
-            color="success"
-            icon={CheckCircle}
-            subtitle="Operativos"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Atención Requerida"
-            value={stats.attention}
-            total={stats.total}
-            color="warning"
-            icon={AlertOctagon}
-            subtitle="Vencimientos"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="En Taller"
-            value={stats.inWorkshop}
-            total={stats.total}
-            color="info"
-            icon={Wrench}
-            subtitle="Servicio"
-          />
-        </Grid>
-      </Grid>
+      {isLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {/* ── KPI Cards ──────────────────────────────────────────────── */}
+          <Grid container spacing={2.5} sx={{ mb: 5 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <KpiCard title="Órdenes Totales" value={stats.total} total={stats.total} color="primary" icon={ClipboardList} subtitle="Historial" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <KpiCard title="En Proceso" value={stats.inProcess} total={stats.total} color="info" icon={Activity} subtitle="Activas" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <KpiCard title="Finalizadas" value={stats.finished} total={stats.total} color="success" icon={CheckCircle} subtitle="Completadas" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <KpiCard title="Equipos en Taller" value={stats.inWorkshop} total={stats.inWorkshop || 1} color="warning" icon={Wrench} subtitle="En proceso" />
+            </Grid>
+          </Grid>
 
-      <Grid container spacing={4}>
-        {/* Instruments List */}
-        <Grid item xs={12} lg={8}>
-          <Paper
-            elevation={0}
-            sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                p: 3,
-                borderBottom: "1px solid",
-                borderColor: "divider",
-                bgcolor: alpha(theme.palette.primary.main, 0.02),
-              }}
-            >
-              <Typography variant="h6" fontWeight="700">
-                Mis Instrumentos
-              </Typography>
-              <Button
-                size="small"
-                endIcon={<ChevronRight size={16} />}
-                sx={{ fontWeight: 600 }}
-              >
-                Ver Todos
-              </Button>
-            </Box>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: theme.palette.action.hover }}>
-                    <TableCell
-                      sx={{ fontWeight: 600, color: "text.secondary" }}
-                    >
-                      TAG / ID
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontWeight: 600, color: "text.secondary" }}
-                    >
-                      INSTRUMENTO
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontWeight: 600, color: "text.secondary" }}
-                    >
-                      VENCIMIENTO
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      sx={{ fontWeight: 600, color: "text.secondary" }}
-                    >
-                      ESTADO
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {MOCK_INSTRUMENTS.map((inst) => (
-                    <TableRow
-                      key={inst.id}
-                      hover
-                      sx={{
-                        cursor: "pointer",
-                        "&:last-child td, &:last-child th": { border: 0 },
-                      }}
-                    >
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          fontWeight="600"
-                          color="primary"
-                        >
-                          {inst.tag}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="500">
-                          {inst.name}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {inst.nextCalibration}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <StatusChip status={inst.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-
-        {/* Recent Activity / History */}
-        <Grid item xs={12} lg={4}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-              px: 1,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              Historial Reciente
-            </Typography>
-            <Button size="small">Ver historial</Button>
-          </Box>
-          <Stack spacing={2}>
-            {MOCK_HISTORY.map((item) => (
-              <Card
-                key={item.id}
+          <Grid container spacing={3}>
+            {/* ── Recent Orders ────────────────────────────────────────── */}
+            <Grid size={{ xs: 12, lg: 7 }}>
+              <Paper
                 elevation={0}
                 sx={{
-                  p: 2,
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 3,
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    borderColor: "primary.main",
-                    bgcolor: alpha(theme.palette.primary.main, 0.02),
-                  },
+                  overflow: "hidden",
+                  height: "100%",
                 }}
               >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      bgcolor: "primary.50",
-                      color: "primary.main",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    px: 3,
+                    py: 2,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: alpha(theme.palette.primary.main, 0.02),
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <ClipboardList size={18} color={theme.palette.primary.main} />
+                    <Typography variant="h6" fontWeight={700}>
+                      Órdenes Recientes
+                    </Typography>
+                  </Box>
+                  <Button
+                    size="small"
+                    endIcon={<ChevronRight size={15} />}
+                    sx={{ fontWeight: 600, textTransform: "none" }}
+                    onClick={() => navigate("/portal/orders")}
                   >
-                    <FileText size={20} />
+                    Ver todas
+                  </Button>
+                </Box>
+
+                {recentOrders.length === 0 ? (
+                  <Box sx={{ textAlign: "center", py: 8, px: 3 }}>
+                    <Box sx={{ opacity: 0.15, mb: 2 }}><ClipboardList size={48} /></Box>
+                    <Typography color="text.secondary">Sin órdenes de servicio aún</Typography>
                   </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle2" fontWeight="bold">
-                      {item.type}
+                ) : (
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{
+                          "& th": { fontWeight: 700, fontSize: "0.75rem", color: "text.secondary",
+                            textTransform: "uppercase", letterSpacing: 0.5 }
+                        }}>
+                          <TableCell>Código</TableCell>
+                          <TableCell>Sucursal</TableCell>
+                          <TableCell>Fecha</TableCell>
+                          <TableCell align="center">Equipos</TableCell>
+                          <TableCell>Estado</TableCell>
+                          <TableCell />
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {recentOrders.map((order) => (
+                          <TableRow
+                            key={order._id}
+                            hover
+                            sx={{ cursor: "pointer", "&:last-child td": { border: 0 } }}
+                            onClick={() => navigate(`/portal/orders/${order._id}`)}
+                          >
+                            <TableCell>
+                              <Chip
+                                label={order.code}
+                                size="small"
+                                sx={{
+                                  fontFamily: "monospace", fontWeight: 700, bgcolor: "action.selected",
+                                  borderRadius: 1, height: 22, fontSize: "0.78rem",
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ fontSize: "0.85rem" }}>
+                              {order.office?.name ?? "—"}
+                            </TableCell>
+                            <TableCell sx={{ color: "text.secondary", fontSize: "0.82rem" }}>
+                              {formatDate(order.createdAt)}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Chip label={order.equipments?.length ?? 0} size="small" variant="outlined" sx={{ height: 20 }} />
+                            </TableCell>
+                            <TableCell>
+                              <StatusChip status={order.generalStatus} />
+                            </TableCell>
+                            <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                              <Tooltip title="Ver orden">
+                                <IconButton size="small" color="primary" onClick={() => navigate(`/portal/orders/${order._id}`)}>
+                                  <Eye size={14} />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </Paper>
+            </Grid>
+
+            {/* ── Equipment in Workshop ─────────────────────────────────── */}
+            <Grid size={{ xs: 12, lg: 5 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    px: 3,
+                    py: 2,
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: alpha(theme.palette.warning.main, 0.03),
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Wrench size={18} color={theme.palette.warning.main} />
+                    <Typography variant="h6" fontWeight={700}>
+                      En Taller
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {item.instrument}
-                    </Typography>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      sx={{ mt: 0.5 }}
-                    >
-                      <Typography variant="caption" color="text.disabled">
-                        {item.date}
-                      </Typography>
-                      <Box
-                        sx={{
-                          width: 4,
-                          height: 4,
-                          borderRadius: "50%",
-                          bgcolor: "text.disabled",
-                        }}
+                    {workshopEquipment.length > 0 && (
+                      <Chip
+                        label={workshopEquipment.length}
+                        size="small"
+                        color="warning"
+                        sx={{ height: 20, fontSize: "0.72rem", fontWeight: 700 }}
                       />
-                      <Typography
-                        variant="caption"
-                        fontWeight="600"
-                        color={
-                          item.result === "Aprobado" ||
-                          item.result === "Completado"
-                            ? "success.main"
-                            : "text.secondary"
-                        }
-                      >
-                        {item.result}
-                      </Typography>
-                    </Stack>
+                    )}
                   </Box>
-                </Stack>
-              </Card>
-            ))}
-          </Stack>
-        </Grid>
-      </Grid>
+                </Box>
+
+                {workshopEquipment.length === 0 ? (
+                  <Box sx={{ textAlign: "center", py: 8, px: 3 }}>
+                    <Box sx={{ opacity: 0.15, mb: 2 }}><Package size={48} /></Box>
+                    <Typography color="text.secondary" variant="body2">
+                      No hay equipos en taller actualmente
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Stack spacing={0} divider={<Divider />}>
+                    {workshopEquipment.map((eq) => (
+                      <Box
+                        key={eq._id || eq.id}
+                        sx={{
+                          px: 3,
+                          py: 1.5,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                          cursor: "pointer",
+                          transition: "bgcolor 0.15s",
+                          "&:hover": { bgcolor: alpha(theme.palette.warning.main, 0.04) },
+                        }}
+                        onClick={() => navigate(`/portal/orders/${eq.orderId}`)}
+                      >
+                        <Box
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.warning.main, 0.1),
+                            color: "warning.main",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Wrench size={16} />
+                        </Box>
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={600} fontFamily="monospace" noWrap>
+                            {eq.serialNumber || "—"}
+                          </Typography>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
+                            {eq.tag && (
+                              <Chip
+                                label={eq.tag}
+                                size="small"
+                                sx={{ height: 18, fontSize: "0.68rem", borderRadius: 0.5, bgcolor: "action.selected" }}
+                              />
+                            )}
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                              {eq.range || ""}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Chip
+                          label={eq.orderCode}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontFamily: "monospace", fontSize: "0.7rem", height: 22, borderRadius: 1, flexShrink: 0 }}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </>
+      )}
     </Container>
   );
 };

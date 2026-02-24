@@ -117,18 +117,25 @@ export class AddClientCommandHandler
           responsable: addClientDTO.responsable,
         };
 
-        console.log(`Creating default office "Casa Central" for client: ${newClient.socialReason}`);
-        const createdOffice = await this.commandBus.execute(new AddOfficeCommand(officeDto));
+        console.log(
+          `Creating default office "Casa Central" for client: ${newClient.socialReason}`,
+        );
+        const createdOffice = await this.commandBus.execute(
+          new AddOfficeCommand(officeDto),
+        );
         defaultOffice = createdOffice._id;
       } catch (officeError) {
-        console.error("Error creating default office for client:", officeError.message);
+        console.error(
+          "Error creating default office for client:",
+          officeError.message,
+        );
       }
 
       // 2. Automate User Creation ONLY if email is present AND office was created
       if (newClient.email && defaultOffice) {
         try {
           // Prepare User DTO
-          // Password = CUIT (numbers only) without suffix
+          // Password = CUIT (numbers only)
           const password = newClient.cuit.replace(/[^0-9]/g, "");
 
           const userDto: CreateUserDTO = {
@@ -143,8 +150,10 @@ export class AddClientCommandHandler
           } as any;
 
           console.log(`Creating automatic user for client: ${newClient.email}`);
-          console.log(`Password will be: ${password}`);
-          const createdUser = await this.commandBus.execute(new CreateUserCommand(userDto));
+          console.log(`Password set to: ${password}`);
+          const createdUser = await this.commandBus.execute(
+            new CreateUserCommand(userDto),
+          );
           console.log(`✅ User created successfully: ${createdUser._id}`);
         } catch (authError) {
           console.error("❌ Error creating user for client:", authError);

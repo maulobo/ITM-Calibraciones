@@ -43,8 +43,7 @@ export const MoveToOutputTrayDialog = ({
     updateMutation.mutate(
       {
         id: equipment._id,
-        logisticState: "OUTPUT_TRAY",
-        technicalState: "CALIBRATED", // Confirmar calibrado
+        logisticState: "READY_TO_DELIVER",
       },
       {
         onSuccess: () => {
@@ -69,7 +68,7 @@ export const MoveToOutputTrayDialog = ({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <PackageCheck size={22} />
           <Typography variant="h6" fontWeight="bold">
-            Mover a Bandeja de Salida
+            Marcar como Listo para Retiro
           </Typography>
         </Box>
         <IconButton onClick={onClose} size="small" sx={{ color: "white" }}>
@@ -89,16 +88,15 @@ export const MoveToOutputTrayDialog = ({
               </Typography>
             </Alert>
 
-            <Alert severity="warning">
+            <Alert severity="success">
               <Typography variant="body2">
-                El equipo está técnicamente listo pero falta documentación
-                administrativa (certificados, remito, factura, etc.).
+                El equipo está técnicamente listo y puede ser retirado por el cliente.
               </Typography>
             </Alert>
 
             <Typography variant="body2" color="text.secondary">
-              Esto moverá el equipo a "Bandeja de Salida" indicando que está
-              calibrado pero pendiente de papeles para su retiro.
+              Esto cambiará el estado logístico a "Listo para Retiro" indicando
+              que el equipo puede ser entregado.
             </Typography>
           </Stack>
         </DialogContent>
@@ -113,7 +111,7 @@ export const MoveToOutputTrayDialog = ({
             color="warning"
             disabled={updateMutation.isPending}
           >
-            {updateMutation.isPending ? "Moviendo..." : "Mover a Bandeja"}
+            {updateMutation.isPending ? "Guardando..." : "Marcar como Listo"}
           </Button>
         </DialogActions>
       </form>

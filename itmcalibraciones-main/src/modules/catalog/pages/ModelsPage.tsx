@@ -25,8 +25,9 @@ import {
   Select,
   MenuItem,
   Chip,
+  InputAdornment,
 } from "@mui/material";
-import { Plus, X, Box as BoxIcon, Eye, Trash2 } from "lucide-react";
+import { Plus, X, Box as BoxIcon, Eye, Trash2, Search } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import {
   useModels,
@@ -49,6 +50,17 @@ export const ModelsPage = () => {
     name: string;
   } | null>(null);
   const [filters, setFilters] = useState({ brand: "", equipmentType: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      pagination.goToPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Configurar paginación para modelos
   const pagination = usePagination({
@@ -56,13 +68,13 @@ export const ModelsPage = () => {
     initialPage: 1,
   });
 
-  // Data Fetching SIN paginación (backend valida DTOs estrictamente)
-  // TODO: Activar cuando el backend haga campos opcionales con @IsOptional()
+  // Data Fetching
   const queryFilters = {
-    // limit: pagination.pageSize,
-    // offset: pagination.offset,
+    limit: pagination.pageSize,
+    offset: pagination.offset,
     ...(filters.brand ? { brand: filters.brand } : {}),
     ...(filters.equipmentType ? { equipmentType: filters.equipmentType } : {}),
+    ...(debouncedSearch ? { name: debouncedSearch } : {}),
   };
 
   const { data: modelsResponse, isLoading, error } = useModels(queryFilters);
@@ -181,7 +193,22 @@ export const ModelsPage = () => {
       </Box>
 
       {/* Filters */}
-      <Box sx={{ mb: 3, display: "flex", gap: 2 }}>
+      <Box sx={{ mb: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
+        <TextField
+          size="small"
+          placeholder="Buscar por nombre..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ minWidth: 250 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search size={18} opacity={0.5} />
+              </InputAdornment>
+            ),
+          }}
+        />
+
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel>Filtrar por Tipo</InputLabel>
           <Select

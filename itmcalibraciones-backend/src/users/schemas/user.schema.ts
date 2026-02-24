@@ -36,9 +36,15 @@ export class UserEntity extends Document {
   lastLogin: Date;
 
   // Vinculación con Sucursal (Scope de visibilidad principal)
-  // Un usuario "Cliente" (TGS) solo ve órdenes de SU sucursal (Neuquén).
-  @Prop({ required: true, ref: "Office", type: Types.ObjectId })
+  // Un usuario "Cliente" (USER) solo ve órdenes de SU sucursal.
+  // Para usuarios ADMIN/TECHNICAL no es requerida.
+  @Prop({ required: false, ref: "Office", type: Types.ObjectId, default: null })
   office: Types.ObjectId;
+
+  // Especialidad del técnico (ej: "Metrología dimensional", "Presión")
+  // Aplica a usuarios con rol ADMIN/TECHNICAL
+  @Prop({ required: false })
+  specialty?: string;
 
   // Vinculación con Cliente (Organizacional)
   // Si está definido, el usuario es externo (pertenece a esa empresa).

@@ -36,10 +36,15 @@ export class EquipmentEntity extends Document {
   @Prop()
   orderIndex?: number;
 
+  // Código de OT individual del equipo (ej: "OT-26-0006-1")
+  // Siempre pertenece a un serviceOrder
+  @Prop({ index: true })
+  otCode?: string;
+
   @Prop({
     type: String,
     enum: Object.values(EquipmentTechnicalStateEnum),
-    default: EquipmentTechnicalStateEnum.TO_CALIBRATE,
+    default: EquipmentTechnicalStateEnum.PENDING,
   })
   technicalState: EquipmentTechnicalStateEnum;
 
@@ -88,11 +93,53 @@ export class EquipmentEntity extends Document {
   @Prop({ type: [{ type: Types.ObjectId, ref: "StandardEquipment" }] })
   usedStandards?: Types.ObjectId[];
 
+  @Prop({
+    type: [
+      {
+        serviceOrder:              { type: Types.ObjectId, ref: "ServiceOrderEntity" },
+        otCode:                    { type: String }, // Snapshot: "OT-26-0006-1"
+        entryDate:                 { type: Date, default: Date.now },
+        exitDate:                  { type: Date },
+        entryObservations:         { type: String }, // Observaciones al ingreso
+        exitObservations:          { type: String }, // Observaciones al retiro
+        calibrationDate:           { type: Date },
+        calibrationExpirationDate: { type: Date },
+        certificateNumber:         { type: String },
+        technicalResult:           { type: String },
+        usedStandards:             [{ type: Types.ObjectId, ref: "StandardEquipment" }],
+        technicianId:              { type: Types.ObjectId },
+        technicianName:            { type: String },
+      },
+    ],
+    _id: false,
+    default: [],
+  })
+  serviceHistory: {
+    serviceOrder: Types.ObjectId;
+    otCode?: string;
+    entryDate: Date;
+    exitDate?: Date;
+    entryObservations?: string;
+    exitObservations?: string;
+    calibrationDate?: Date;
+    calibrationExpirationDate?: Date;
+    certificateNumber?: string;
+    technicalResult?: string;
+    usedStandards?: Types.ObjectId[];
+    technicianId?: Types.ObjectId;
+    technicianName?: string;
+  }[];
+
   @Prop({ required: true, ref: "Model" })
   model: Types.ObjectId;
 
   @Prop({ required: true, ref: "Office" })
   office: Types.ObjectId;
+
+  // Dueño del equipo — nunca cambia aunque el equipo se mueva entre sucursales
+  // Es la clave para evitar colisiones de S/N entre distintas empresas
+  @Prop({ required: true, type: Types.ObjectId, ref: "Client" })
+  client: Types.ObjectId;
 
   @Prop()
   label?: string;
@@ -131,4 +178,6 @@ export class EquipmentEntity extends Document {
 
 export const EquipmentSchema = SchemaFactory.createForClass(EquipmentEntity);
 
-EquipmentSchema.index({ serialNumber: 1, office: 1 }, { unique: true });
+// Un equipo es único por: número de serie + modelo + cliente (empresa dueña)
+// Dos empresas distintas pueden tener equipos con el mismo S/N sin colisión
+EquipmentSchema.index({ serialNumber: 1, model: 1, client: 1 }, { unique: true });

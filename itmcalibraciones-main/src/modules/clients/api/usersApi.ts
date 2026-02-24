@@ -1,5 +1,11 @@
 import api from "../../../api/axios";
 
+export interface PopulatedClient {
+  _id: string;
+  socialReason: string;
+  cuit?: string;
+}
+
 export interface User {
   id: string;
   _id?: string;
@@ -7,7 +13,7 @@ export interface User {
   lastName: string;
   email: string;
   roles: string[];
-  client?: string;
+  client?: string | PopulatedClient;
   office?: string;
   phoneNumber?: string;
 }
@@ -40,7 +46,7 @@ export const usersApi = {
     if (params?.client) queryParams.append("client", params.client);
     if (params?.office) queryParams.append("office", params.office);
 
-    if (!params?.limit) queryParams.append("limit", "100");
+    if (!params?.limit) queryParams.append("limit", "1000");
 
     const response = await api.get<User[]>(`/users?${queryParams.toString()}`);
     return response.data;
@@ -65,6 +71,11 @@ export const usersApi = {
       password: data.password || "123456",
     };
     const response = await api.post<User>("/users/singup", payload);
+    return response.data;
+  },
+
+  updateUser: async (id: string, data: Partial<User>): Promise<User> => {
+    const response = await api.patch<User>(`/users/${id}`, data);
     return response.data;
   },
 };

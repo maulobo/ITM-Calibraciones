@@ -47,7 +47,8 @@ export const OfficeFormDialog = ({
   defaultClientId,
 }: OfficeFormDialogProps) => {
   const theme = useTheme();
-  const { data: clients = [], isLoading: isLoadingClients } = useClients();
+  const { data: clientsResponse, isLoading: isLoadingClients } = useClients();
+  const clients = clientsResponse?.data || [];
   const { mutate, isPending } = useOfficeMutation();
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
@@ -202,8 +203,7 @@ export const OfficeFormDialog = ({
               >
                 <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
                   <Typography variant="body2" color="text.secondary">
-                    Sucursal de:{" "}
-                    <strong>{selectedClient.socialReason}</strong>
+                    Sucursal de: <strong>{selectedClient.socialReason}</strong>
                   </Typography>
                 </CardContent>
               </Card>
@@ -219,43 +219,45 @@ export const OfficeFormDialog = ({
                 size="small"
                 helperText="El cliente no puede modificarse"
               />
+            ) : defaultClientId ? (
+              // Cliente pre-seleccionado (oculto)
+              <input
+                type="hidden"
+                {...register("client")}
+                value={defaultClientId}
+              />
             ) : (
-              defaultClientId ? (
-                // Cliente pre-seleccionado (oculto)
-                <input type="hidden" {...register("client")} value={defaultClientId} />
-              ) : (
-                <Autocomplete
-                  value={selectedClient}
-                  onChange={(_, newValue) => {
-                    setSelectedClient(newValue);
-                    setValue("client", newValue?.id || "");
-                  }}
-                  options={clients}
-                  getOptionLabel={(option) => option.socialReason}
-                  loading={isLoadingClients}
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Cliente"
-                      required
-                      error={!!errors.client}
-                      helperText={errors.client?.message}
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <>
-                            {isLoadingClients ? (
-                              <CircularProgress size={20} />
-                            ) : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              )
+              <Autocomplete
+                value={selectedClient}
+                onChange={(_, newValue) => {
+                  setSelectedClient(newValue);
+                  setValue("client", newValue?.id || "");
+                }}
+                options={clients}
+                getOptionLabel={(option) => option.socialReason}
+                loading={isLoadingClients}
+                size="small"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Cliente"
+                    required
+                    error={!!errors.client}
+                    helperText={errors.client?.message}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {isLoadingClients ? (
+                            <CircularProgress size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
             )}
 
             {/* Identificación */}
@@ -264,13 +266,19 @@ export const OfficeFormDialog = ({
               placeholder="Ej: Base Neuquén, Planta Bahía Blanca"
               {...register("name")}
               error={!!errors.name}
-              helperText={errors.name?.message || "Nombre descriptivo del lugar"}
+              helperText={
+                errors.name?.message || "Nombre descriptivo del lugar"
+              }
               fullWidth
               required
             />
 
             <Divider>
-              <Chip label="Ubicación" size="small" icon={<MapPin size={14} />} />
+              <Chip
+                label="Ubicación"
+                size="small"
+                icon={<MapPin size={14} />}
+              />
             </Divider>
 
             {/* Ubicación */}
@@ -342,7 +350,11 @@ export const OfficeFormDialog = ({
             </Grid>
 
             <Divider>
-              <Chip label="Logística" size="small" icon={<TruckIcon size={14} />} />
+              <Chip
+                label="Logística"
+                size="small"
+                icon={<TruckIcon size={14} />}
+              />
             </Divider>
 
             {/* Logística */}
@@ -371,23 +383,37 @@ export const OfficeFormDialog = ({
               }
               fullWidth
               InputProps={{
-                startAdornment: <Clock size={18} style={{ marginRight: 8, color: theme.palette.text.secondary }} />,
+                startAdornment: (
+                  <Clock
+                    size={18}
+                    style={{
+                      marginRight: 8,
+                      color: theme.palette.text.secondary,
+                    }}
+                  />
+                ),
               }}
             />
           </Stack>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: "divider" }}>
+        <DialogActions
+          sx={{ px: 3, py: 2, borderTop: 1, borderColor: "divider" }}
+        >
           <Button onClick={onClose} variant="outlined" disabled={isPending}>
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
-            variant="contained" 
+          <Button
+            type="submit"
+            variant="contained"
             disabled={isPending}
             sx={{ minWidth: 120 }}
           >
-            {isPending ? "Guardando..." : office ? "Actualizar" : "Crear Sucursal"}
+            {isPending
+              ? "Guardando..."
+              : office
+                ? "Actualizar"
+                : "Crear Sucursal"}
           </Button>
         </DialogActions>
       </form>

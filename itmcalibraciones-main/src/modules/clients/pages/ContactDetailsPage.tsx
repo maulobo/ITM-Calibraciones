@@ -1,8 +1,40 @@
+
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Typography, Button, Paper, Avatar, Grid, Tabs, Tab, CircularProgress, Chip, Divider, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { ArrowLeft, Mail, Phone, Building2, FileText, Clock, MapPin } from "lucide-react";
-import { useContact } from "../hooks/useContacts";
+import { 
+    Box, 
+    Typography, 
+    Button, 
+    Paper, 
+    Avatar, 
+    Grid, 
+    Tabs, 
+    Tab, 
+    CircularProgress, 
+    Chip, 
+    Divider, 
+    TableContainer, 
+    Table, 
+    TableHead, 
+    TableRow, 
+    TableCell, 
+    TableBody,
+    Tooltip
+} from "@mui/material";
+import { 
+    ArrowLeft, 
+    Mail, 
+    Phone, 
+    Building2, 
+    FileText, 
+    Clock, 
+    MapPin,
+    Pencil,
+    Lock
+} from "lucide-react";
+import { useContact, useUpdateContactMutation } from "../hooks/useContacts";
 import { useState } from "react";
+import { ContactFormDialog } from "../components/ContactFormDialog";
+import { ChangePasswordDialog } from "../../users/components/ChangePasswordDialog";
 
 // Mock Data for Service History
 const MOCK_SERVICE_HISTORY = [
@@ -29,10 +61,20 @@ export const ContactDetailsPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { data: contact, isLoading, error } = useContact(id || "");
+    const { mutate: updateContact, isPending: isUpdating } = useUpdateContactMutation();
+
     const [tabValue, setTabValue] = useState(0);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
+    };
+
+    const handleEditSubmit = async (data: any) => {
+        if (contact && (contact.id || contact._id)) {
+            updateContact({ id: contact.id || contact._id!, data });
+        }
     };
 
     if (isLoading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
@@ -42,6 +84,13 @@ export const ContactDetailsPage = () => {
             <Button variant="outlined" onClick={() => navigate("/contacts")}>Volver a la lista</Button>
         </Box>
     );
+
+    // Cast contact to compatible User type for ChangePasswordDialog if needed
+    // The ChangePasswordDialog expects id, name, etc.
+    const userForPasswordDialog: any = {
+        ...contact,
+        id: contact.id || contact._id,
+    };
 
     return (
         <Box sx={{ pb: 4 }}>
@@ -57,7 +106,7 @@ export const ContactDetailsPage = () => {
                     background: "linear-gradient(to right, #ffffff, #f8fafc)",
                 }}
             >
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Button
                         startIcon={<ArrowLeft size={16} />}
                         onClick={() => navigate("/contacts")}
@@ -67,6 +116,27 @@ export const ContactDetailsPage = () => {
                     >
                         Volver a Contactos
                     </Button>
+
+                    <Box display="flex" gap={1}>
+                        <Tooltip title="Cambiar Contraseña">
+                             <Button
+                                variant="outlined" 
+                                color="warning"
+                                size="small"
+                                startIcon={<Lock size={16} />}
+                                onClick={() => setChangePasswordOpen(true)}
+                            >
+                                Seguridad
+                            </Button>
+                        </Tooltip>
+                        <Button 
+                            variant="contained" 
+                            startIcon={<Pencil size={16} />} 
+                            onClick={() => setEditDialogOpen(true)}
+                        >
+                            Editar
+                        </Button>
+                    </Box>
                 </Box>
 
                 <Box sx={{ display: "flex", gap: 3, alignItems: "center", flexWrap: "wrap" }}>
@@ -188,6 +258,25 @@ export const ContactDetailsPage = () => {
                     </Paper>
                 </Grid>
             </Grid>
+
+            {contact && (
+                <>
+                    <ContactFormDialog 
+                        open={editDialogOpen}
+                        onClose={() => setEditDialogOpen(false)}
+                        onSubmit={handleEditSubmit}
+                        user={contact}
+                        isLoading={isUpdating}
+                    />
+
+                    <ChangePasswordDialog
+                        open={changePasswordOpen}
+                        onClose={() => setChangePasswordOpen(false)}
+                        user={userForPasswordDialog}
+                        onSuccess={() => {/* Maybe show toast */}}
+                    />
+                </>
+            )}
         </Box>
     );
 };

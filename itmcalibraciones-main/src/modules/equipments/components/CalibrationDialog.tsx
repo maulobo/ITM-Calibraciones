@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,12 +11,23 @@ import {
   IconButton,
   Stack,
   Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { X, Save } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { StandardEquipmentSelector } from "./StandardEquipmentSelector";
-import { useUpdateEquipment } from "../hooks/useEquipments";
+import { useRegisterCalibration } from "../hooks/useEquipments";
 import type { Equipment } from "../types";
+
+interface FormData {
+  calibrationDate: string;
+  validityMonths: number;
+  calibrationExpirationDate: string;
+  usedStandards: string[];
+}
 
 interface CalibrationDialogProps {
   open: boolean;
@@ -29,31 +40,45 @@ export const CalibrationDialog = ({
   onClose,
   equipment,
 }: CalibrationDialogProps) => {
-  const updateMutation = useUpdateEquipment();
+  const calibrationMutation = useRegisterCalibration();
 
   const {
     control,
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm<{
-    calibrationDate: string;
-    usedStandards: string[];
-  }>();
+  } = useForm<FormData>({
+    defaultValues: {
+      validityMonths: 12,
+    },
+  });
 
-  const onSubmit = (data: {
-    calibrationDate: string;
-    usedStandards: string[];
-  }) => {
+  const calibrationDate = watch("calibrationDate");
+  const validityMonths = watch("validityMonths");
+
+  // Auto-calcular fecha de vencimiento cuando cambia la fecha base o los meses
+  useEffect(() => {
+    if (calibrationDate && Number(validityMonths) > 0) {
+      const base = new Date(calibrationDate + "T00:00:00");
+      base.setMonth(base.getMonth() + Number(validityMonths));
+      setValue("calibrationExpirationDate", base.toISOString().split("T")[0]);
+    }
+  }, [calibrationDate, validityMonths, setValue]);
+
+  const onSubmit = (data: FormData) => {
     if (!equipment) return;
 
-    updateMutation.mutate(
+    calibrationMutation.mutate(
       {
         id: equipment._id,
-        technicalState: "CALIBRATED",
-        calibrationDate: data.calibrationDate,
-        usedStandards: data.usedStandards,
+        dto: {
+          calibrationDate: data.calibrationDate,
+          calibrationExpirationDate: data.calibrationExpirationDate,
+          usedStandards: data.usedStandards,
+        },
       },
       {
         onSuccess: () => {
@@ -109,6 +134,44 @@ export const CalibrationDialog = ({
               helperText={errors.calibrationDate?.message}
             />
 
+            {/* Vigencia de calibración */}
+            <Controller
+              name="validityMonths"
+              control={control}
+              rules={{ required: "Seleccione la vigencia" }}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.validityMonths}>
+                  <InputLabel>Vigencia de Calibración</InputLabel>
+                  <Select {...field} label="Vigencia de Calibración">
+                    <MenuItem value={6}>6 meses</MenuItem>
+                    <MenuItem value={12}>12 meses</MenuItem>
+                    <MenuItem value={18}>18 meses</MenuItem>
+                    <MenuItem value={24}>24 meses</MenuItem>
+                    <MenuItem value={36}>36 meses</MenuItem>
+                    <MenuItem value={0}>Personalizado</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            />
+
+            {/* Fecha de Vencimiento (calculada o manual) */}
+            <TextField
+              {...register("calibrationExpirationDate", {
+                required: "Fecha de vencimiento requerida",
+              })}
+              label="Fecha de Vencimiento"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              InputProps={{ readOnly: Number(validityMonths) > 0 }}
+              helperText={
+                Number(validityMonths) > 0
+                  ? "Calculada automáticamente según la vigencia seleccionada"
+                  : "Ingrese la fecha de vencimiento manualmente"
+              }
+              error={!!errors.calibrationExpirationDate}
+            />
+
             {/* Selector de Patrones */}
             <Box>
               <Typography
@@ -157,9 +220,9 @@ export const CalibrationDialog = ({
             type="submit"
             variant="contained"
             startIcon={<Save size={18} />}
-            disabled={updateMutation.isPending}
+            disabled={calibrationMutation.isPending}
           >
-            {updateMutation.isPending ? "Guardando..." : "Guardar Calibración"}
+            {calibrationMutation.isPending ? "Guardando..." : "Guardar Calibración"}
           </Button>
         </DialogActions>
       </form>

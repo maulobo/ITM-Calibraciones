@@ -12,6 +12,10 @@ export interface PaginationParams {
   select?: string[];
   /** Campos a poblar (populate) */
   populate?: string[];
+  /** Búsqueda por nombre (insensible a mayúsculas) */
+  name?: string;
+  /** Búsqueda general (nombre, cuit, etc) */
+  search?: string;
 }
 
 /**

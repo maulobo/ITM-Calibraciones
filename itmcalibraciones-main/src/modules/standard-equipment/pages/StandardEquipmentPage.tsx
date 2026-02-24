@@ -263,7 +263,7 @@ export const StandardEquipmentPage = () => {
                           {item.description}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {item.brand.name} - {item.model.name}
+                          {item.brand?.name ?? "—"} - {item.model?.name ?? "—"}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -286,11 +286,13 @@ export const StandardEquipmentPage = () => {
                               item.status === "VENCIDO" ? "bold" : "normal",
                           }}
                         >
-                          {format(
-                            new Date(item.calibrationExpirationDate),
-                            "dd/MM/yyyy",
-                            { locale: es },
-                          )}
+                          {item.calibrationExpirationDate
+                            ? format(
+                                new Date(item.calibrationExpirationDate),
+                                "dd/MM/yyyy",
+                                { locale: es },
+                              )
+                            : "—"}
                         </Typography>
                         <Typography
                           variant="caption"

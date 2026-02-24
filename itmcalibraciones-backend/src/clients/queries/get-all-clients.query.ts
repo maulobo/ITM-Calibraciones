@@ -24,7 +24,7 @@ export class FindAllClientsQueryHandler
     const { populate, select, search, limit, offset, ...find } = params as any;
 
     // Support text search by Search Query
-    const filter = { ...find };
+    const filter: any = { ...find, isActive: { $ne: false } };
     if (search) {
       filter.$or = [
         { socialReason: { $regex: search, $options: "i" } },

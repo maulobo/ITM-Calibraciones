@@ -151,6 +151,10 @@ export const EXCEPTIONS: IException = {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'Error can´t delete the certificate becouse is under use.',
     errorCode: StatusEnum.ERROR_DELETE_CERTIFICATE_UNDER_USING
+  },
+  '1025': {
+    status: HttpStatus.CONFLICT,
+    message: 'No se puede archivar el cliente porque tiene órdenes de servicio activas (Pendiente o En proceso).',
+    errorCode: StatusEnum.CLIENT_HAS_ACTIVE_ORDERS,
   }
-  
 };

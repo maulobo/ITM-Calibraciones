@@ -79,7 +79,7 @@ async function runTestScenario() {
     });
     console.log(`✅ Orden creada. ID: ${newOrder._id}`);
     console.log(
-      `   👉 Contacto congelado en Orden: ${newOrder.contact.name} (${newOrder.contact.email})`,
+      `   👉 Contacto congelado en Orden: ${newOrder.contacts[0]?.name} (${newOrder.contacts[0]?.email})`,
     );
 
     // --- PASO 3: Ingresar Equipos ---
@@ -89,7 +89,7 @@ async function runTestScenario() {
       serialNumber: "SN-MAN-001",
       serviceOrder: newOrder._id, // Vinculación Padre
       orderIndex: 0,
-      technicalState: "TO_CALIBRATE", // Estado Individual
+      technicalState: "PENDING", // Estado Individual
       logisticState: "RECEIVED",
       tag: "MAN-TGS-01",
       // Campos requeridos por validación estricta
@@ -105,7 +105,7 @@ async function runTestScenario() {
       serialNumber: "SN-MAN-002",
       serviceOrder: newOrder._id, // Vinculación Padre
       orderIndex: 1,
-      technicalState: "TO_REPAIR", // SIMULACION: Este está roto
+      technicalState: "PENDING", // SIMULACION: Pendiente de diagnóstico
       logisticState: "RECEIVED",
       tag: "MAN-TGS-02",
       // Campos requeridos por validación estricta

@@ -143,7 +143,7 @@ export const StandardEquipmentDetailPage = () => {
               sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}
             >
               <ShieldCheck size={18} />
-              {equipment.brand.name} {equipment.model.name}
+              {equipment.brand?.name ?? "—"} {equipment.model?.name ?? "—"}
             </Typography>
           </Box>
 

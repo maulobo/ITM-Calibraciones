@@ -24,6 +24,11 @@ export class FindAllBrandsQueryHandler
     const { params, options } = query;
     const { populate, select, limit, offset, ...find } = params;
 
+    // Búsqueda por Regex (parcial e insensible a mayúsculas) para 'name'
+    if (find.name) {
+      (find as any).name = { $regex: new RegExp(find.name as string, "i") };
+    }
+
     const queryBuilder = new QueryBuilder<IBrand>(this.brandModel, options)
       .find(find)
       .select(select)

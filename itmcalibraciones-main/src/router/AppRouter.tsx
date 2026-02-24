@@ -14,6 +14,10 @@ import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import { RoleRedirect } from "../components/layout/RoleRedirect";
 import { ClientLayout } from "../modules/client-portal/layout/ClientLayout";
 import { ClientDashboardPage } from "../modules/client-portal/pages/ClientDashboardPage";
+import { PortalOrdersPage } from "../modules/client-portal/pages/PortalOrdersPage";
+import { PortalOrderDetailPage } from "../modules/client-portal/pages/PortalOrderDetailPage";
+import { PortalEquipmentsPage } from "../modules/client-portal/pages/PortalEquipmentsPage";
+import { PortalEquipmentDetailPage } from "../modules/client-portal/pages/PortalEquipmentDetailPage";
 import { EquipmentTypesPage } from "../modules/catalog/pages/EquipmentTypesPage";
 import { BrandsPage } from "../modules/catalog/pages/BrandsPage";
 import { ModelsPage } from "../modules/catalog/pages/ModelsPage";
@@ -22,9 +26,11 @@ import { ModelDetailPage } from "../modules/catalog/pages/ModelDetailPage";
 import { StandardEquipmentPage } from "../modules/standard-equipment/pages/StandardEquipmentPage";
 import { StandardEquipmentDetailPage } from "../modules/standard-equipment/pages/StandardEquipmentDetailPage";
 import { CreateServiceOrderPage } from "../modules/service-orders/pages/CreateServiceOrderPage";
+import { ServiceOrderDetailPage } from "../modules/service-orders/pages/ServiceOrderDetailPage";
 import { EquipmentsPage } from "../modules/equipments/pages/EquipmentsPage";
 import { EquipmentDetailPage } from "../modules/equipments/pages/EquipmentDetailPage";
 import { Box, Typography } from "@mui/material";
+import { ProfilePage } from "../modules/users/pages/ProfilePage";
 
 // Placeholder generic page
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -53,10 +59,11 @@ export const router = createBrowserRouter([
         path: "/portal",
         element: <ClientLayout />,
         children: [
-          {
-            path: "",
-            element: <ClientDashboardPage />,
-          },
+          { path: "",               element: <ClientDashboardPage /> },
+          { path: "orders",         element: <PortalOrdersPage /> },
+          { path: "orders/:id",     element: <PortalOrderDetailPage /> },
+          { path: "equipment",      element: <PortalEquipmentsPage /> },
+          { path: "equipment/:id",  element: <PortalEquipmentDetailPage /> },
         ],
       },
       // Admin / Technical Routes
@@ -74,6 +81,10 @@ export const router = createBrowserRouter([
           {
             path: "/service-orders/new",
             element: <CreateServiceOrderPage />,
+          },
+          {
+            path: "/service-orders/:id",
+            element: <ServiceOrderDetailPage />,
           },
           {
             path: "/equipments",
@@ -118,7 +129,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "/settings",
-            element: <PlaceholderPage title="Configuración" />,
+            element: <ProfilePage />,
           },
           {
             path: "/params/types",

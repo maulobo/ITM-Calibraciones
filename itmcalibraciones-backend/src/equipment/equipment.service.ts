@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, forwardRef } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 
 import { Cron } from "@nestjs/schedule";
@@ -15,10 +15,20 @@ import { AddEquipmentCommand } from "./commands/add-equipment.command";
 import { UpdateInstrumentCommand } from "./commands/update-instrument.command";
 import { AddEquipmentDTO } from "./dto/add-equipment.dto";
 import { GetInstrumentsDTO } from "./dto/get-instruments.dto";
+import { RegisterCalibrationDto } from "./dto/register-calibration.dto";
+import { RegisterTechnicalResultDto } from "./dto/register-technical-result.dto";
 import { UpdateInstrumentReceivedDTO } from "./dto/update-instrument-received.dto";
 import { UpdateInstrumentDTO } from "./dto/update-instrument.dto";
 import { IEquipment } from "./interfaces/equipment.interface";
 import { FindAllEquipmentsQuery } from "./queries/get-all-equipment.query";
+import { EquipmentTechnicalStateEnum, EquipmentLogisticStateEnum } from "./const.enum";
+
+// Resultados que indican que el equipo ya no puede ser trabajado:
+// se pasa automáticamente a READY_TO_DELIVER para que el cliente lo retire
+const AUTO_READY_RESULTS = [
+  EquipmentTechnicalStateEnum.OUT_OF_SERVICE,
+  EquipmentTechnicalStateEnum.RETURN_WITHOUT_CALIBRATION,
+];
 
 @Injectable()
 export class EquipmentService {
@@ -164,6 +174,128 @@ export class EquipmentService {
       instrument.calibrationExpirationDate = newExpiratinDate;
     }
     return await instrument.save();
+  }
+
+  async searchBySerial(q: string, clientId?: string, tag?: string): Promise<IEquipment[]> {
+    const filter: Record<string, any> = {};
+    if (tag) {
+      filter.tag = { $regex: tag, $options: "i" };
+    } else {
+      filter.serialNumber = { $regex: q, $options: "i" };
+    }
+    if (clientId) {
+      filter.client = new Types.ObjectId(clientId);
+    }
+    return this.equipmentModel
+      .find(filter)
+      .populate({ path: "model", populate: [{ path: "brand" }, { path: "equipmentType" }] })
+      .limit(15)
+      .lean() as unknown as IEquipment[];
+  }
+
+  async findById(id: string): Promise<IEquipment> {
+    return this.equipmentModel
+      .findById(id)
+      .populate({ path: "model", populate: [{ path: "brand" }, { path: "equipmentType" }] })
+      .populate("office")
+      .lean() as unknown as IEquipment;
+  }
+
+  async registerCalibration(
+    id: string,
+    dto: RegisterCalibrationDto,
+    technician: JwtPayload,
+  ): Promise<IEquipment> {
+    const equipment = await this.equipmentModel.findById(id).lean();
+    if (!equipment) throw new NotFoundException(`Equipo ${id} no encontrado`);
+
+    // Find the serviceHistory entry matching the current active service order
+    let historyIndex = -1;
+    if (equipment.serviceHistory) {
+      for (let i = equipment.serviceHistory.length - 1; i >= 0; i--) {
+        if (equipment.serviceHistory[i].serviceOrder?.toString() === equipment.serviceOrder?.toString()) {
+          historyIndex = i;
+          break;
+        }
+      }
+    }
+
+    const setOps: Record<string, any> = {
+      technicalState: EquipmentTechnicalStateEnum.CALIBRATED,
+      calibrationDate: dto.calibrationDate,
+      calibrationExpirationDate: dto.calibrationExpirationDate,
+      usedStandards: dto.usedStandards ?? [],
+    };
+
+    if (dto.certificateNumber) {
+      setOps.certificateNumber = dto.certificateNumber;
+    }
+
+    if (historyIndex >= 0) {
+      setOps[`serviceHistory.${historyIndex}.calibrationDate`] = dto.calibrationDate;
+      setOps[`serviceHistory.${historyIndex}.calibrationExpirationDate`] = dto.calibrationExpirationDate;
+      setOps[`serviceHistory.${historyIndex}.technicalResult`] = EquipmentTechnicalStateEnum.CALIBRATED;
+      setOps[`serviceHistory.${historyIndex}.usedStandards`] = dto.usedStandards ?? [];
+      setOps[`serviceHistory.${historyIndex}.technicianId`] = technician.id;
+      setOps[`serviceHistory.${historyIndex}.technicianName`] = `${technician.name} ${technician.lastName}`;
+      if (dto.certificateNumber) {
+        setOps[`serviceHistory.${historyIndex}.certificateNumber`] = dto.certificateNumber;
+      }
+    }
+
+    return this.equipmentModel
+      .findByIdAndUpdate(id, { $set: setOps }, { new: true })
+      .populate({ path: "model", populate: [{ path: "brand" }, { path: "equipmentType" }] })
+      .populate("office")
+      .lean() as unknown as IEquipment;
+  }
+
+  async registerTechnicalResult(
+    id: string,
+    dto: RegisterTechnicalResultDto,
+    technician: JwtPayload,
+  ): Promise<IEquipment> {
+    const equipment = await this.equipmentModel.findById(id).lean();
+    if (!equipment) throw new NotFoundException(`Equipo ${id} no encontrado`);
+
+    // Find the serviceHistory entry matching the current active service order
+    let historyIndex = -1;
+    if (equipment.serviceHistory) {
+      for (let i = equipment.serviceHistory.length - 1; i >= 0; i--) {
+        if (
+          equipment.serviceHistory[i].serviceOrder?.toString() ===
+          equipment.serviceOrder?.toString()
+        ) {
+          historyIndex = i;
+          break;
+        }
+      }
+    }
+
+    const setOps: Record<string, any> = {
+      technicalState: dto.technicalResult,
+    };
+
+    // OUT_OF_SERVICE and RETURN_WITHOUT_CALIBRATION auto-transition to READY_TO_DELIVER
+    if (AUTO_READY_RESULTS.includes(dto.technicalResult as any)) {
+      setOps.logisticState = EquipmentLogisticStateEnum.READY_TO_DELIVER;
+    }
+
+    if (historyIndex >= 0) {
+      setOps[`serviceHistory.${historyIndex}.technicalResult`] = dto.technicalResult;
+      setOps[`serviceHistory.${historyIndex}.technicianId`]    = technician.id;
+      setOps[`serviceHistory.${historyIndex}.technicianName`]  =
+        `${technician.name} ${technician.lastName}`;
+      if (dto.observations) {
+        setOps[`serviceHistory.${historyIndex}.exitObservations`] = dto.observations;
+      }
+    }
+
+    return this.equipmentModel
+      .findByIdAndUpdate(id, { $set: setOps }, { new: true })
+      .populate({ path: "model", populate: [{ path: "brand" }, { path: "equipmentType" }] })
+      .populate("office")
+      .lean() as unknown as IEquipment;
   }
 
   async cleanInstrumentUserAccess(

@@ -12,6 +12,7 @@ export const technicianSchema = z.object({
     .optional(),
   office: z.string().optional(),
   phoneNumber: z.string().optional(),
+  specialty: z.string().optional(),
 });
 
 export type CreateOrUpdateTechnicianDTO = z.infer<typeof technicianSchema>;
@@ -24,5 +25,6 @@ export interface Technician {
   email: string;
   office?: string;
   phoneNumber?: string;
+  specialty?: string;
   roles: UserRoles[];
 }

@@ -1,16 +1,38 @@
 import type { StandardEquipment } from "../../standard-equipment/types";
 
 export const EquipmentLogisticState = {
-  RECEIVED: "RECEIVED", // Ingreso
-  IN_LABORATORY: "IN_LABORATORY", // En Laboratorio
-  OUTPUT_TRAY: "OUTPUT_TRAY", // Bandeja de Salida (Falta papeles/admin)
-  READY_TO_DELIVER: "READY_TO_DELIVER", // Listo para retirar
-  DELIVERED: "DELIVERED", // Retirado
-  ON_HOLD: "ON_HOLD", // Frenado (Espera)
+  RECEIVED: "RECEIVED",               // Ingresado en ITM
+  IN_LABORATORY: "IN_LABORATORY",     // En laboratorio
+  EXTERNAL: "EXTERNAL",               // En proveedor externo
+  ON_HOLD: "ON_HOLD",                 // En espera (papeles, autorización, piezas)
+  READY_TO_DELIVER: "READY_TO_DELIVER", // Listo para retiro
+  DELIVERED: "DELIVERED",             // Entregado al cliente
 } as const;
 
 export type EquipmentLogisticState =
   (typeof EquipmentLogisticState)[keyof typeof EquipmentLogisticState];
+
+export const EquipmentTechnicalState = {
+  PENDING: "PENDING",                                   // A calibrar / pendiente
+  IN_PROCESS: "IN_PROCESS",                             // En proceso
+  CALIBRATED: "CALIBRATED",                             // Calibrado ✓
+  VERIFIED: "VERIFIED",                                 // Verificado ✓
+  MAINTENANCE: "MAINTENANCE",                           // Mantenimiento realizado ✓
+  OUT_OF_SERVICE: "OUT_OF_SERVICE",                     // Fuera de servicio ✗
+  RETURN_WITHOUT_CALIBRATION: "RETURN_WITHOUT_CALIBRATION", // Devolución ✗
+} as const;
+
+export type EquipmentTechnicalState =
+  (typeof EquipmentTechnicalState)[keyof typeof EquipmentTechnicalState];
+
+// Terminal states — work is done (service order can be FINISHED)
+export const TERMINAL_TECHNICAL_STATES: EquipmentTechnicalState[] = [
+  EquipmentTechnicalState.CALIBRATED,
+  EquipmentTechnicalState.VERIFIED,
+  EquipmentTechnicalState.MAINTENANCE,
+  EquipmentTechnicalState.OUT_OF_SERVICE,
+  EquipmentTechnicalState.RETURN_WITHOUT_CALIBRATION,
+];
 
 export const PurchaseOrderRequirement = {
   YES: "YES",
@@ -20,6 +42,20 @@ export const PurchaseOrderRequirement = {
 
 export type PurchaseOrderRequirement =
   (typeof PurchaseOrderRequirement)[keyof typeof PurchaseOrderRequirement];
+
+export interface ServiceHistoryEntry {
+  serviceOrder: string;
+  otCode?: string;
+  entryDate: string;
+  exitDate?: string;
+  calibrationDate?: string;
+  calibrationExpirationDate?: string;
+  certificateNumber?: string;
+  technicalResult?: string;
+  usedStandards?: string[];
+  technicianId?: string;
+  technicianName?: string;
+}
 
 export interface ExternalProvider {
   providerName: string;
@@ -48,6 +84,7 @@ export interface Equipment {
   };
   range?: string;
   tag?: string;
+  otCode?: string;
   technicalState?: string;
   logisticState?: EquipmentLogisticState;
   location?: "ITM" | "EXTERNAL";
@@ -59,6 +96,11 @@ export interface Equipment {
   certificateNumber?: string;
   externalProvider?: ExternalProvider;
   usedStandards?: StandardEquipment[]; // Patrones usados en la calibración
+  serviceHistory?: ServiceHistoryEntry[];
+  office?: {
+    _id: string;
+    name?: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -69,6 +111,7 @@ export interface UpdateEquipmentDTO {
   logisticState?: EquipmentLogisticState | string;
   location?: "ITM" | "EXTERNAL";
   calibrationDate?: string;
+  calibrationExpirationDate?: string;
   retireDate?: string;
   remittanceNumber?: string;
   certificateNumber?: string;

@@ -15,6 +15,9 @@ export interface Model {
   brand: string | Brand; // Can be ID or populated object
   equipmentType: string | EquipmentType; // Can be ID or populated object
   description?: string;
+  datasheet?: string; // URL del datasheet
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateModelDTO {

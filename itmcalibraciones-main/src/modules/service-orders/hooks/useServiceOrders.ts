@@ -1,15 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  getServiceOrders, 
-  getServiceOrderById, 
-  createServiceOrder 
+import {
+  getServiceOrders,
+  getServiceOrderById,
+  getServiceOrdersByClient,
+  createServiceOrder,
+  updateServiceOrder,
 } from "../api";
-import type { CreateServiceOrderDTO } from "../types";
+import type { CreateServiceOrderDTO, UpdateServiceOrderDTO } from "../types";
 
 export const useServiceOrders = () => {
   return useQuery({
     queryKey: ["serviceOrders"],
     queryFn: getServiceOrders,
+  });
+};
+
+export const useServiceOrdersByClient = (clientId?: string) => {
+  return useQuery({
+    queryKey: ["serviceOrders", "client", clientId],
+    queryFn: () => getServiceOrdersByClient(clientId!),
+    enabled: !!clientId,
   });
 };
 
@@ -26,6 +36,18 @@ export const useCreateServiceOrder = () => {
   return useMutation({
     mutationFn: (data: CreateServiceOrderDTO) => createServiceOrder(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["serviceOrders"] });
+    },
+  });
+};
+
+export const useUpdateServiceOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: UpdateServiceOrderDTO }) =>
+      updateServiceOrder(id, dto),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["serviceOrder", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["serviceOrders"] });
     },
   });

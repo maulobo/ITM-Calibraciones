@@ -6,24 +6,31 @@ import multerS3 from "multer-s3";
 import * as path from "path";
 import { Color, PDFDocument, PDFPage, degrees, grayscale } from "pdf-lib";
 
-const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "img2.itmcalibraciones.com";
-const s3 = new AWS.S3({
-  region: "us-east-2",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-});
-
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
-const r3 = new AWS.S3({
-    endpoint: process.env.R2_ENDPOINT,
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    signatureVersion: 'v4',
-});
-
 @Injectable()
 export class ImageUploadService {
-  constructor() {}
+  private s3: AWS.S3;
+  private r2: AWS.S3;
+  private s3BucketName: string;
+  private r2BucketName: string;
+
+  constructor() {
+    this.s3BucketName =
+      process.env.AWS_S3_BUCKET_NAME || "img2.itmcalibraciones.com";
+    this.r2BucketName = process.env.R2_BUCKET_NAME;
+
+    this.s3 = new AWS.S3({
+      region: "us-east-2",
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
+
+    this.r2 = new AWS.S3({
+      endpoint: process.env.R2_ENDPOINT,
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      signatureVersion: "v4",
+    });
+  }
 
   async fileupload(@Req() req, path: string) {
     try {
@@ -55,15 +62,20 @@ export class ImageUploadService {
 
       await new Promise<void>((resolve, reject) => {
         uploadMiddleware(req, null, (error: any) => {
+          // Si el archivo es demasiado grande, multer devuelve error con code
           if (error) {
-            console.log(error);
-            reject(error);
+            console.log("Error en subida:", error);
+            if (error.code === "LIMIT_FILE_SIZE") {
+              reject(new Error("El archivo es demasiado pesado (Max 10MB)"));
+            } else {
+              reject(error);
+            }
           } else {
             resolve();
           }
         });
       });
-      // R2 usually returns the location, but if not we might construct it. 
+      // R2 usually returns the location, but if not we might construct it.
       // multer-s3 should populate `location`.
       return req.files[0].location;
     } catch (error) {
@@ -72,11 +84,11 @@ export class ImageUploadService {
     }
   }
 
-  upload = (path: string) =>
-    multer({
+  upload(path: string) {
+    return multer({
       storage: multerS3({
-        s3: s3,
-        bucket: AWS_S3_BUCKET_NAME,
+        s3: this.s3,
+        bucket: this.s3BucketName,
         acl: "public-read",
         key: (req, file, cb) => {
           const key = `${path}/${Date.now().toString()} - ${file.originalname}`;
@@ -84,12 +96,14 @@ export class ImageUploadService {
         },
       }),
     }).array("upload", 1);
+  }
 
-  uploadR2 = (path: string) =>
-    multer({
+  uploadR2(path: string) {
+    return multer({
+      limits: { fileSize: 10 * 1024 * 1024 }, // Límite de 10MB
       storage: multerS3({
-        s3: r3,
-        bucket: R2_BUCKET_NAME,
+        s3: this.r2,
+        bucket: this.r2BucketName,
         // acl: "public-read", // R2 doesn't support ACLs like S3. Ensure bucket is public or use presigned.
         key: (req, file, cb) => {
           const key = `${path}/${Date.now().toString()}-${file.originalname}`;
@@ -97,26 +111,54 @@ export class ImageUploadService {
         },
       }),
     }).array("file", 1); // Expecting field name 'file' for R2 uploads
-
+  }
 
   async uploadToS3(filePath: string, destinationPath: string): Promise<string> {
     try {
       const fileContent = fs.readFileSync(filePath);
 
       const params: AWS.S3.PutObjectRequest = {
-        Bucket: AWS_S3_BUCKET_NAME,
+        Bucket: this.s3BucketName,
         Key: destinationPath,
         Body: fileContent,
         ACL: "public-read",
       };
 
-      const result = await s3.upload(params).promise();
+      const result = await this.s3.upload(params).promise();
 
       return result.Location;
     } catch (error) {
       // Handle error
       console.error("Error uploading file to S3:", error);
       throw new Error("Failed to upload file to S3");
+    }
+  }
+
+  async deleteFileR2(fileUrl: string): Promise<void> {
+    if (!fileUrl) return;
+
+    try {
+      // Extract Key from URL
+      // URL format: https://.../datasheets/timestamp-filename
+      const urlParts = fileUrl.split("/");
+      // Assuming structure is endpoint/bucket/datasheets/file OR custom-domain/datasheets/file
+      // We need to look for where "datasheets" starts
+      const keyIndex = urlParts.indexOf("datasheets");
+      if (keyIndex === -1) {
+        console.warn("Could not extract key from URL for deletion:", fileUrl);
+        return;
+      }
+      const key = urlParts.slice(keyIndex).join("/");
+
+      await this.r2
+        .deleteObject({
+          Bucket: this.r2BucketName,
+          Key: key,
+        })
+        .promise();
+    } catch (error) {
+      console.error("Error deleting file from R2:", error);
+      // We don't throw here to allow the DB update to proceed even if file deletion fails
     }
   }
 

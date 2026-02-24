@@ -21,6 +21,8 @@ const buildQueryString = (params: PaginationParams): string => {
     params.select.forEach((s) => searchParams.append("select", s));
   if (params.populate)
     params.populate.forEach((p) => searchParams.append("populate", p));
+  if (params.name) searchParams.append("name", params.name);
+  if (params.search) searchParams.append("search", params.search);
 
   return searchParams.toString();
 };

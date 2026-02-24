@@ -20,7 +20,7 @@ import {
   Alert,
   useTheme,
 } from "@mui/material";
-import { Plus, X, Tag, Eye } from "lucide-react";
+import { Plus, X, Tag, Eye, Search } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useBrands, useCreateBrand } from "../hooks/useCatalog";
@@ -32,6 +32,7 @@ export const BrandsPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Configurar paginación
   const pagination = usePagination({
@@ -39,31 +40,28 @@ export const BrandsPage = () => {
     initialPage: 1,
   });
 
-  // Obtener datos SIN paginación (backend valida DTOs estrictamente)
-  // TODO: Activar cuando el backend haga campos opcionales con @IsOptional()
-  const { data: brandsResponse, isLoading, error } = useBrands();
-  // { limit: pagination.pageSize, offset: pagination.offset }
-
-  // Actualizar total cuando lleguen los datos
-  useEffect(() => {
-    if (brandsResponse?.pagination?.total !== undefined) {
-      // Forzar actualización del total en el hook de paginación
-      const currentTotal = brandsResponse.pagination.total;
-      if (currentTotal !== pagination.total) {
-        // Ir a la primera página si el total cambió
-        pagination.goToPage(1);
-      }
-    }
-  }, [brandsResponse?.pagination?.total]);
+  // Configurar consulta para traer TODAS las marcas (o filtradas por search)
+  // Al no enviar limit/offset, esperamos que traiga todo.
+  const { data: brandsResponse, isLoading, error } = useBrands({ 
+    name: searchTerm
+  });
 
   const brands = brandsResponse?.data || [];
 
-  // Calcular qué items mostrar en esta página
+  // Paginación en cliente (Client-Side Pagination)
   const paginatedBrands = useMemo(() => {
     const start = pagination.offset;
     const end = start + pagination.pageSize;
     return brands.slice(start, end);
   }, [brands, pagination.offset, pagination.pageSize]);
+
+  // Actualizar el total cuando cambien los datos
+  useEffect(() => {
+    pagination.setTotal(brands.length);
+  }, [brands.length, pagination]);
+
+
+
 
   // Actualizar el total cuando cambien los datos
   useEffect(() => {
@@ -97,6 +95,8 @@ export const BrandsPage = () => {
           justifyContent: "space-between",
           alignItems: "center",
           mb: 4,
+          flexWrap: "wrap",
+          gap: 2,
         }}
       >
         <Box>
@@ -110,20 +110,34 @@ export const BrandsPage = () => {
             Gestiona las marcas de fabricantes disponibles
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={20} />}
-          onClick={() => setOpen(true)}
-          sx={{
-            px: 3,
-            py: 1,
-            borderRadius: "12px",
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            boxShadow: "0 4px 14px 0 rgba(0,118,255,0.39)",
-          }}
-        >
-          Nueva Marca
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
+                placeholder="Buscar marca..."
+                size="small"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                    startAdornment: (
+                        <Search size={18} style={{ marginRight: 8, color: "gray" }} />
+                    ),
+                }}
+                sx={{ bgcolor: "background.paper", borderRadius: 1 }}
+            />
+            <Button
+            variant="contained"
+            startIcon={<Plus size={20} />}
+            onClick={() => setOpen(true)}
+            sx={{
+                px: 3,
+                py: 1,
+                borderRadius: "12px",
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                boxShadow: "0 4px 14px 0 rgba(0,118,255,0.39)",
+            }}
+            >
+            Nueva Marca
+            </Button>
+        </Box>
       </Box>
 
       {/* Content */}
@@ -162,16 +176,16 @@ export const BrandsPage = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedBrands?.length === 0 ? (
+                  {paginatedBrands.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={2} align="center" sx={{ py: 8 }}>
                         <Typography color="text.secondary">
-                          No hay marcas definidas aún
+                          No se encontraron marcas
                         </Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    paginatedBrands?.map((item) => (
+                    paginatedBrands.map((item) => (
                       <TableRow key={item._id} hover>
                         <TableCell
                           sx={{
@@ -231,7 +245,7 @@ export const BrandsPage = () => {
               <PaginationControls
                 pagination={{
                   ...pagination,
-                  total: brandsResponse.pagination.total,
+                  total: brands.length,
                 }}
               />
             )}

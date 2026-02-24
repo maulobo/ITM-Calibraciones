@@ -7,6 +7,8 @@ import { AddOrUpdateClientDTO } from "./dto/add-update-client.dto";
 import { GetClientDTO } from "./dto/get-client.dto";
 import { IClient } from "./interfaces/client.interface";
 import { FindAllClientsQuery } from "./queries/get-all-clients.query";
+import { StatusEnum } from "src/errors-handler/enums/status.enum";
+import { throwException } from "src/errors-handler/throw-exception";
 
 @Injectable()
 export class ClientService {
@@ -14,6 +16,7 @@ export class ClientService {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     @InjectModel("Client") private readonly clientModel: Model<IClient>,
+    @InjectModel("ServiceOrder") private readonly serviceOrderModel: Model<any>,
   ) {}
 
   async addClient(addClientDTO: AddOrUpdateClientDTO) {
@@ -25,7 +28,19 @@ export class ClientService {
   }
 
   async deleteClient(id: Types.ObjectId): Promise<{ deleted: boolean }> {
-    const result = await this.clientModel.deleteOne({ _id: id });
-    return { deleted: result.deletedCount > 0 };
+    const activeCount = await this.serviceOrderModel.countDocuments({
+      client: id,
+      generalStatus: { $in: ["PENDING", "IN_PROCESS"] },
+    });
+
+    if (activeCount > 0) {
+      throwException(StatusEnum.CLIENT_HAS_ACTIVE_ORDERS);
+    }
+
+    const result = await this.clientModel.updateOne(
+      { _id: id },
+      { $set: { isActive: false } },
+    );
+    return { deleted: result.modifiedCount > 0 };
   }
 }

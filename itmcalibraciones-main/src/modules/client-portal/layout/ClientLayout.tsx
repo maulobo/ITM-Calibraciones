@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -12,121 +12,143 @@ import {
   Avatar,
   useTheme,
   Tooltip,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import { LogOut, User as UserIcon, Sun, Moon } from "lucide-react";
+import { LogOut, User as UserIcon, Sun, Moon, LayoutDashboard, ClipboardList, Wrench } from "lucide-react";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { useColorMode } from "../../../theme/AppTheme";
+
+const NAV_ITEMS = [
+  { label: "Dashboard",    path: "/portal",           icon: LayoutDashboard },
+  { label: "Mis Órdenes",  path: "/portal/orders",    icon: ClipboardList   },
+  { label: "Mis Equipos",  path: "/portal/equipment", icon: Wrench          },
+];
 
 export const ClientLayout = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
   const { toggleColorMode, mode } = useColorMode();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // Determine active tab: check from most specific first
+  const tabValue = NAV_ITEMS.reduce((acc, item, idx) => {
+    if (location.pathname === item.path || location.pathname.startsWith(item.path + "/")) {
+      return idx;
+    }
+    return acc;
+  }, 0);
+
   return (
-    <Box
-      sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}
-    >
+    <Box sx={{ flexGrow: 1, minHeight: "100vh", bgcolor: "background.default" }}>
+      {/* ── Top AppBar ─────────────────────────────────────────────────── */}
       <AppBar
-        position="static"
+        position="sticky"
         color="default"
         elevation={0}
         sx={{
           bgcolor: "background.paper",
           borderBottom: 1,
           borderColor: "divider",
+          top: 0,
+          zIndex: theme.zIndex.appBar,
         }}
       >
         <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            {/* Logo area */}
+          <Toolbar disableGutters sx={{ minHeight: 56 }}>
             <Typography
               variant="h6"
-              component="div"
-              sx={{ flexGrow: 1, color: "primary.main", fontWeight: "bold" }}
+              sx={{ flexGrow: 1, color: "primary.main", fontWeight: 800, letterSpacing: "-0.3px" }}
             >
-              ITM Clientes
+              ITM Calibraciones
             </Typography>
 
-            {/* User Menu */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <Tooltip title={mode === "dark" ? "Modo Claro" : "Modo Oscuro"}>
-                <IconButton onClick={toggleColorMode} color="inherit">
-                  {mode === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                <IconButton onClick={toggleColorMode} size="small">
+                  {mode === "dark" ? <Sun size={18} /> : <Moon size={18} />}
                 </IconButton>
               </Tooltip>
 
               <Typography
                 variant="body2"
-                sx={{
-                  display: { xs: "none", sm: "block" },
-                  ml: 2,
-                  mr: 1,
-                  color: "text.primary",
-                }}
+                color="text.secondary"
+                sx={{ display: { xs: "none", sm: "block" }, mx: 1 }}
               >
-                Hola, {user?.name}
+                {user?.name} {user?.lastName}
               </Typography>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: theme.palette.primary.main,
-                    width: 32,
-                    height: 32,
-                  }}
-                >
-                  {user?.name?.[0]?.toUpperCase() || <UserIcon size={18} />}
-                </Avatar>
-              </IconButton>
+
+              <Tooltip title="Opciones de cuenta">
+                <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
+                  <Avatar
+                    sx={{ bgcolor: theme.palette.primary.main, width: 30, height: 30, fontSize: "0.85rem", fontWeight: 700 }}
+                  >
+                    {user?.name?.[0]?.toUpperCase() || <UserIcon size={16} />}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+
               <Menu
-                id="menu-appbar"
                 anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
                 open={Boolean(anchorEl)}
-                onClose={handleClose}
+                onClose={() => setAnchorEl(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
                 <MenuItem onClick={handleLogout}>
-                  <LogOut size={16} style={{ marginRight: 8 }} />
+                  <LogOut size={15} style={{ marginRight: 8 }} />
                   Cerrar Sesión
                 </MenuItem>
               </Menu>
             </Box>
           </Toolbar>
         </Container>
+
+        {/* ── Nav Tabs ─────────────────────────────────────────────────── */}
+        <Box sx={{ borderTop: 1, borderColor: "divider" }}>
+          <Container maxWidth="xl">
+            <Tabs
+              value={tabValue}
+              onChange={(_, v) => navigate(NAV_ITEMS[v].path)}
+              indicatorColor="primary"
+              textColor="primary"
+              sx={{
+                minHeight: 44,
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  minHeight: 44,
+                  py: 0,
+                },
+              }}
+            >
+              {NAV_ITEMS.map(({ label, icon: Icon }) => (
+                <Tab
+                  key={label}
+                  label={label}
+                  icon={<Icon size={15} />}
+                  iconPosition="start"
+                />
+              ))}
+            </Tabs>
+          </Container>
+        </Box>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Outlet />
-      </Container>
+      {/* Explicit bg ensures dark mode color applies even before page-level bgcolor */}
+      <Box sx={{ bgcolor: "background.default", flexGrow: 1 }}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Outlet />
+        </Container>
+      </Box>
     </Box>
   );
 };

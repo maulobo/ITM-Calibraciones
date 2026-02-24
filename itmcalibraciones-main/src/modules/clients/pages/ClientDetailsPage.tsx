@@ -17,6 +17,16 @@ import {
   Avatar,
   Stack,
   Divider,
+  Card,
+  CardContent,
+  CardActions,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  CircularProgress,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
   ArrowLeft,
@@ -24,298 +34,239 @@ import {
   Mail,
   Phone,
   MapPin,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
   FileText,
-  Wrench,
-  Search,
   Settings,
   Users,
   Eye,
+  ClipboardList,
+  Wrench,
+  Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useClients } from "../hooks/useClients";
 import { useOfficesByClient } from "../hooks/useOffices";
 import { useClientUsers } from "../hooks/useClientUsers";
+import { useServiceOrdersByClient } from "../../service-orders/hooks/useServiceOrders";
 import { OfficeFormDialog } from "../components/OfficeFormDialog";
+import { UserFormDialog } from "../components/UserFormDialog";
 import type { Office } from "../types/officeTypes";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  CircularProgress,
-} from "@mui/material";
+import type { ServiceOrderStatus } from "../../service-orders/types";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-// Mock Data for Instruments
-const MOCK_INSTRUMENTS = [
-  {
-    id: 1,
-    tag: "ITM-001",
-    name: "Manómetro Digital",
-    brand: "WIKA",
-    model: "CPG1500",
-    serial: "123456789",
-    lastCalibration: "2025-05-15",
-    nextCalibration: "2026-05-15",
-    status: "VALID",
-  },
-  {
-    id: 2,
-    tag: "ITM-042",
-    name: "Termómetro IR",
-    brand: "FLUKE",
-    model: "62 MAX+",
-    serial: "987654321",
-    lastCalibration: "2025-02-01",
-    nextCalibration: "2026-02-01",
-    status: "EXPIRING_SOON",
-  },
-  {
-    id: 3,
-    tag: "ITM-105",
-    name: "Calibre Pie de Rey",
-    brand: "MITUTOYO",
-    model: "500-196-30",
-    serial: "456789123",
-    lastCalibration: "2025-01-10",
-    nextCalibration: "2026-01-10",
-    status: "EXPIRED",
-  },
+// ─── Avatar color palette (same as ClientsPage) ─────────────────────────────
+const AVATAR_COLORS = [
+  "#2563eb", "#7c3aed", "#db2777", "#dc2626",
+  "#d97706", "#059669", "#0891b2", "#4f46e5",
 ];
+const avatarColor = (name: string) =>
+  AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 
-const MOCK_HISTORY = [
-  {
-    id: "ORD-001",
-    date: "2025-12-10",
-    instrument: "Manómetro Digital",
-    type: "Calibración",
-    status: "Completado",
-    technician: "Juan Tecnico",
-  },
-  {
-    id: "ORD-002",
-    date: "2025-11-05",
-    instrument: "Termómetro IR",
-    type: "Reparación",
-    status: "Completado",
-    technician: "Pedro Tecnico",
-  },
-];
+// ─── Service Order Status chip ───────────────────────────────────────────────
+const SO_STATUS: Record<ServiceOrderStatus, { label: string; color: "default" | "info" | "success" | "warning" | "error" }> = {
+  PENDING:    { label: "Pendiente",   color: "default" },
+  IN_PROCESS: { label: "En proceso",  color: "info"    },
+  FINISHED:   { label: "Terminado",   color: "success" },
+  DELIVERED:  { label: "Entregado",   color: "warning" },
+  CANCELLED:  { label: "Cancelado",   color: "error"   },
+};
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+const StatusChip = ({ status }: { status: ServiceOrderStatus }) => {
+  const s = SO_STATUS[status] ?? { label: status, color: "default" as const };
+  return <Chip label={s.label} color={s.color} size="small" variant="outlined" />;
+};
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+// ─── Logistic state label ────────────────────────────────────────────────────
+const LOGISTIC_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
+  RECEIVED:        { label: "Recibido",          color: "primary"  },
+  IN_LABORATORY:   { label: "En lab",            color: "warning"  },
+  EXTERNAL:        { label: "En externo",        color: "warning"  },
+  ON_HOLD:         { label: "En espera",         color: "error"    },
+  READY_TO_DELIVER:{ label: "Listo para retiro", color: "success"  },
+  DELIVERED:       { label: "Entregado",         color: "default"  },
+};
+const LogisticChip = ({ state }: { state?: string }) => {
+  const s = state ? (LOGISTIC_LABELS[state] ?? { label: state, color: "default" as const }) : null;
+  if (!s) return <Typography variant="caption" color="text.disabled">—</Typography>;
+  return <Chip label={s.label} color={s.color} size="small" />;
+};
 
+// ─── Tab panel ───────────────────────────────────────────────────────────────
+function TabPanel({ children, value, index }: { children?: React.ReactNode; value: number; index: number }) {
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index}>
       {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
 }
 
-const StatusChip = ({ status }: { status: string }) => {
-  switch (status) {
-    case "VALID":
-      return (
-        <Chip
-          label="Vigente"
-          color="success"
-          size="small"
-          icon={<CheckCircle size={14} />}
-          variant="outlined"
-        />
-      );
-    case "EXPIRING_SOON":
-      return (
-        <Chip
-          label="Por Vencer"
-          color="warning"
-          size="small"
-          icon={<Clock size={14} />}
-          variant="outlined"
-        />
-      );
-    case "EXPIRED":
-      return (
-        <Chip
-          label="Vencido"
-          color="error"
-          size="small"
-          icon={<AlertTriangle size={14} />}
-          variant="outlined"
-        />
-      );
-    default:
-      return <Chip label={status} size="small" />;
-  }
-};
+// ─── Empty state ─────────────────────────────────────────────────────────────
+function EmptyState({ icon, text, action }: { icon: React.ReactNode; text: string; action?: React.ReactNode }) {
+  return (
+    <Box sx={{ textAlign: "center", py: 8, px: 2 }}>
+      <Box sx={{ opacity: 0.18, mb: 2 }}>{icon}</Box>
+      <Typography variant="h6" color="text.secondary" gutterBottom>{text}</Typography>
+      {action}
+    </Box>
+  );
+}
 
+// ─── Main Component ───────────────────────────────────────────────────────────
 export const ClientDetailsPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const handleOpenOfficeDetails = (office: Office) => {
-    navigate(`/offices/${office.id || office._id}`);
-  };
-
-  const { data: clients } = useClients();
   const [tabValue, setTabValue] = useState(0);
   const [officeDialogOpen, setOfficeDialogOpen] = useState(false);
   const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
+  const [userFormOpen, setUserFormOpen] = useState(false);
 
-  const client = clients?.find((c) => c.id === id || c._id === id);
-
-  // Fetch offices for this client
+  // Data
+  const { data: clientsResponse, isLoading: isLoadingClients } = useClients();
+  const clients = clientsResponse?.data || [];
+  const client = clients.find((c) => c.id === id || c._id === id);
   const clientId = client?._id || client?.id || "";
-  const { data: offices = [], isLoading: isLoadingOffices } =
-    useOfficesByClient(clientId);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
+  const { data: offices = [], isLoading: isLoadingOffices } = useOfficesByClient(clientId);
+  const { data: serviceOrders = [], isLoading: isLoadingOrders } = useServiceOrdersByClient(clientId);
+  const { data: contacts = [], isLoading: isLoadingContacts } = useClientUsers(clientId);
 
-  const handleCreateOffice = () => {
-    setSelectedOffice(null);
-    setOfficeDialogOpen(true);
-  };
+  // Aggregate equipments from all OTs (deduplicated by _id)
+  const equipments = useMemo(() => {
+    const seen = new Set<string>();
+    const result = [];
+    for (const order of serviceOrders) {
+      for (const eq of order.equipments ?? []) {
+        const eqId = eq._id || eq.id;
+        if (eqId && !seen.has(eqId)) {
+          seen.add(eqId);
+          result.push(eq);
+        }
+      }
+    }
+    return result;
+  }, [serviceOrders]);
 
-  const handleEditOffice = (office: Office) => {
-    setSelectedOffice(office);
-    setOfficeDialogOpen(true);
-  };
+  const color = client ? avatarColor(client.socialReason) : "#2563eb";
 
-  if (!client && clients) {
+  // ─── Loading / not found states ────────────────────────────────────────────
+  if (isLoadingClients) {
     return (
-      <Box p={4}>
-        <Typography>Cliente no encontrado</Typography>
-        <Button onClick={() => navigate("/clients")} sx={{ mt: 2 }}>
-          Volver
-        </Button>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   if (!client) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress />
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h6" color="text.secondary">Cliente no encontrado</Typography>
+        <Button startIcon={<ArrowLeft size={16} />} onClick={() => navigate("/clients")} sx={{ mt: 2 }}>
+          Volver a Clientes
+        </Button>
       </Box>
     );
   }
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    try { return format(new Date(dateStr), "dd/MM/yyyy", { locale: es }); } catch { return dateStr; }
+  };
+
   return (
-    <Box sx={{ pb: 4 }}>
-      {/* Header Section */}
+    <Box sx={{ pb: 6 }}>
+
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <Paper
         elevation={0}
         sx={{
-          p: 3,
+          p: { xs: 2.5, sm: 3.5 },
           mb: 3,
-          border: 1,
+          borderRadius: 3,
+          border: "1px solid",
           borderColor: "divider",
-          borderRadius: 2,
-          background: "linear-gradient(to right, #ffffff, #f8fafc)",
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <Button
-            startIcon={<ArrowLeft size={16} />}
-            onClick={() => navigate("/clients")}
-            color="inherit"
-            sx={{
-              textTransform: "none",
-              color: "text.secondary",
-              mb: 1,
-              p: 0,
-              minWidth: "auto",
-              "&:hover": { bgcolor: "transparent", color: "text.primary" },
-            }}
-            disableRipple
-          >
-            Volver a Clientes
-          </Button>
-        </Box>
-
-        <Box
+        {/* Back button */}
+        <Button
+          startIcon={<ArrowLeft size={15} />}
+          onClick={() => navigate("/clients")}
+          size="small"
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: 2,
+            mb: 2,
+            color: "text.secondary",
+            textTransform: "none",
+            fontWeight: 500,
+            p: 0,
+            minWidth: "auto",
+            "&:hover": { bgcolor: "transparent", color: "text.primary" },
           }}
+          disableRipple
         >
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          Volver a Clientes
+        </Button>
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 3 }}>
+          {/* Avatar + info */}
+          <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start" }}>
             <Avatar
               sx={{
-                width: 64,
-                height: 64,
-                bgcolor: "primary.main",
-                fontSize: "1.75rem",
-                fontWeight: "bold",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                width: 72,
+                height: 72,
+                bgcolor: color,
+                fontSize: "2rem",
+                fontWeight: 800,
+                flexShrink: 0,
+                boxShadow: `0 4px 16px ${color}40`,
               }}
             >
-              {client.socialReason.charAt(0)}
+              {client.socialReason.charAt(0).toUpperCase()}
             </Avatar>
             <Box>
-              <Typography variant="h4" fontWeight="800" letterSpacing="-0.5px">
+              <Typography variant="h4" fontWeight={800} letterSpacing="-0.5px" sx={{ lineHeight: 1.2 }}>
                 {client.socialReason}
               </Typography>
+
               <Stack
                 direction="row"
-                spacing={2}
+                spacing={0}
                 alignItems="center"
-                sx={{ mt: 0.5, color: "text.secondary" }}
+                flexWrap="wrap"
+                sx={{ mt: 0.75, gap: 1.5, color: "text.secondary" }}
               >
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <FileText size={14} />
-                  <Typography variant="body2">{client.cuit}</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <FileText size={13} />
+                  <Typography variant="body2" fontFamily="monospace">{client.cuit}</Typography>
                 </Box>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={{ height: 16, alignSelf: "center" }}
-                />
-                <Box display="flex" alignItems="center" gap={0.5}>
-                  <MapPin size={14} />
-                  <Typography variant="body2">
-                    {client.cityData?.name || client.cityName || "Global"},{" "}
-                    {client.stateData?.nombre || client.stateName || ""}
-                  </Typography>
-                </Box>
+                {(client.cityData?.name || client.cityName) && (
+                  <>
+                    <Divider orientation="vertical" flexItem sx={{ height: 14, alignSelf: "center" }} />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <MapPin size={13} />
+                      <Typography variant="body2">
+                        {client.cityData?.name || client.cityName}
+                        {(client.stateData?.nombre || client.stateName) && `, ${client.stateData?.nombre || client.stateName}`}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
                 {client.email && (
                   <>
-                    <Divider
-                      orientation="vertical"
-                      flexItem
-                      sx={{ height: 16, alignSelf: "center" }}
-                    />
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Mail size={14} />
+                    <Divider orientation="vertical" flexItem sx={{ height: 14, alignSelf: "center" }} />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Mail size={13} />
                       <Typography variant="body2">{client.email}</Typography>
+                    </Box>
+                  </>
+                )}
+                {client.phoneNumber && (
+                  <>
+                    <Divider orientation="vertical" flexItem sx={{ height: 14, alignSelf: "center" }} />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Phone size={13} />
+                      <Typography variant="body2">{client.phoneNumber}</Typography>
                     </Box>
                   </>
                 )}
@@ -323,364 +274,398 @@ export const ClientDetailsPage = () => {
             </Box>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 3 }}>
+          {/* KPI mini-cards */}
+          <Stack direction="row" spacing={2}>
             <Paper
               elevation={0}
               sx={{
-                p: 2,
-                bgcolor: "background.paper",
-                border: 1,
-                borderColor: "divider",
-                borderRadius: 2,
-                minWidth: 120,
-                textAlign: "center",
+                px: 2.5, py: 1.5, textAlign: "center", borderRadius: 2,
+                border: "1px solid", borderColor: "divider", minWidth: 90,
               }}
             >
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                fontWeight="600"
-                textTransform="uppercase"
-              >
-                Instrumentos
-              </Typography>
-              <Typography variant="h4" fontWeight=" bold" color="primary.main">
-                {MOCK_INSTRUMENTS.length}
-              </Typography>
-            </Paper>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                bgcolor: "background.paper",
-                border: 1,
-                borderColor: "divider",
-                borderRadius: 2,
-                minWidth: 120,
-                textAlign: "center",
-              }}
-            >
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                fontWeight="600"
-                textTransform="uppercase"
-              >
-                Oficinas
-              </Typography>
-              <Typography variant="h4" fontWeight=" bold" color="primary.main">
+              <Typography variant="h4" fontWeight={800} color="primary.main">
                 {offices.length}
               </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase" letterSpacing={0.5}>
+                Sucursales
+              </Typography>
             </Paper>
-          </Box>
+            <Paper
+              elevation={0}
+              sx={{
+                px: 2.5, py: 1.5, textAlign: "center", borderRadius: 2,
+                border: "1px solid", borderColor: "divider", minWidth: 90,
+              }}
+            >
+              <Typography variant="h4" fontWeight={800} color="primary.main">
+                {serviceOrders.length}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase" letterSpacing={0.5}>
+                Órdenes
+              </Typography>
+            </Paper>
+            <Paper
+              elevation={0}
+              sx={{
+                px: 2.5, py: 1.5, textAlign: "center", borderRadius: 2,
+                border: "1px solid", borderColor: "divider", minWidth: 90,
+              }}
+            >
+              <Typography variant="h4" fontWeight={800} color="primary.main">
+                {equipments.length}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase" letterSpacing={0.5}>
+                Equipos
+              </Typography>
+            </Paper>
+          </Stack>
         </Box>
       </Paper>
 
+      {/* ── Tabs ─────────────────────────────────────────────────────────── */}
       <Paper
         elevation={0}
-        sx={{
-          border: 1,
-          borderColor: "divider",
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
+        sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", overflow: "hidden" }}
       >
-        <Box
-          sx={{
-            borderBottom: 1,
-            borderColor: "divider",
-            px: 2,
-            bgcolor: "background.paper",
-          }}
-        >
+        <Box sx={{ borderBottom: 1, borderColor: "divider", px: 2, bgcolor: "background.paper" }}>
           <Tabs
             value={tabValue}
-            onChange={handleTabChange}
+            onChange={(_, v) => setTabValue(v)}
             textColor="primary"
             indicatorColor="primary"
-            sx={{
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "0.95rem",
-                minHeight: 56,
-              },
-            }}
+            sx={{ "& .MuiTab-root": { textTransform: "none", fontWeight: 600, fontSize: "0.9rem", minHeight: 52 } }}
           >
-            <Tab
-              icon={<Wrench size={18} />}
-              iconPosition="start"
-              label="Instrumentos"
-            />
-            <Tab
-              icon={<Building2 size={18} />}
-              iconPosition="start"
-              label="Oficinas"
-            />
-            <Tab
-              icon={<Clock size={18} />}
-              iconPosition="start"
-              label="Historial de Servicios"
-            />
+            <Tab icon={<ClipboardList size={16} />} iconPosition="start" label={`Órdenes${serviceOrders.length ? ` (${serviceOrders.length})` : ""}`} />
+            <Tab icon={<Wrench size={16} />}         iconPosition="start" label={`Equipos${equipments.length ? ` (${equipments.length})` : ""}`} />
+            <Tab icon={<Building2 size={16} />}      iconPosition="start" label={`Sucursales${offices.length ? ` (${offices.length})` : ""}`} />
+            <Tab icon={<Users size={16} />}          iconPosition="start" label={`Contactos${contacts.length ? ` (${contacts.length})` : ""}`} />
           </Tabs>
         </Box>
 
-        {/* Instruments Tab */}
-        <CustomTabPanel value={tabValue} index={0}>
-          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
-            <Button variant="contained" startIcon={<Wrench size={16} />}>
-              Nuevo Instrumento
-            </Button>
+        {/* ── Tab 0: Órdenes de Servicio ───────────────────────────────── */}
+        <TabPanel value={tabValue} index={0}>
+          <Box sx={{ px: 3 }}>
+            {isLoadingOrders ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress size={32} /></Box>
+            ) : serviceOrders.length === 0 ? (
+              <EmptyState
+                icon={<ClipboardList size={56} />}
+                text="Sin órdenes de servicio"
+                action={
+                  <Button variant="outlined" startIcon={<Plus size={16} />} onClick={() => navigate("/service-orders/new")}>
+                    Nueva Orden
+                  </Button>
+                }
+              />
+            ) : (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ "& th": { fontWeight: 700, color: "text.secondary", fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 0.5 } }}>
+                      <TableCell>Código</TableCell>
+                      <TableCell>Fecha</TableCell>
+                      <TableCell>Sucursal</TableCell>
+                      <TableCell align="center">Equipos</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {serviceOrders.map((order) => (
+                      <TableRow key={order._id} hover sx={{ cursor: "pointer" }} onClick={() => navigate(`/service-orders/${order._id}`)}>
+                        <TableCell>
+                          <Chip
+                            label={order.code}
+                            size="small"
+                            sx={{ fontFamily: "monospace", fontWeight: 700, bgcolor: "action.selected", borderRadius: 1, height: 24 }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ color: "text.secondary", fontSize: "0.85rem" }}>
+                          {formatDate(order.createdAt)}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.85rem" }}>
+                          {order.office?.name ?? "—"}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip label={order.equipments?.length ?? 0} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>
+                          <StatusChip status={order.generalStatus} />
+                        </TableCell>
+                        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip title="Ver orden">
+                            <IconButton size="small" color="primary" onClick={() => navigate(`/service-orders/${order._id}`)}>
+                              <Eye size={15} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </Box>
-          <TableContainer component={Paper} elevation={0} variant="outlined">
-            <Table>
-              <TableHead sx={{ bgcolor: "background.default" }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Tag</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Equipo</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Marca/Modelo</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Serie</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Última Cal.</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Vencimiento</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {MOCK_INSTRUMENTS.map((instrument) => (
-                  <TableRow key={instrument.id} hover>
-                    <TableCell>
-                      <Chip
-                        label={instrument.tag}
-                        size="small"
-                        sx={{
-                          borderRadius: 1,
-                          height: 24,
-                          bgcolor: "grey.100",
-                          fontWeight: 500,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {instrument.name}
-                    </TableCell>
-                    <TableCell>
-                      {instrument.brand}{" "}
-                      <Typography
-                        component="span"
-                        color="text.secondary"
-                        variant="body2"
-                      >
-                        {instrument.model}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ color: "text.secondary" }}>
-                      {instrument.serial}
-                    </TableCell>
-                    <TableCell>{instrument.lastCalibration}</TableCell>
-                    <TableCell>{instrument.nextCalibration}</TableCell>
-                    <TableCell>
-                      <StatusChip status={instrument.status} />
-                    </TableCell>
-                    <TableCell align="right">
-                      <Button size="small">Ver</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CustomTabPanel>
+        </TabPanel>
 
-        {/* Offices Tab */}
-        <CustomTabPanel value={tabValue} index={1}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<Building2 size={16} />}
-              onClick={handleCreateOffice}
-            >
-              Nueva Oficina
-            </Button>
+        {/* ── Tab 1: Equipos ───────────────────────────────────────────── */}
+        <TabPanel value={tabValue} index={1}>
+          <Box sx={{ px: 3 }}>
+            {isLoadingOrders ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress size={32} /></Box>
+            ) : equipments.length === 0 ? (
+              <EmptyState
+                icon={<Wrench size={56} />}
+                text="Sin equipos registrados"
+              />
+            ) : (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ "& th": { fontWeight: 700, color: "text.secondary", fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 0.5 } }}>
+                      <TableCell>N° Serie</TableCell>
+                      <TableCell>Tag</TableCell>
+                      <TableCell>Rango</TableCell>
+                      <TableCell>Estado Logístico</TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {equipments.map((eq) => (
+                      <TableRow key={eq._id || eq.id} hover>
+                        <TableCell sx={{ fontFamily: "monospace", fontWeight: 600, fontSize: "0.85rem" }}>
+                          {eq.serialNumber ?? "—"}
+                        </TableCell>
+                        <TableCell>
+                          {eq.tag
+                            ? <Chip label={eq.tag} size="small" sx={{ borderRadius: 1, height: 22, bgcolor: "action.selected", fontWeight: 500, fontSize: "0.75rem" }} />
+                            : <Typography variant="caption" color="text.disabled">—</Typography>
+                          }
+                        </TableCell>
+                        <TableCell sx={{ color: "text.secondary", fontSize: "0.85rem" }}>
+                          {eq.range ?? "—"}
+                        </TableCell>
+                        <TableCell>
+                          <LogisticChip state={eq.logisticState} />
+                        </TableCell>
+                        <TableCell align="right">
+                          <Tooltip title="Ver equipo">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => navigate(`/equipments/${eq._id || eq.id}`)}
+                            >
+                              <Eye size={15} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </Box>
+        </TabPanel>
 
-          {isLoadingOffices ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <CircularProgress size={32} />
-            </Box>
-          ) : offices.length === 0 ? (
-            <Box
-              sx={{
-                textAlign: "center",
-                py: 8,
-                bgcolor: "background.default",
-                borderRadius: 2,
-                border: "1px dashed",
-                borderColor: "divider",
-              }}
-            >
-              <Building2 size={48} style={{ opacity: 0.2, marginBottom: 16 }} />
-              <Typography variant="h6" color="text.secondary">
-                No hay oficinas registradas
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 1, mb: 3 }}
-              >
-                Comienza agregando sucursales para gestionar este cliente.
-              </Typography>
+        {/* ── Tab 2: Sucursales (cards) ─────────────────────────────────── */}
+        <TabPanel value={tabValue} index={2}>
+          <Box sx={{ px: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
               <Button
-                variant="outlined"
-                startIcon={<Building2 size={16} />}
-                onClick={handleCreateOffice}
+                variant="contained"
+                size="small"
+                startIcon={<Plus size={16} />}
+                onClick={() => { setSelectedOffice(null); setOfficeDialogOpen(true); }}
               >
-                Crear Primera Oficina
+                Nueva Sucursal
               </Button>
             </Box>
-          ) : (
-            <TableContainer component={Paper} elevation={0} variant="outlined">
-              <Table>
-                <TableHead sx={{ bgcolor: "background.default" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Ubicación</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Dirección</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Responsable</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Teléfono</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>
-                      Acciones
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {offices.map((office) => (
-                    <TableRow key={office._id || office.id} hover>
-                      <TableCell
-                        sx={{ fontWeight: 600, color: "primary.main" }}
-                      >
-                        {office.name}
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <Typography variant="body2">
-                            {office.cityName || "-"}
-                          </Typography>
-                          {office.stateName && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              ({office.stateName})
-                            </Typography>
-                          )}
-                        </Box>
-                      </TableCell>
-                      <TableCell>{office.adress || "-"}</TableCell>
-                      <TableCell>{office.responsable || "-"}</TableCell>
-                      <TableCell>{office.phoneNumber || "-"}</TableCell>
-                      <TableCell align="right">
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          justifyContent="flex-end"
-                        >
-                          <Button
-                            size="small"
-                            startIcon={<Eye size={14} />}
-                            onClick={() => handleOpenOfficeDetails(office)}
-                            variant="outlined"
-                            sx={{
-                              borderColor: "divider",
-                              color: "text.primary",
-                            }}
-                          >
-                            Detalles
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={() => handleEditOffice(office)}
-                            sx={{ minWidth: "auto", p: 1 }}
-                          >
-                            <Settings size={16} />
-                          </Button>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CustomTabPanel>
 
-        {/* History Tab */}
-        <CustomTabPanel value={tabValue} index={2}>
-          <TableContainer component={Paper} elevation={0} variant="outlined">
-            <Table>
-              <TableHead sx={{ bgcolor: "background.default" }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>ID Orden</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Fecha</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Equipo</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Tipo Servicio</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Técnico</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {MOCK_HISTORY.map((item) => (
-                  <TableRow key={item.id} hover>
-                    <TableCell sx={{ fontFamily: "monospace" }}>
-                      {item.id}
-                    </TableCell>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {item.instrument}
-                    </TableCell>
-                    <TableCell>{item.type}</TableCell>
-                    <TableCell>{item.technician}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={item.status}
-                        size="small"
-                        color="success"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <Button size="small">Ver Reporte</Button>
-                    </TableCell>
-                  </TableRow>
+            {isLoadingOffices ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress size={32} /></Box>
+            ) : offices.length === 0 ? (
+              <EmptyState
+                icon={<Building2 size={56} />}
+                text="Sin sucursales registradas"
+                action={
+                  <Button variant="outlined" startIcon={<Building2 size={16} />} onClick={() => { setSelectedOffice(null); setOfficeDialogOpen(true); }}>
+                    Crear Primera Sucursal
+                  </Button>
+                }
+              />
+            ) : (
+              <Grid container spacing={2}>
+                {offices.map((office) => (
+                  <Grid key={office._id || office.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                    <Card
+                      elevation={0}
+                      sx={{
+                        height: "100%",
+                        borderRadius: 2.5,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        transition: "all 0.18s ease",
+                        "&:hover": { boxShadow: "0 4px 16px rgba(0,0,0,0.09)", borderColor: "primary.light" },
+                      }}
+                    >
+                      <CardContent sx={{ pb: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+                          <Avatar
+                            sx={{ width: 40, height: 40, bgcolor: "primary.main", fontSize: "1rem", fontWeight: 700 }}
+                          >
+                            {office.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Typography fontWeight={700} variant="subtitle1" sx={{ lineHeight: 1.2 }}>
+                            {office.name}
+                          </Typography>
+                        </Box>
+
+                        <Stack spacing={0.6}>
+                          {(office.cityName || office.stateName) && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <MapPin size={13} color="#94a3b8" />
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {[office.cityName, office.stateName].filter(Boolean).join(", ")}
+                              </Typography>
+                            </Box>
+                          )}
+                          {office.adress && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <FileText size={13} color="#94a3b8" />
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {office.adress}
+                              </Typography>
+                            </Box>
+                          )}
+                          {office.responsable && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Users size={13} color="#94a3b8" />
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {office.responsable}
+                              </Typography>
+                            </Box>
+                          )}
+                          {office.phoneNumber && (
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Phone size={13} color="#94a3b8" />
+                              <Typography variant="caption" color="text.secondary">
+                                {office.phoneNumber}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Stack>
+                      </CardContent>
+
+                      <CardActions sx={{ px: 2, pb: 1.5, pt: 0.5, justifyContent: "flex-end" }}>
+                        <Tooltip title="Ver detalle">
+                          <IconButton size="small" color="primary" onClick={() => navigate(`/offices/${office._id || office.id}`)}>
+                            <Eye size={15} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Editar">
+                          <IconButton size="small" onClick={() => { setSelectedOffice(office); setOfficeDialogOpen(true); }}>
+                            <Settings size={15} />
+                          </IconButton>
+                        </Tooltip>
+                      </CardActions>
+                    </Card>
+                  </Grid>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CustomTabPanel>
+              </Grid>
+            )}
+          </Box>
+        </TabPanel>
+
+        {/* ── Tab 3: Contactos ─────────────────────────────────────────── */}
+        <TabPanel value={tabValue} index={3}>
+          <Box sx={{ px: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<Plus size={16} />}
+                onClick={() => setUserFormOpen(true)}
+              >
+                Nuevo Usuario
+              </Button>
+            </Box>
+
+            {isLoadingContacts ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress size={32} /></Box>
+            ) : contacts.length === 0 ? (
+              <EmptyState
+                icon={<Users size={56} />}
+                text="Sin contactos registrados"
+                action={
+                  <Button variant="outlined" startIcon={<Plus size={16} />} onClick={() => setUserFormOpen(true)}>
+                    Crear Primer Usuario
+                  </Button>
+                }
+              />
+            ) : (
+              <List disablePadding>
+                {contacts.map((user, idx) => {
+                  const initials = `${user.name?.charAt(0) ?? ""}${user.lastName?.charAt(0) ?? ""}`.toUpperCase();
+                  const fullName = `${user.name} ${user.lastName}`.trim();
+                  const userColor = avatarColor(fullName || "X");
+                  return (
+                    <Box key={user.id || user._id}>
+                      {idx > 0 && <Divider variant="inset" component="li" />}
+                      <ListItem alignItems="flex-start" sx={{ px: 0 }}>
+                        <ListItemAvatar>
+                          <Avatar sx={{ bgcolor: userColor, fontWeight: 700, width: 44, height: 44 }}>
+                            {initials || "?"}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                              <Typography fontWeight={600}>{fullName || "—"}</Typography>
+                              {user.roles?.map((r) => (
+                                <Chip key={r} label={r} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.7rem", borderRadius: 1 }} />
+                              ))}
+                            </Box>
+                          }
+                          secondary={
+                            <Stack direction="row" spacing={2} sx={{ mt: 0.5 }}>
+                              {user.email && (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <Mail size={12} color="#94a3b8" />
+                                  <Typography variant="caption" color="text.secondary">{user.email}</Typography>
+                                </Box>
+                              )}
+                              {user.phoneNumber && (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                  <Phone size={12} color="#94a3b8" />
+                                  <Typography variant="caption" color="text.secondary">{user.phoneNumber}</Typography>
+                                </Box>
+                              )}
+                            </Stack>
+                          }
+                        />
+                      </ListItem>
+                    </Box>
+                  );
+                })}
+              </List>
+            )}
+          </Box>
+        </TabPanel>
       </Paper>
 
+      {/* ── Dialogs ──────────────────────────────────────────────────────── */}
       <OfficeFormDialog
         open={officeDialogOpen}
-        onClose={() => setOfficeDialogOpen(false)}
+        onClose={() => { setOfficeDialogOpen(false); setSelectedOffice(null); }}
         office={selectedOffice}
+      />
+
+      <UserFormDialog
+        open={userFormOpen}
+        onClose={() => setUserFormOpen(false)}
+        clientId={clientId}
+        offices={offices}
       />
     </Box>
   );
