@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
+import { EmailModule } from 'src/email/email.module';
 import { BadgetController } from './badgets.controller';
 import { BadgetService } from './badgets.service';
 
@@ -13,8 +14,6 @@ import { badgetSchemaProvier } from './schemas/badget.schema.provider';
 
 const QueriesHandler = [
   FindAllBadgetsQueryHandler,
-
-  
 ];
 const CommandHandlers = [
   AddBadgetCommandHandler,
@@ -25,6 +24,7 @@ const CommandHandlers = [
 @Module({
   imports: [
     CqrsModule,
+    EmailModule,
     MongooseModule.forFeatureAsync([
       badgetSchemaProvier,
     ]),

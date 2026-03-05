@@ -36,6 +36,8 @@ import {
   Wrench,
   XCircle,
   PackageX,
+  PauseCircle,
+  Mail,
   Building2,
   Tag,
   Ruler,
@@ -45,7 +47,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as equipmentsApi from "../api";
-import { useUpdateEquipment } from "../hooks/useEquipments";
+import { useUpdateEquipment, useUnblockEquipment } from "../hooks/useEquipments";
+import { useServiceOrder } from "../../service-orders/hooks/useServiceOrders";
+import { useBudgetsByEquipment } from "../../budgets/hooks/useBudgets";
+import { BlockNotificationPreviewDialog } from "../components/BlockNotificationPreviewDialog";
 import { LogisticStateBadge } from "../components/LogisticStateBadge";
 import { UsedStandardsDisplay } from "../components/UsedStandardsDisplay";
 import { CalibrationDialog } from "../components/CalibrationDialog";
@@ -61,6 +66,7 @@ import type { NonCalibrationResult } from "../api";
 const TECH_LABELS: Record<string, string> = {
   PENDING: "Pendiente",
   IN_PROCESS: "En Proceso",
+  BLOCKED: "Frenado",
   CALIBRATED: "Calibrado",
   VERIFIED: "Verificado",
   MAINTENANCE: "Mantenimiento",
@@ -73,6 +79,7 @@ const TECH_COLORS: Record<string, "success" | "warning" | "error" | "default" | 
   VERIFIED: "success",
   MAINTENANCE: "success",
   IN_PROCESS: "warning",
+  BLOCKED: "error",
   OUT_OF_SERVICE: "error",
   RETURN_WITHOUT_CALIBRATION: "error",
   PENDING: "default",
@@ -148,7 +155,10 @@ export const EquipmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const updateMutation = useUpdateEquipment();
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const updateMutation  = useUpdateEquipment();
+  const unblockMutation = useUnblockEquipment();
   const [tabValue, setTabValue] = useState(0);
 
   // Dialogs
@@ -165,6 +175,12 @@ export const EquipmentDetailPage = () => {
     queryFn: () => equipmentsApi.getEquipmentById(id!),
     enabled: !!id,
   });
+
+  // Hooks must be called unconditionally — before any early return
+  const isBlocked      = equipment?.technicalState === "BLOCKED";
+  const serviceOrderId = isBlocked ? (equipment as any).serviceOrder as string | undefined : undefined;
+  const { data: blockedServiceOrder, isLoading: isLoadingOrder } = useServiceOrder(serviceOrderId ?? "");
+  const { data: linkedBudgets = [] } = useBudgetsByEquipment(equipment?._id);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "—";
@@ -244,11 +260,12 @@ export const EquipmentDetailPage = () => {
   const canMoveToLab    = equipment.logisticState === EquipmentLogisticState.RECEIVED;
   const canCalibrate    = equipment.logisticState === EquipmentLogisticState.IN_LABORATORY;
   const canMoveToReady  = ["CALIBRATED", "VERIFIED", "MAINTENANCE"].includes(equipment.technicalState ?? "")
-                          && equipment.logisticState !== EquipmentLogisticState.READY_TO_DELIVER;
+                          && equipment.logisticState !== EquipmentLogisticState.READY_TO_DELIVER
+                          && equipment.logisticState !== EquipmentLogisticState.DELIVERED;
   const canDeliver      = equipment.logisticState === EquipmentLogisticState.READY_TO_DELIVER;
   const canReturnFromExternal = equipment.logisticState === EquipmentLogisticState.EXTERNAL;
   const canSendToExternal     = equipment.logisticState === EquipmentLogisticState.IN_LABORATORY;
-  const hasAnyAction = canMoveToLab || canCalibrate || canMoveToReady || canDeliver || canReturnFromExternal;
+  const hasAnyAction = canMoveToLab || canCalibrate || isBlocked || canMoveToReady || canDeliver || canReturnFromExternal;
 
   const openTechnicalResult = (result: NonCalibrationResult) => {
     setTechnicalResultType(result);
@@ -358,6 +375,14 @@ export const EquipmentDetailPage = () => {
                 size="small"
                 sx={{ fontWeight: 700, px: 0.5 }}
               />
+              {equipment.technicalState === "BLOCKED" && (equipment as any).blockReason && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: "rgba(255,200,200,0.9)", maxWidth: 200, textAlign: "right", fontStyle: "italic" }}
+                >
+                  {(equipment as any).blockReason}
+                </Typography>
+              )}
             </Stack>
           </Stack>
         </Box>
@@ -614,6 +639,97 @@ export const EquipmentDetailPage = () => {
                   </Button>
                 )}
 
+                {/* BLOCKED → info + acciones */}
+                {isBlocked && (() => {
+                  const blockTypeLabel = {
+                    BROKEN:                    "Equipo roto / no funciona",
+                    NEEDS_PART:               "Requiere repuesto",
+                    NEEDS_EXTERNAL_MAINTENANCE:"Requiere mantenimiento externo",
+                    OTHER:                    "Otro motivo",
+                  }[(equipment as any).blockType] ?? "Sin especificar";
+
+                  return (
+                    <Stack spacing={1}>
+                      <Alert severity="warning" sx={{ py: 0.5, borderRadius: 1.5, fontSize: "0.82rem" }}>
+                        <strong>{blockTypeLabel}</strong>
+                        {(equipment as any).blockReason && (
+                          <Typography variant="caption" display="block" sx={{ mt: 0.25 }}>
+                            {(equipment as any).blockReason}
+                          </Typography>
+                        )}
+                      </Alert>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="warning"
+                        startIcon={<PauseCircle size={16} />}
+                        onClick={() => unblockMutation.mutate(equipment._id)}
+                        disabled={unblockMutation.isPending}
+                        size="large"
+                      >
+                        {unblockMutation.isPending ? "Retomando..." : "Retomar trabajo"}
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        color="inherit"
+                        startIcon={<Mail size={15} />}
+                        onClick={() => setPreviewOpen(true)}
+                        size="small"
+                      >
+                        Notificar cliente por email
+                      </Button>
+                      {linkedBudgets.length > 0 ? (
+                        <Box sx={{ mt: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" sx={{ mb: 0.75 }}>
+                            Presupuesto{linkedBudgets.length > 1 ? "s" : ""} vinculado{linkedBudgets.length > 1 ? "s" : ""}
+                          </Typography>
+                          <Stack spacing={0.5}>
+                            {linkedBudgets.map((b: any) => {
+                              const statusColor = b.status === "APPROVED" ? "success" : b.status === "REJECTED" ? "error" : "warning";
+                              const statusLabel = b.status === "APPROVED" ? "Aprobado" : b.status === "REJECTED" ? "Rechazado" : "Pendiente";
+                              const code = b.code ?? `${String(b.year).slice(-2)}-${String(b.number).padStart(5,"0")}`;
+                              return (
+                                <Box key={b._id} sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, borderRadius: 1.5, border: "1px solid", borderColor: "divider", bgcolor: "background.default" }}>
+                                  <FileText size={13} color="#64748b" />
+                                  <Typography variant="caption" fontWeight={700} fontFamily="monospace" sx={{ flexGrow: 1 }}>{code}</Typography>
+                                  <Chip label={statusLabel} color={statusColor} size="small" sx={{ height: 20, fontSize: "0.72rem" }} />
+                                  <Button size="small" sx={{ minWidth: "auto", p: 0.25, fontSize: "0.72rem" }} onClick={() => navigate(`/budgets/${b._id}`)}>
+                                    Ver
+                                  </Button>
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+                        </Box>
+                      ) : (
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="primary"
+                          startIcon={<FileText size={15} />}
+                          size="small"
+                          onClick={() =>
+                            navigate("/budgets/new", {
+                              state: {
+                                fromEquipment: {
+                                  clientId:    (equipment.office as any)?.client?.toString(),
+                                  officeId:    equipment.office?._id,
+                                  equipmentId: equipment._id,
+                                  otCode:      equipment.otCode,
+                                  description: blockTypeLabel,
+                                },
+                              },
+                            })
+                          }
+                        >
+                          Crear presupuesto
+                        </Button>
+                      )}
+                    </Stack>
+                  );
+                })()}
+
                 {/* IN_LABORATORY → Lab work */}
                 {canCalibrate && (
                   <Stack spacing={1}>
@@ -634,6 +750,16 @@ export const EquipmentDetailPage = () => {
                       </Typography>
                     </Divider>
 
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      color="error"
+                      startIcon={<PauseCircle size={15} />}
+                      onClick={() => openTechnicalResult("BLOCKED")}
+                      size="small"
+                    >
+                      Frenado (no puede continuar)
+                    </Button>
                     <Button
                       fullWidth
                       variant="outlined"
@@ -760,6 +886,41 @@ export const EquipmentDetailPage = () => {
         </Grid>
       </Grid>
 
+      {/* ── Historial de acciones ──────────────────────────────────────── */}
+      {(equipment.actionHistory?.length ?? 0) > 0 && (
+        <Paper elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden", mt: 3 }}>
+          <Box sx={{ px: 2.5, py: 1.5, bgcolor: "background.neutral", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 1 }}>
+            <History size={16} />
+            <Typography variant="subtitle2" fontWeight={700}>Historial de acciones</Typography>
+          </Box>
+          <Box sx={{ px: 3, py: 2 }}>
+            <Stack spacing={0}>
+              {[...(equipment.actionHistory ?? [])].reverse().map((entry, i, arr) => (
+                <Box key={i} sx={{ display: "flex", gap: 2, pb: i < arr.length - 1 ? 2 : 0 }}>
+                  {/* timeline dot + line */}
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 0.5 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "primary.main", flexShrink: 0 }} />
+                    {i < arr.length - 1 && <Box sx={{ width: 2, flex: 1, bgcolor: "divider", mt: 0.5 }} />}
+                  </Box>
+                  <Box sx={{ pb: i < arr.length - 1 ? 0.5 : 0 }}>
+                    <Typography variant="body2" fontWeight={600}>{entry.label ?? entry.action}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {entry.at ? format(new Date(entry.at), "dd/MM/yyyy HH:mm", { locale: es }) : "—"}
+                      {entry.performedBy && <> &nbsp;·&nbsp; {entry.performedBy}</>}
+                    </Typography>
+                    {entry.notes && (
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontStyle: "italic" }}>
+                        {entry.notes}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+        </Paper>
+      )}
+
       {/* ── Dialogs ──────────────────────────────────────────────────────── */}
       <CalibrationDialog open={calibrationDialog} onClose={() => setCalibrationDialog(false)} equipment={equipment} />
       <MoveToOutputTrayDialog open={outputTrayDialog} onClose={() => setOutputTrayDialog(false)} equipment={equipment} />
@@ -771,6 +932,13 @@ export const EquipmentDetailPage = () => {
         onClose={() => setTechnicalResultDialog(false)}
         equipment={equipment}
         result={technicalResultType}
+      />
+      <BlockNotificationPreviewDialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        equipment={equipment}
+        serviceOrder={blockedServiceOrder}
+        isLoadingOrder={isLoadingOrder}
       />
     </Box>
   );

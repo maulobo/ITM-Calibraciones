@@ -14,6 +14,7 @@ import { EquipmentService } from './equipment.service';
 import { FindAllEquipmentsQueryHandler } from './queries/get-all-equipment.query';
 import { EquipmentStateLogSchema } from './schemas/equipment-state-log.schema';
 import { EquipmentSchema } from './schemas/equipment.schema';
+import { ServiceOrderSchema } from 'src/service-orders/schemas/service-order.schema';
 
 
 const QueriesHandler = [
@@ -32,6 +33,7 @@ const CommandHandlers = [
     MongooseModule.forFeature([
       { name: 'Equipment', schema: EquipmentSchema },
       { name: 'EquipmentStateLogSchema', schema: EquipmentStateLogSchema },
+      { name: 'ServiceOrder', schema: ServiceOrderSchema },
     ]),
     UsersModule,
     QRModule,

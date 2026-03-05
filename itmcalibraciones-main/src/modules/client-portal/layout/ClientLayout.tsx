@@ -15,14 +15,15 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { LogOut, User as UserIcon, Sun, Moon, LayoutDashboard, ClipboardList, Wrench } from "lucide-react";
+import { LogOut, User as UserIcon, Sun, Moon, LayoutDashboard, ClipboardList, Wrench, FileText } from "lucide-react";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { useColorMode } from "../../../theme/AppTheme";
 
 const NAV_ITEMS = [
-  { label: "Dashboard",    path: "/portal",           icon: LayoutDashboard },
-  { label: "Mis Órdenes",  path: "/portal/orders",    icon: ClipboardList   },
-  { label: "Mis Equipos",  path: "/portal/equipment", icon: Wrench          },
+  { label: "Dashboard",       path: "/portal",           icon: LayoutDashboard },
+  { label: "Mis Órdenes",     path: "/portal/orders",    icon: ClipboardList   },
+  { label: "Mis Equipos",     path: "/portal/equipment", icon: Wrench          },
+  { label: "Presupuestos",    path: "/portal/budgets",   icon: FileText        },
 ];
 
 export const ClientLayout = () => {

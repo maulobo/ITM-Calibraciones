@@ -1,0 +1,95 @@
+<!-- HEADING: confirmed -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+  <tr>
+    <td style="background-color:#f0fdf4;border-left:4px solid #16a34a;border-radius:0 4px 4px 0;padding:14px 16px;">
+      <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#15803d;margin:0 0 2px;">
+        &#10003;&nbsp; Presupuesto N&deg; {{code}} &mdash; Aprobado
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;margin:0;">
+        Aprobado por <strong>{{approvedBy}}</strong> el {{approvedAt}}
+      </p>
+    </td>
+  </tr>
+</table>
+
+<!-- INTRO -->
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;margin:0 0 16px;line-height:1.7;">
+  El laboratorio ha recibido la confirmaci&oacute;n. A continuaci&oacute;n el detalle del presupuesto aprobado:
+</p>
+
+<!-- BUDGET META -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+  {{#if reference}}
+  <tr>
+    <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;padding:3px 0;">
+      <strong>Referencia:</strong> {{reference}}
+    </td>
+  </tr>
+  {{/if}}
+  <tr>
+    <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;padding:3px 0;">
+      <strong>Fecha del presupuesto:</strong> {{date}}
+    </td>
+  </tr>
+  <tr>
+    <td style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;padding:3px 0;">
+      <strong>Forma de pago:</strong> {{paymentTerms}}
+    </td>
+  </tr>
+</table>
+
+<!-- SEPARATOR -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+  <tr>
+    <td height="1" style="background-color:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td>
+  </tr>
+</table>
+
+<!-- ITEMS TABLE -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-size:12px;font-family:Arial,Helvetica,sans-serif;margin-bottom:4px;">
+  <thead>
+    <tr style="background-color:#326699;">
+      <th style="padding:8px 10px;text-align:left;color:#ffffff;font-weight:bold;width:8%;">Cant.</th>
+      <th style="padding:8px 10px;text-align:left;color:#ffffff;font-weight:bold;">Descripci&oacute;n</th>
+      <th style="padding:8px 10px;text-align:right;color:#ffffff;font-weight:bold;width:16%;">Precio unit.</th>
+      <th style="padding:8px 10px;text-align:right;color:#ffffff;font-weight:bold;width:8%;">Dto.</th>
+      <th style="padding:8px 10px;text-align:right;color:#ffffff;font-weight:bold;width:16%;">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each details}}
+    <tr style="background-color:{{#if @even}}#f8fafc{{else}}#ffffff{{/if}};">
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;color:#374151;">{{quantity}}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;color:#111827;">{{description}}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right;color:#374151;">{{currency}} {{unitPrice}}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right;color:#374151;">{{#if discount}}{{discount}}%{{else}}&mdash;{{/if}}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:bold;color:#111827;">{{currency}} {{totalPrice}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+  {{#if showTotal}}
+  <tfoot>
+    <tr>
+      <td colspan="4" style="padding:10px;text-align:right;font-weight:bold;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;border-top:2px solid #326699;">
+        TOTAL:
+      </td>
+      <td style="padding:10px;text-align:right;font-weight:bold;font-size:15px;color:#326699;border-top:2px solid #326699;">
+        {{currency}} {{grandTotal}}
+      </td>
+    </tr>
+  </tfoot>
+  {{/if}}
+</table>
+
+<!-- SEPARATOR -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+  <tr>
+    <td height="1" style="background-color:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td>
+  </tr>
+</table>
+
+<!-- SIGN-OFF -->
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;margin:0;line-height:1.7;">
+  Ante cualquier consulta respond&aacute; este email o comun&iacute;cate directamente con el laboratorio.<br />
+  <strong style="color:#1e4470;">Calibraciones ITM S.A.</strong> &mdash; Almafuerte 357, Bah&iacute;a Blanca, Buenos Aires.
+</p>

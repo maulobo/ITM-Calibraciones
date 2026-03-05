@@ -60,6 +60,8 @@ export interface PopulatedEquipment {
   range?: string;
   technicalState?: string;
   logisticState?: string;
+  blockType?: string;
+  blockReason?: string;
   orderIndex?: number;
   otCode?: string;
   serviceHistory?: Array<{

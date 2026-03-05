@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from "mongoose";
 import {
+  BlockTypeEnum,
   EquipmentStateEnum,
   EquipmentTechnicalStateEnum,
   EquipmentLogisticStateEnum,
@@ -47,6 +48,14 @@ export class EquipmentEntity extends Document {
     default: EquipmentTechnicalStateEnum.PENDING,
   })
   technicalState: EquipmentTechnicalStateEnum;
+
+  // Campos de freno — solo presentes cuando technicalState === BLOCKED
+  @Prop({ type: String, enum: Object.values(BlockTypeEnum) })
+  blockType?: BlockTypeEnum;
+
+  // Detalle del freno: nombre del repuesto (NEEDS_PART) o texto libre (otros)
+  @Prop()
+  blockReason?: string;
 
   @Prop({
     type: String,
@@ -174,6 +183,31 @@ export class EquipmentEntity extends Document {
 
   @Prop()
   outOfService?: boolean;
+
+  // Person who physically picked up the equipment (recorded at delivery)
+  @Prop()
+  deliveredTo?: string;
+
+  @Prop({
+    type: [{
+      action:        { type: String, required: true },
+      label:         { type: String },
+      performedBy:   { type: String },
+      performedById: { type: Types.ObjectId },
+      at:            { type: Date, default: Date.now },
+      notes:         { type: String },
+    }],
+    _id: false,
+    default: [],
+  })
+  actionHistory: {
+    action: string;
+    label?: string;
+    performedBy?: string;
+    performedById?: Types.ObjectId;
+    at: Date;
+    notes?: string;
+  }[];
 }
 
 export const EquipmentSchema = SchemaFactory.createForClass(EquipmentEntity);

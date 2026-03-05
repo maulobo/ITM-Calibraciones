@@ -15,6 +15,7 @@ export type EquipmentLogisticState =
 export const EquipmentTechnicalState = {
   PENDING: "PENDING",                                   // A calibrar / pendiente
   IN_PROCESS: "IN_PROCESS",                             // En proceso
+  BLOCKED: "BLOCKED",                                   // Frenado (ver blockReason)
   CALIBRATED: "CALIBRATED",                             // Calibrado ✓
   VERIFIED: "VERIFIED",                                 // Verificado ✓
   MAINTENANCE: "MAINTENANCE",                           // Mantenimiento realizado ✓
@@ -42,6 +43,14 @@ export const PurchaseOrderRequirement = {
 
 export type PurchaseOrderRequirement =
   (typeof PurchaseOrderRequirement)[keyof typeof PurchaseOrderRequirement];
+
+export interface EquipmentActionHistory {
+  action: string;
+  label?: string;
+  performedBy?: string;
+  at: string;
+  notes?: string;
+}
 
 export interface ServiceHistoryEntry {
   serviceOrder: string;
@@ -94,12 +103,17 @@ export interface Equipment {
   observations?: string;
   remittanceNumber?: string;
   certificateNumber?: string;
+  blockType?: string;
+  blockReason?: string;
   externalProvider?: ExternalProvider;
   usedStandards?: StandardEquipment[]; // Patrones usados en la calibración
   serviceHistory?: ServiceHistoryEntry[];
+  actionHistory?: EquipmentActionHistory[];
+  deliveredTo?: string;
   office?: {
     _id: string;
     name?: string;
+    client?: string;
   };
   createdAt?: string;
   updatedAt?: string;

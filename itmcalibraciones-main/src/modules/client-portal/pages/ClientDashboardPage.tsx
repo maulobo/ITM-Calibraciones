@@ -179,10 +179,10 @@ export const ClientDashboardPage = () => {
     const finished = serviceOrders.filter((o) => ["FINISHED", "DELIVERED"].includes(o.generalStatus)).length;
     const pending = serviceOrders.filter((o) => o.generalStatus === "PENDING").length;
 
-    // Equipments in workshop (logisticState === IN_LABORATORY)
+    // Equipments in workshop (IN_LABORATORY o EXTERNAL — el cliente no distingue)
     const inWorkshop = serviceOrders
       .flatMap((o) => o.equipments ?? [])
-      .filter((eq) => eq.logisticState === "IN_LABORATORY").length;
+      .filter((eq) => eq.logisticState === "IN_LABORATORY" || eq.logisticState === "EXTERNAL").length;
 
     return { total, inProcess, finished, pending, inWorkshop };
   }, [serviceOrders]);
@@ -190,13 +190,13 @@ export const ClientDashboardPage = () => {
   // Recent orders (last 8)
   const recentOrders = useMemo(() => serviceOrders.slice(0, 8), [serviceOrders]);
 
-  // Equipment currently in workshop (deduplicated, IN_LABORATORY)
+  // Equipment currently in workshop (deduplicated, IN_LABORATORY o EXTERNAL — el cliente no distingue)
   const workshopEquipment = useMemo(() => {
     const seen = new Set<string>();
     const result = [];
     for (const order of serviceOrders) {
       for (const eq of order.equipments ?? []) {
-        if (eq.logisticState !== "IN_LABORATORY") continue;
+        if (eq.logisticState !== "IN_LABORATORY" && eq.logisticState !== "EXTERNAL") continue;
         const eqId = eq._id || eq.id;
         if (eqId && !seen.has(eqId)) {
           seen.add(eqId);

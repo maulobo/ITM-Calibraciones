@@ -93,6 +93,7 @@ const technicalStateLabels: Record<
 > = {
   PENDING:                   { label: "Pendiente",          color: "warning" },
   IN_PROCESS:                { label: "En Proceso",         color: "primary" },
+  BLOCKED:                   { label: "Frenado",            color: "error"   },
   CALIBRATED:                { label: "Calibrado",          color: "success" },
   VERIFIED:                  { label: "Verificado",         color: "info"    },
   MAINTENANCE:               { label: "Mantenimiento",      color: "success" },
@@ -394,6 +395,32 @@ export const ServiceOrderDetailPage = () => {
                     </TableCell>
                     <TableCell>
                       <Chip label={techState.label} color={techState.color} size="small" />
+                      {eq.technicalState === "BLOCKED" && (() => {
+                        const blockTypeLabel = {
+                          BROKEN:                    "Roto",
+                          NEEDS_PART:               "Requiere repuesto",
+                          NEEDS_EXTERNAL_MAINTENANCE:"Mant. externo",
+                          OTHER:                    "Otro",
+                        }[(eq as any).blockType] ?? null;
+                        return (
+                          <>
+                            {blockTypeLabel && (
+                              <Chip
+                                label={blockTypeLabel}
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                sx={{ mt: 0.5, display: "flex", height: 20, fontSize: 10 }}
+                              />
+                            )}
+                            {eq.blockReason && (
+                              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25, maxWidth: 180, fontStyle: "italic" }}>
+                                {eq.blockReason}
+                              </Typography>
+                            )}
+                          </>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <LogisticStateBadge state={eq.logisticState as any} />

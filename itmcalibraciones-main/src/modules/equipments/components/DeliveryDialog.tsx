@@ -13,9 +13,9 @@ import {
   Alert,
   Grid,
 } from "@mui/material";
-import { X, CheckCircle, FileText } from "lucide-react";
+import { X, CheckCircle, FileText, User } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useUpdateEquipment } from "../hooks/useEquipments";
+import { useDeliverEquipment } from "../hooks/useEquipments";
 import type { Equipment } from "../types";
 
 interface DeliveryDialogProps {
@@ -29,7 +29,7 @@ export const DeliveryDialog = ({
   onClose,
   equipment,
 }: DeliveryDialogProps) => {
-  const updateMutation = useUpdateEquipment();
+  const deliverMutation = useDeliverEquipment();
 
   const {
     register,
@@ -37,25 +37,29 @@ export const DeliveryDialog = ({
     reset,
     formState: { errors },
   } = useForm<{
+    deliveredTo: string;
     retireDate: string;
     remittanceNumber: string;
     certificateNumber?: string;
   }>();
 
   const onSubmit = (data: {
+    deliveredTo: string;
     retireDate: string;
     remittanceNumber: string;
     certificateNumber?: string;
   }) => {
     if (!equipment) return;
 
-    updateMutation.mutate(
+    deliverMutation.mutate(
       {
         id: equipment._id,
-        logisticState: "DELIVERED",
-        retireDate: data.retireDate,
-        remittanceNumber: data.remittanceNumber,
-        certificateNumber: data.certificateNumber,
+        dto: {
+          deliveredTo: data.deliveredTo,
+          retireDate: data.retireDate || undefined,
+          remittanceNumber: data.remittanceNumber || undefined,
+          certificateNumber: data.certificateNumber || undefined,
+        },
       },
       {
         onSuccess: () => {
@@ -101,52 +105,54 @@ export const DeliveryDialog = ({
             </Alert>
 
             <Box>
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
-                color="text.primary"
-                gutterBottom
-              >
+              <Typography variant="subtitle2" fontWeight="bold" color="text.primary" gutterBottom>
                 Información de Entrega
               </Typography>
               <Typography variant="caption" color="text.secondary" gutterBottom>
-                Completa los datos legales de salida del equipo
+                Completá los datos de salida del equipo
               </Typography>
             </Box>
 
             <Grid container spacing={2.5}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
-                  {...register("retireDate", {
-                    required: "Fecha de retiro requerida",
+                  {...register("deliveredTo", {
+                    required: "Nombre de quien retira requerido",
                   })}
-                  label="Fecha de Retiro"
-                  type="datetime-local"
+                  label="Nombre de quien retira"
+                  placeholder="Ej: Juan Pérez"
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  error={!!errors.retireDate}
-                  helperText={errors.retireDate?.message}
-                  defaultValue={new Date().toISOString().slice(0, 16)}
+                  error={!!errors.deliveredTo}
+                  helperText={errors.deliveredTo?.message ?? "Persona que retira físicamente el equipo"}
+                  InputProps={{
+                    startAdornment: <User size={18} style={{ marginRight: 8, color: "#6b7280" }} />,
+                  }}
                   required
                 />
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
-                  {...register("remittanceNumber", {
-                    required: "N° de remito requerido",
-                  })}
+                  {...register("retireDate")}
+                  label="Fecha de Retiro"
+                  type="datetime-local"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  defaultValue={new Date().toISOString().slice(0, 16)}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  {...register("remittanceNumber")}
                   label="N° de Remito"
                   placeholder="Ej: R-0001-9999"
                   fullWidth
-                  error={!!errors.remittanceNumber}
-                  helperText={errors.remittanceNumber?.message}
                   InputProps={{
                     startAdornment: (
                       <FileText size={18} style={{ marginRight: 8 }} />
                     ),
                   }}
-                  required
                 />
               </Grid>
 
@@ -179,9 +185,9 @@ export const DeliveryDialog = ({
             variant="contained"
             color="success"
             startIcon={<CheckCircle size={18} />}
-            disabled={updateMutation.isPending}
+            disabled={deliverMutation.isPending}
           >
-            {updateMutation.isPending ? "Registrando..." : "Registrar Entrega"}
+            {deliverMutation.isPending ? "Registrando..." : "Registrar Entrega"}
           </Button>
         </DialogActions>
       </form>

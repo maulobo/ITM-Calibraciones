@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ITM Calibraciones — Simulacro de Documento A4</title>
+  <style>
+    /* ── RESET & BASE ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 12pt;
+      color: #1a1a1a;
+      background: #d9d9d9;
+      padding: 32px 16px;
+    }
+
+    /* ── A4 PAGE WRAPPER ────────────────────────────────────────── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      padding: 18mm 18mm 14mm 18mm;
+      position: relative;
+    }
+
+    /* ── VARIABLES DE COLOR ─────────────────────────────────────── */
+    :root {
+      --primary:       #326699;
+      --primary-dark:  #1e4470;
+      --primary-light: #e8f0f8;
+      --accent:        #e8521a;
+      --text-muted:    #666666;
+      --border:        #dde3ea;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────────── */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 10mm;
+      border-bottom: 2.5pt solid var(--primary);
+    }
+
+    .doc-header .logo-block img {
+      height: 52px;
+      display: block;
+    }
+
+    .doc-header .company-info {
+      text-align: right;
+      font-size: 8.5pt;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .doc-header .company-info .company-name {
+      font-size: 12pt;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: 0.3px;
+    }
+
+    /* ── DOCUMENT TITLE BAND ────────────────────────────────────── */
+    .doc-title-band {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--primary);
+      color: #fff;
+      padding: 5mm 6mm;
+      margin: 6mm 0 0 0;
+      border-radius: 3px;
+    }
+
+    .doc-title-band h1 {
+      font-size: 15pt;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-title-band .doc-meta {
+      text-align: right;
+      font-size: 9pt;
+      line-height: 1.7;
+      opacity: 0.92;
+    }
+
+    /* ── CLIENT SECTION ─────────────────────────────────────────── */
+    .section-block {
+      margin-top: 6mm;
+    }
+
+    .section-label {
+      font-size: 7.5pt;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 2mm;
+    }
+
+    .client-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 8mm;
+      background: var(--primary-light);
+      border: 1pt solid var(--border);
+      border-radius: 3px;
+      padding: 4mm 5mm;
+    }
+
+    .client-field {
+      font-size: 9pt;
+      line-height: 1.8;
+    }
+
+    .client-field span {
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 2mm;
+    }
+
+    /* ── TERMS ROW ──────────────────────────────────────────────── */
+    .terms-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3mm;
+      margin-top: 5mm;
+    }
+
+    .term-card {
+      border: 1pt solid var(--border);
+      border-radius: 3px;
+      padding: 2.5mm 3mm;
+    }
+
+    .term-card .label {
+      font-size: 7pt;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1mm;
+    }
+
+    .term-card .value {
+      font-size: 9.5pt;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    /* ── ITEMS TABLE ────────────────────────────────────────────── */
+    .items-section {
+      margin-top: 6mm;
+      flex: 1;
+    }
+
+    table.items {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    table.items thead tr {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    table.items thead th {
+      padding: 3mm 3.5mm;
+      text-align: left;
+      font-weight: 600;
+      font-size: 8.5pt;
+    }
+
+    table.items thead th.right { text-align: right; }
+
+    table.items tbody tr:nth-child(even) {
+      background: #f7f9fc;
+    }
+
+    table.items tbody td {
+      padding: 2.5mm 3.5mm;
+      border-bottom: 0.5pt solid var(--border);
+      vertical-align: top;
+    }
+
+    table.items tbody td.right { text-align: right; }
+
+    table.items tbody td .item-desc {
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.4;
+    }
+
+    table.items tbody td .item-sub {
+      font-size: 7.5pt;
+      color: var(--text-muted);
+      margin-top: 0.5mm;
+    }
+
+    /* Total row */
+    table.items tfoot td {
+      padding: 3mm 3.5mm;
+    }
+
+    table.items tfoot .total-label {
+      text-align: right;
+      font-size: 9pt;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    table.items tfoot .total-value {
+      text-align: right;
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    table.items tfoot tr.subtotal td {
+      padding-top: 4mm;
+      border-top: 1.5pt solid var(--primary);
+    }
+
+    /* ── NOTES ──────────────────────────────────────────────────── */
+    .notes-section {
+      margin-top: 6mm;
+      font-size: 8pt;
+      color: var(--text-muted);
+      line-height: 1.6;
+      border-top: 1pt solid var(--border);
+      padding-top: 3mm;
+    }
+
+    .notes-section strong {
+      color: #444;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────────────── */
+    .doc-footer {
+      margin-top: auto;
+      padding-top: 5mm;
+      border-top: 1.5pt solid var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.5pt;
+      color: var(--text-muted);
+    }
+
+    .doc-footer .footer-brand {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 8pt;
+    }
+
+    .doc-footer .footer-contact {
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .doc-footer .footer-page {
+      text-align: right;
+    }
+
+    /* ── STAMP / FIRMA ──────────────────────────────────────────── */
+    .stamp-area {
+      margin-top: 8mm;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10mm;
+    }
+
+    .stamp-box {
+      width: 42mm;
+      text-align: center;
+    }
+
+    .stamp-box .stamp-line {
+      border-top: 1pt solid #999;
+      margin-top: 10mm;
+      padding-top: 1.5mm;
+      font-size: 7.5pt;
+      color: var(--text-muted);
+    }
+
+    /* ── STATUS BADGE ───────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 1mm 3mm;
+      border-radius: 2px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-pending  { background: #fff3e0; color: #e65100; }
+    .badge-approved { background: #e8f5e9; color: #2e7d32; }
+    .badge-rejected { background: #fce4ec; color: #b71c1c; }
+
+    /* ── PRINT STYLES ───────────────────────────────────────────── */
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      body {
+        background: none;
+        padding: 0;
+      }
+
+      .page {
+        box-shadow: none;
+        width: 210mm;
+        min-height: 297mm;
+      }
+
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control bar (sólo pantalla) -->
+  <div class="no-print" style="width:210mm;margin:0 auto 16px;display:flex;gap:8px;justify-content:flex-end;">
+    <button onclick="window.print()"
+      style="background:var(--primary,#326699);color:#fff;border:none;padding:8px 18px;border-radius:4px;font-size:13px;cursor:pointer;font-weight:600;">
+      ⬇ Exportar / Imprimir PDF
+    </button>
+  </div>
+
+  <!-- ─── A4 PAGE ─────────────────────────────────────────────── -->
+  <div class="page">
+
+    <!-- HEADER -->
+    <header class="doc-header">
+      <div class="logo-block">
+        <img src="https://i.ibb.co/pzTc0q4/logo-itm-removebg-preview.png" alt="ITM Calibraciones" />
+      </div>
+      <div class="company-info">
+        <div class="company-name">Calibraciones ITM S.A.</div>
+        Almafuerte 357, Bahía Blanca, Buenos Aires<br />
+        Tel: xxxxxxxxxx &nbsp;·&nbsp; xxxxxxxxxx<br />
+        CUIT: 30-71167690-9
+      </div>
+    </header>
+
+    <!-- DOCUMENT TITLE BAND -->
+    <div class="doc-title-band">
+      <h1>PRESUPUESTO</h1>
+      <div class="doc-meta">
+        <strong>N° 26-00012</strong><br />
+        Fecha: 03/03/2026<br />
+        <span class="badge badge-pending">En espera</span>
+      </div>
+    </div>
+
+    <!-- CLIENT -->
+    <div class="section-block">
+      <div class="section-label">Datos del cliente</div>
+      <div class="client-grid">
+        <div>
+          <div class="client-field"><span>Empresa:</span> Soluciones Industriales del Sur S.R.L.</div>
+          <div class="client-field"><span>Contacto:</span> Ing. María González</div>
+          <div class="client-field"><span>Email:</span> mgonzalez@solind.com.ar</div>
+        </div>
+        <div>
+          <div class="client-field"><span>Referencia:</span> Mantenimiento anual 2026</div>
+          <div class="client-field"><span>A la atención de:</span> Área de Calidad</div>
+          <div class="client-field"><span>CUIT:</span> 30-69874521-4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TERMS -->
+    <div class="terms-row">
+      <div class="term-card">
+        <div class="label">Forma de pago</div>
+        <div class="value">30 días factura</div>
+      </div>
+      <div class="term-card">
+        <div class="label">Validez de oferta</div>
+        <div class="value">30 días</div>
+      </div>
+      <div class="term-card">
+        <div class="label">Plazo de entrega</div>
+        <div class="value">15 días hábiles</div>
+      </div>
+      <div class="term-card">
+        <div class="label">Moneda</div>
+        <div class="value">ARS $</div>
+      </div>
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <div class="items-section">
+      <div class="section-label" style="margin-top:6mm;">Detalle de servicios</div>
+      <table class="items">
+        <thead>
+          <tr>
+            <th style="width:8%">Cant.</th>
+            <th>Descripción</th>
+            <th class="right" style="width:16%">Precio unit.</th>
+            <th class="right" style="width:9%">Dto.</th>
+            <th class="right" style="width:16%">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>3</td>
+            <td>
+              <div class="item-desc">Calibración de termómetro digital</div>
+              <div class="item-sub">Certificado de calibración acreditado INTI · Rango: -20°C a 200°C</div>
+            </td>
+            <td class="right">$ 45.000</td>
+            <td class="right">10%</td>
+            <td class="right"><strong>$ 121.500</strong></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>
+              <div class="item-desc">Calibración de manómetro</div>
+              <div class="item-sub">Rango 0–10 bar · Clase 0.6 · Certificado INTI</div>
+            </td>
+            <td class="right">$ 38.000</td>
+            <td class="right">—</td>
+            <td class="right"><strong>$ 76.000</strong></td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>
+              <div class="item-desc">Mantenimiento preventivo de balanza analítica</div>
+              <div class="item-sub">Limpieza interna, ajuste de nivel, verificación de platos</div>
+            </td>
+            <td class="right">$ 85.000</td>
+            <td class="right">—</td>
+            <td class="right"><strong>$ 85.000</strong></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>
+              <div class="item-desc">Verificación de higrómetro</div>
+              <div class="item-sub">Sin certificado de calibración acreditado</div>
+            </td>
+            <td class="right">$ 18.000</td>
+            <td class="right">15%</td>
+            <td class="right"><strong>$ 76.500</strong></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="subtotal">
+            <td colspan="4" class="total-label">TOTAL</td>
+            <td class="total-value">$ 359.000</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- NOTES -->
+    <div class="notes-section">
+      <strong>Notas:</strong> Los precios no incluyen IVA. La presente oferta tiene validez por 30 días corridos desde su emisión.
+      El servicio incluye el traslado de instrumentos dentro del radio de Bahía Blanca. Instrumentos fuera de rango o
+      con daños visibles se presupuestan por separado previa evaluación en laboratorio.
+    </div>
+
+    <!-- STAMP / FIRMA -->
+    <div class="stamp-area">
+      <div class="stamp-box">
+        <div class="stamp-line">Firma autorizada</div>
+      </div>
+      <div class="stamp-box">
+        <div class="stamp-line">Aclaración</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="doc-footer">
+      <div>
+        <div class="footer-brand">Calibraciones ITM S.A.</div>
+        CUIT 30-71167690-9<br />
+        Almafuerte 357 — Bahía Blanca
+      </div>
+      <div class="footer-contact">
+        Tel: xxxxxxxxxx<br />
+        xxxxxxxxxx<br />
+        xxxxxxxxxx
+      </div>
+      <div class="footer-page">
+        Documento generado por sistema<br />
+        Calibraciones ITM ERP<br />
+        Página 1 de 1
+      </div>
+    </footer>
+
+  </div><!-- /.page -->
+
+</body>
+</html>

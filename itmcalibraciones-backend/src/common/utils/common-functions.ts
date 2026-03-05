@@ -20,6 +20,9 @@ export const checkMongoId = (id:string | Types.ObjectId): Types.ObjectId => {
 
 export const convertToObjectId = (obj: any): any => {
   if (obj && typeof obj === 'object') {
+    // Don't recurse into arrays — their elements (e.g. populate/select strings) are never ObjectIds
+    if (Array.isArray(obj)) return obj;
+
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         if (typeof obj[key] === 'string' && Types.ObjectId.isValid(obj[key])) {
@@ -30,7 +33,7 @@ export const convertToObjectId = (obj: any): any => {
           }
 
           if (key === "id") obj["_id"] = obj[key];
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
           obj[key] = convertToObjectId(obj[key]); // Llamada recursiva para objetos anidados
         }
       }

@@ -18,6 +18,8 @@ import { PortalOrdersPage } from "../modules/client-portal/pages/PortalOrdersPag
 import { PortalOrderDetailPage } from "../modules/client-portal/pages/PortalOrderDetailPage";
 import { PortalEquipmentsPage } from "../modules/client-portal/pages/PortalEquipmentsPage";
 import { PortalEquipmentDetailPage } from "../modules/client-portal/pages/PortalEquipmentDetailPage";
+import { PortalBudgetsPage } from "../modules/client-portal/pages/PortalBudgetsPage";
+import { PortalBudgetDetailPage } from "../modules/client-portal/pages/PortalBudgetDetailPage";
 import { EquipmentTypesPage } from "../modules/catalog/pages/EquipmentTypesPage";
 import { BrandsPage } from "../modules/catalog/pages/BrandsPage";
 import { ModelsPage } from "../modules/catalog/pages/ModelsPage";
@@ -31,6 +33,9 @@ import { EquipmentsPage } from "../modules/equipments/pages/EquipmentsPage";
 import { EquipmentDetailPage } from "../modules/equipments/pages/EquipmentDetailPage";
 import { Box, Typography } from "@mui/material";
 import { ProfilePage } from "../modules/users/pages/ProfilePage";
+import { BudgetsPage } from "../modules/budgets/pages/BudgetsPage";
+import { BudgetDetailPage } from "../modules/budgets/pages/BudgetDetailPage";
+import { CreateBudgetPage } from "../modules/budgets/pages/CreateBudgetPage";
 
 // Placeholder generic page
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -64,6 +69,8 @@ export const router = createBrowserRouter([
           { path: "orders/:id",     element: <PortalOrderDetailPage /> },
           { path: "equipment",      element: <PortalEquipmentsPage /> },
           { path: "equipment/:id",  element: <PortalEquipmentDetailPage /> },
+          { path: "budgets",        element: <PortalBudgetsPage /> },
+          { path: "budgets/:id",    element: <PortalBudgetDetailPage /> },
         ],
       },
       // Admin / Technical Routes
@@ -121,7 +128,15 @@ export const router = createBrowserRouter([
           },
           {
             path: "/budgets",
-            element: <PlaceholderPage title="Presupuestos" />,
+            element: <BudgetsPage />,
+          },
+          {
+            path: "/budgets/new",
+            element: <CreateBudgetPage />,
+          },
+          {
+            path: "/budgets/:id",
+            element: <BudgetDetailPage />,
           },
           {
             path: "/logistics",

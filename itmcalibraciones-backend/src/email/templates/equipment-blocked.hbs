@@ -1,0 +1,49 @@
+<!-- WARNING HEADING -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+  <tr>
+    <td style="background-color:#fffbeb;border-left:4px solid #d97706;border-radius:0 4px 4px 0;padding:14px 16px;">
+      <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#92400e;margin:0 0 4px;">
+        &#9888;&#65039; Equipo frenado en laboratorio
+      </p>
+      <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#78350f;margin:0;">
+        Le informamos que el siguiente equipo ha sido marcado como <strong>Frenado</strong> durante su proceso en el laboratorio.
+      </p>
+    </td>
+  </tr>
+</table>
+
+<!-- EQUIPMENT DETAIL TABLE -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:4px;margin-bottom:20px;font-size:13px;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td width="38%" style="padding:10px 14px;background-color:#f9fafb;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;">OT / Código</td>
+    <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#111827;font-family:'Courier New',Courier,monospace;">{{otCode}}</td>
+  </tr>
+  <tr>
+    <td style="padding:10px 14px;background-color:#f9fafb;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;">Equipo</td>
+    <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#111827;">{{equipmentLabel}}</td>
+  </tr>
+  <tr>
+    <td style="padding:10px 14px;background-color:#f9fafb;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;">N&deg; de Serie</td>
+    <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#111827;font-family:'Courier New',Courier,monospace;">{{serialNumber}}</td>
+  </tr>
+  <tr>
+    <td style="padding:10px 14px;background-color:#f9fafb;{{#if blockReason}}border-bottom:1px solid #e5e7eb;{{/if}}font-weight:bold;color:#374151;">Motivo</td>
+    <td style="padding:10px 14px;{{#if blockReason}}border-bottom:1px solid #e5e7eb;{{/if}}">
+      <span style="display:inline-block;background-color:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;">
+        {{blockTypeLabel}}
+      </span>
+    </td>
+  </tr>
+  {{#if blockReason}}
+  <tr>
+    <td style="padding:10px 14px;background-color:#f9fafb;font-weight:bold;color:#374151;">Detalle</td>
+    <td style="padding:10px 14px;color:#111827;">{{blockReason}}</td>
+  </tr>
+  {{/if}}
+</table>
+
+<!-- SIGN-OFF -->
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#6b7280;margin:0;line-height:1.7;">
+  Ante cualquier consulta no dude en comunicarse con el laboratorio.<br />
+  <strong style="color:#1e4470;">Calibraciones ITM S.A.</strong>
+</p>

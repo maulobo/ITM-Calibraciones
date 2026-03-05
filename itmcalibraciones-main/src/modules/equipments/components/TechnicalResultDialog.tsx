@@ -11,24 +11,49 @@ import {
   Stack,
   Alert,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from "@mui/material";
-import { X, CheckCircle, Wrench, XCircle, PackageX, Info } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { X, CheckCircle, Wrench, XCircle, PackageX, Info, PauseCircle } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
 import { useRegisterTechnicalResult } from "../hooks/useEquipments";
 import type { NonCalibrationResult } from "../api";
 import type { Equipment } from "../types";
+
+// ─── Tipos de freno ──────────────────────────────────────────────────────────
+export const BLOCK_TYPES = [
+  { value: "BROKEN",                    label: "Equipo roto / no funciona" },
+  { value: "NEEDS_PART",               label: "Requiere repuesto" },
+  { value: "NEEDS_EXTERNAL_MAINTENANCE",label: "Requiere mantenimiento externo" },
+  { value: "OTHER",                     label: "Otro motivo" },
+] as const;
+
+export type BlockType = typeof BLOCK_TYPES[number]["value"];
 
 // ─── Config por tipo de resultado ───────────────────────────────────────────
 interface ResultConfig {
   label: string;
   description: string;
   autoReadyNote?: string;  // si aplica → auto READY_TO_DELIVER
+  requiresBlockReason?: boolean;
   color: "success" | "warning" | "error" | "info";
   icon: React.ReactNode;
   confirmLabel: string;
 }
 
 const RESULT_CONFIG: Record<NonCalibrationResult, ResultConfig> = {
+  BLOCKED: {
+    label: "Frenado",
+    description:
+      "No se puede continuar con la calibración. El trabajo queda pausado hasta resolver el problema.",
+    color: "warning",
+    icon: <PauseCircle size={20} />,
+    confirmLabel: "Confirmar Freno",
+    requiresBlockReason: true,
+  },
   VERIFIED: {
     label: "Verificado",
     description:
@@ -66,6 +91,7 @@ const RESULT_CONFIG: Record<NonCalibrationResult, ResultConfig> = {
 
 // ─── Color de header por tipo ────────────────────────────────────────────────
 const HEADER_BG: Record<NonCalibrationResult, string> = {
+  BLOCKED:                    "warning.dark",
   VERIFIED:                   "success.main",
   MAINTENANCE:                "info.main",
   OUT_OF_SERVICE:             "error.main",
@@ -90,14 +116,28 @@ export const TechnicalResultDialog = ({
   const mutation = useRegisterTechnicalResult();
   const config = RESULT_CONFIG[result];
 
-  const { register, handleSubmit, reset } = useForm<{ observations: string }>({
-    defaultValues: { observations: "" },
+  const { register, handleSubmit, reset, control, watch, formState: { errors } } = useForm<{
+    observations: string;
+    blockType: BlockType | "";
+    blockReason: string;
+  }>({
+    defaultValues: { observations: "", blockType: "", blockReason: "" },
   });
 
-  const onSubmit = ({ observations }: { observations: string }) => {
+  const watchedBlockType = watch("blockType");
+
+  const onSubmit = ({ observations, blockType, blockReason }: { observations: string; blockType: BlockType | ""; blockReason: string }) => {
     if (!equipment) return;
     mutation.mutate(
-      { id: equipment._id, dto: { technicalResult: result, observations: observations || undefined } },
+      {
+        id: equipment._id,
+        dto: {
+          technicalResult: result,
+          observations: observations || undefined,
+          blockType: result === "BLOCKED" ? (blockType as BlockType) : undefined,
+          blockReason: result === "BLOCKED" && blockType === "NEEDS_PART" ? blockReason : undefined,
+        },
+      },
       {
         onSuccess: () => {
           onClose();
@@ -169,10 +209,50 @@ export const TechnicalResultDialog = ({
               </Alert>
             )}
 
+            {/* Formulario estructurado de freno — solo para BLOCKED */}
+            {config.requiresBlockReason && (
+              <Stack spacing={2}>
+                {/* Tipo de freno */}
+                <Controller
+                  name="blockType"
+                  control={control}
+                  rules={{ required: "Seleccioná el motivo del freno" }}
+                  render={({ field }) => (
+                    <FormControl fullWidth size="small" error={!!errors.blockType}>
+                      <InputLabel>Motivo del freno *</InputLabel>
+                      <Select {...field} label="Motivo del freno *">
+                        {BLOCK_TYPES.map((bt) => (
+                          <MenuItem key={bt.value} value={bt.value}>
+                            {bt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        {errors.blockType?.message ?? "¿Por qué no puede continuar?"}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+
+                {/* Detalle del repuesto — solo si NEEDS_PART */}
+                {watchedBlockType === "NEEDS_PART" && (
+                  <TextField
+                    {...register("blockReason", { required: "Indicá qué repuesto se necesita" })}
+                    label="¿Qué repuesto necesita? *"
+                    placeholder="Ej: Sensor de temperatura NTC 10kΩ, fusible 250V 2A..."
+                    fullWidth
+                    size="small"
+                    error={!!errors.blockReason}
+                    helperText={errors.blockReason?.message}
+                  />
+                )}
+              </Stack>
+            )}
+
             {/* Observaciones */}
             <TextField
               {...register("observations")}
-              label="Observaciones"
+              label={config.requiresBlockReason ? "Observaciones adicionales" : "Observaciones"}
               placeholder="Describí qué se hizo, qué se encontró, novedades..."
               multiline
               minRows={3}

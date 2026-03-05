@@ -44,6 +44,7 @@ export const registerCalibration = async (
 };
 
 export type NonCalibrationResult =
+  | "BLOCKED"
   | "VERIFIED"
   | "MAINTENANCE"
   | "OUT_OF_SERVICE"
@@ -52,6 +53,7 @@ export type NonCalibrationResult =
 export interface RegisterTechnicalResultPayload {
   technicalResult: NonCalibrationResult;
   observations?: string;
+  blockReason?: string;
 }
 
 export const registerTechnicalResult = async (
@@ -59,5 +61,34 @@ export const registerTechnicalResult = async (
   dto: RegisterTechnicalResultPayload,
 ): Promise<Equipment> => {
   const { data } = await api.patch(`/equipments/${id}/result`, dto);
+  return data;
+};
+
+export const unblockEquipment = async (id: string): Promise<Equipment> => {
+  const { data } = await api.patch(`/equipments/${id}/unblock`);
+  return data;
+};
+
+export const sendBlockNotification = async (id: string): Promise<void> => {
+  await api.post(`/equipments/${id}/block-notification`);
+};
+
+export const clientRequestReturn = async (id: string): Promise<Equipment> => {
+  const { data } = await api.patch(`/equipments/${id}/client-return`);
+  return data;
+};
+
+export interface DeliverEquipmentPayload {
+  deliveredTo: string;
+  retireDate?: string;
+  remittanceNumber?: string;
+  certificateNumber?: string;
+}
+
+export const deliverEquipment = async (
+  id: string,
+  dto: DeliverEquipmentPayload,
+): Promise<Equipment> => {
+  const { data } = await api.patch(`/equipments/${id}/deliver`, dto);
   return data;
 };

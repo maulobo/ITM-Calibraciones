@@ -25,7 +25,7 @@ import { PaginationControls } from "../../../components/ui/PaginationControls";
 const LOGISTIC_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
   RECEIVED:        { label: "Recibido",          color: "primary"  },
   IN_LABORATORY:   { label: "En laboratorio",    color: "warning"  },
-  EXTERNAL:        { label: "En externo",        color: "warning"  },
+  EXTERNAL:        { label: "En laboratorio",    color: "warning"  }, // interno — el cliente no ve "En externo"
   ON_HOLD:         { label: "En espera",         color: "error"    },
   READY_TO_DELIVER:{ label: "Listo para retirar",color: "success"  },
   DELIVERED:       { label: "Entregado",         color: "default"  },
@@ -35,7 +35,6 @@ const LOGISTIC_FILTERS = [
   { value: "ALL",              label: "Todos" },
   { value: "RECEIVED",         label: "Recibido" },
   { value: "IN_LABORATORY",    label: "En laboratorio" },
-  { value: "EXTERNAL",         label: "En externo" },
   { value: "READY_TO_DELIVER", label: "Listo" },
   { value: "DELIVERED",        label: "Entregado" },
 ];
@@ -76,6 +75,10 @@ export const PortalEquipmentsPage = () => {
 
   const filtered = useMemo(() => {
     if (stateFilter === "ALL") return allEquipment;
+    // EXTERNAL se muestra junto a IN_LABORATORY (el cliente no distingue entre ambos)
+    if (stateFilter === "IN_LABORATORY") {
+      return allEquipment.filter((eq) => eq.logisticState === "IN_LABORATORY" || eq.logisticState === "EXTERNAL");
+    }
     return allEquipment.filter((eq) => eq.logisticState === stateFilter);
   }, [allEquipment, stateFilter]);
 

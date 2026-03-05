@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayUnique, IsArray, IsBoolean, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayUnique, IsArray, IsBoolean, IsDateString, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
 import { CurrencyENUM } from 'src/common/enums/currency.enum';
 import { BadgetTypeENUM } from '../enum/type.enum';
@@ -28,6 +28,16 @@ class BudgetDetailDto {
   @ApiProperty()
   @IsNumber()
   totalPrice: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  linkedOtCode?: string;
+
+  @ApiProperty()
+  @IsMongoId()
+  @IsOptional()
+  linkedEquipmentId?: string;
 }
 
 export class AddBadgetDTO {
@@ -56,6 +66,7 @@ export class AddBadgetDTO {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   attention?: string;
 
   @ApiProperty()
@@ -64,11 +75,13 @@ export class AddBadgetDTO {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   reference?: string;
 
   @ApiProperty()
   @IsString()
-  deliveryTime: string;
+  @IsOptional()
+  deliveryTime?: string;
 
   @ApiProperty()
   @IsNumber()
@@ -90,6 +103,8 @@ export class AddBadgetDTO {
   vat: VatENUM;
 
   @ApiProperty()
+  @IsString()
+  @IsOptional()
   notes?: string;
 
   @ApiProperty()
@@ -99,10 +114,17 @@ export class AddBadgetDTO {
 
   @ApiProperty()
   @IsArray()
+  @IsOptional()
   selectedNotes?: string[]
 
   @ApiProperty()
+  @IsMongoId()
+  @IsOptional()
+  serviceOrder?: string;
+
+  @ApiProperty()
   @IsArray()
+  @IsOptional()
   instrumentsRelated?: string[]
 
   @ApiProperty({ type: [BudgetDetailDto] }) // Add type annotation

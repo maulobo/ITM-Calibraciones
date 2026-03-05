@@ -1,6 +1,14 @@
+export enum BlockTypeEnum {
+    BROKEN                   = 'BROKEN',                    // Equipo roto / no funciona
+    NEEDS_PART               = 'NEEDS_PART',                // Requiere repuesto
+    NEEDS_EXTERNAL_MAINTENANCE = 'NEEDS_EXTERNAL_MAINTENANCE', // Requiere mantenimiento externo
+    OTHER                    = 'OTHER',                     // Otro motivo
+}
+
 export enum EquipmentTechnicalStateEnum {
     PENDING = 'PENDING',                               // A calibrar / A reparar (recién ingresó)
     IN_PROCESS = 'IN_PROCESS',                         // En proceso (técnico lo está trabajando)
+    BLOCKED = 'BLOCKED',                               // Frenado (no se puede continuar — ver blockReason)
     CALIBRATED = 'CALIBRATED',                         // Calibrado (con certificado)
     VERIFIED = 'VERIFIED',                             // Verificado (funcional, sin certificado)
     MAINTENANCE = 'MAINTENANCE',                       // Mantenimiento/Reparación realizado

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -14,6 +15,11 @@ import {
   TableHead,
   TableRow,
   Grid,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   ArrowLeft,
@@ -24,29 +30,39 @@ import {
   Award,
   ClipboardList,
   CheckCircle,
+  PackageX,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEquipmentById } from "../../equipments/hooks/useEquipments";
+import { useEquipmentById, useClientRequestReturn } from "../../equipments/hooks/useEquipments";
+import { useBudgetsByEquipment } from "../../budgets/hooks/useBudgets";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const LOGISTIC_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
   RECEIVED:        { label: "Recibido",          color: "primary"  },
   IN_LABORATORY:   { label: "En laboratorio",    color: "warning"  },
-  EXTERNAL:        { label: "En externo",        color: "warning"  },
+  EXTERNAL:        { label: "En laboratorio",    color: "warning"  }, // interno — el cliente no ve "En externo"
   ON_HOLD:         { label: "En espera",         color: "error"    },
   READY_TO_DELIVER:{ label: "Listo para retirar",color: "success"  },
   DELIVERED:       { label: "Entregado",         color: "default"  },
 };
 
 const TECHNICAL_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
-  PENDING:                    { label: "Pendiente",      color: "default" },
-  IN_PROCESS:                 { label: "En proceso",     color: "warning" },
-  CALIBRATED:                 { label: "Calibrado",      color: "success" },
-  VERIFIED:                   { label: "Verificado",     color: "success" },
-  MAINTENANCE:                { label: "Mantenimiento",  color: "success" },
-  OUT_OF_SERVICE:             { label: "Fuera de servicio", color: "error" },
-  RETURN_WITHOUT_CALIBRATION: { label: "Devolución",    color: "error"   },
+  PENDING:                    { label: "Pendiente",         color: "default" },
+  IN_PROCESS:                 { label: "En proceso",        color: "warning" },
+  BLOCKED:                    { label: "Frenado",           color: "warning" },
+  CALIBRATED:                 { label: "Calibrado",         color: "success" },
+  VERIFIED:                   { label: "Verificado",        color: "success" },
+  MAINTENANCE:                { label: "Mantenimiento",     color: "success" },
+  OUT_OF_SERVICE:             { label: "Fuera de servicio", color: "error"   },
+  RETURN_WITHOUT_CALIBRATION: { label: "Devolución",        color: "error"   },
+};
+
+const BLOCK_TYPE_LABELS: Record<string, string> = {
+  BROKEN:                     "Equipo roto / no funciona",
+  NEEDS_PART:                 "Requiere repuesto",
+  NEEDS_EXTERNAL_MAINTENANCE: "Requiere mantenimiento externo",
+  OTHER:                      "Otro motivo",
 };
 
 const formatDate = (d?: string | null) => {
@@ -75,6 +91,9 @@ export const PortalEquipmentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: equipment, isLoading } = useEquipmentById(id);
+  const returnMutation = useClientRequestReturn();
+  const { data: linkedBudgets = [] } = useBudgetsByEquipment(equipment?._id);
+  const [returnOpen, setReturnOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -198,7 +217,68 @@ export const PortalEquipmentDetailPage = () => {
             </Box>
             <InfoItem label="Estado logístico" value={logistic ? <Chip label={logistic.label} color={logistic.color} size="small" /> : undefined} />
             <InfoItem label="Estado técnico" value={technical ? <Chip label={technical.label} color={technical.color} size="small" variant="outlined" /> : undefined} />
-            <InfoItem label="Ubicación" value={equipment.location === "ITM" ? "En laboratorio ITM" : equipment.location === "EXTERNAL" ? "Proveedor externo" : undefined} />
+            <InfoItem label="Ubicación" value={equipment.location === "ITM" || equipment.location === "EXTERNAL" ? "En laboratorio ITM" : undefined} />
+
+            {equipment.technicalState === "BLOCKED" && linkedBudgets.length > 0 && linkedBudgets.map((b: any) => {
+              const isPending  = b.status === "PENDING";
+              const isApproved = b.status === "APPROVED";
+              const code = b.code ?? `${String(b.year).slice(-2)}-${String(b.number).padStart(5, "0")}`;
+              return (
+                <Alert
+                  key={b._id}
+                  severity={isPending ? "info" : isApproved ? "success" : "warning"}
+                  sx={{ mt: 2, borderRadius: 2 }}
+                  action={
+                    <Button
+                      size="small"
+                      color="inherit"
+                      variant="outlined"
+                      sx={{ fontWeight: 700, fontSize: "0.78rem", whiteSpace: "nowrap" }}
+                      onClick={() => navigate(`/portal/budgets/${b._id}`)}
+                    >
+                      {isPending ? "Ver y aprobar" : "Ver presupuesto"}
+                    </Button>
+                  }
+                >
+                  <Typography variant="body2" fontWeight={700}>
+                    {isPending  && `Presupuesto ${code} pendiente de tu aprobación`}
+                    {isApproved && `Presupuesto ${code} aprobado ✓`}
+                    {b.status === "REJECTED" && `Presupuesto ${code} rechazado`}
+                  </Typography>
+                </Alert>
+              );
+            })}
+
+            {equipment.technicalState === "BLOCKED" && (
+              <Alert severity="warning" sx={{ mt: 2, borderRadius: 2, fontSize: "0.82rem" }}>
+                <Typography variant="body2" fontWeight={700} sx={{ mb: 0.5 }}>
+                  Equipo frenado
+                </Typography>
+                {equipment.blockType && (
+                  <Typography variant="body2">
+                    {BLOCK_TYPE_LABELS[equipment.blockType] ?? equipment.blockType}
+                  </Typography>
+                )}
+                {equipment.blockReason && (
+                  <Typography variant="body2" sx={{ mt: 0.5, fontStyle: "italic" }}>
+                    {equipment.blockReason}
+                  </Typography>
+                )}
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                  El laboratorio se comunicará con usted a la brevedad.
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="warning"
+                  startIcon={<PackageX size={14} />}
+                  onClick={() => setReturnOpen(true)}
+                  sx={{ mt: 1.5, fontWeight: 600, fontSize: "0.78rem" }}
+                >
+                  Solicitar devolución sin calibrar
+                </Button>
+              </Alert>
+            )}
 
             <Divider sx={{ my: 2 }} />
 
@@ -339,6 +419,39 @@ export const PortalEquipmentDetailPage = () => {
           </Stack>
         </Grid>
       </Grid>
+
+      {/* ── Return Without Calibration Dialog ───────────────────────────────── */}
+      <Dialog open={returnOpen} onClose={() => setReturnOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Solicitar devolución</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Al solicitar la devolución, el laboratorio procederá a devolver el equipo{" "}
+            <strong>sin calibrar</strong>. Este proceso no tiene costo adicional.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            ¿Confirmás la devolución del equipo <strong>{equipment?.serialNumber}</strong>?
+          </Typography>
+          {returnMutation.isError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {(returnMutation.error as any)?.response?.data?.message ?? "Error al solicitar la devolución"}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button onClick={() => setReturnOpen(false)} color="inherit" disabled={returnMutation.isPending}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={() => returnMutation.mutate(id!, { onSuccess: () => setReturnOpen(false) })}
+            disabled={returnMutation.isPending}
+            startIcon={returnMutation.isPending ? <CircularProgress size={14} color="inherit" /> : <PackageX size={16} />}
+          >
+            {returnMutation.isPending ? "Procesando..." : "Confirmar devolución"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

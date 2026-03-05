@@ -1,6 +1,7 @@
 import {
   Body,
   Controller, Get,
+  HttpCode,
   Param,
   Patch,
   Post, Query, Res, UploadedFile, UseInterceptors, BadRequestException
@@ -18,6 +19,7 @@ import { convertMongoId, convertToObjectId, isAdminOrTechnical } from 'src/commo
 import { StatusEnum } from 'src/errors-handler/enums/status.enum';
 import { throwException } from 'src/errors-handler/throw-exception';
 import { AddEquipmentDTO } from './dto/add-equipment.dto';
+import { DeliverEquipmentDto } from './dto/deliver-equipment.dto';
 import { GetInstrumentsDTO } from './dto/get-instruments.dto';
 import { RegisterCalibrationDto } from './dto/register-calibration.dto';
 import { RegisterTechnicalResultDto } from './dto/register-technical-result.dto';
@@ -84,6 +86,15 @@ import { ImageUploadService } from 'src/image-upload/image-upload.service';
     ): Promise<IEquipment> {
       updateInstrumentDTO = convertToObjectId(updateInstrumentDTO)
       const { isAdmin, isTechnical } = isAdminOrTechnical(user)
+
+      const LOGISTIC_LABELS: Record<string, string> = {
+        IN_LABORATORY:    'Enviado al laboratorio',
+        READY_TO_DELIVER: 'Marcado listo para retiro',
+        EXTERNAL:         'Enviado a servicio externo',
+        RECEIVED:         'Registrado como recibido',
+        ON_HOLD:          'Puesto en espera',
+      };
+
       if( !isAdmin && !isTechnical){
         const instrument = await this.equipmentService.getAllEquipments({_id: updateInstrumentDTO.id})
         if( this.equipmentService.instrumentUserAccess(user, instrument[0]) ){
@@ -93,8 +104,25 @@ import { ImageUploadService } from 'src/image-upload/image-upload.service';
           return throwException(StatusEnum.INSTRUMENT_NOT_BELONG_TO_USER)
         }
       }
-      
-      return await this.equipmentService.updateInstrument(updateInstrumentDTO);
+
+      const result = await this.equipmentService.updateInstrument(updateInstrumentDTO);
+
+      if (updateInstrumentDTO.logisticState) {
+        const logisticLabel = LOGISTIC_LABELS[updateInstrumentDTO.logisticState as string];
+        if (logisticLabel) {
+          await this.equipmentService.appendHistory(
+            updateInstrumentDTO.id.toString(),
+            {
+              action: updateInstrumentDTO.logisticState as string,
+              label: logisticLabel,
+              performedBy: `${user.name} ${user.lastName}`.trim(),
+              performedById: user.id,
+            },
+          );
+        }
+      }
+
+      return result;
     }
 
     @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
@@ -149,6 +177,22 @@ import { ImageUploadService } from 'src/image-upload/image-upload.service';
     }
 
     @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Post("/:id/block-notification")
+    @HttpCode(204)
+    async sendBlockNotification(@Param("id") id: string): Promise<void> {
+      return this.equipmentService.sendBlockNotification(id);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Patch("/:id/unblock")
+    async unblockEquipment(
+      @Param("id") id: string,
+      @User() user: JwtPayload,
+    ): Promise<IEquipment> {
+      return this.equipmentService.unblockEquipment(id, user);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
     @Patch("/:id/result")
     async registerTechnicalResult(
       @Param("id") id: string,
@@ -156,6 +200,26 @@ import { ImageUploadService } from 'src/image-upload/image-upload.service';
       @User() user: JwtPayload,
     ): Promise<IEquipment> {
       return this.equipmentService.registerTechnicalResult(id, dto, user);
+    }
+
+    @Auth(UserRoles.ADMIN, UserRoles.TECHNICAL)
+    @Patch("/:id/deliver")
+    async deliverEquipment(
+      @Param("id") id: string,
+      @Body() dto: DeliverEquipmentDto,
+      @User() user: JwtPayload,
+    ): Promise<IEquipment> {
+      return this.equipmentService.deliverEquipment(id, dto, user);
+    }
+
+    @Auth(UserRoles.USER)
+    @HttpCode(200)
+    @Patch("/:id/client-return")
+    async clientRequestReturn(
+      @Param("id") id: string,
+      @User() user: JwtPayload,
+    ): Promise<IEquipment> {
+      return this.equipmentService.clientRequestReturn(id, user);
     }
 
     @Auth()

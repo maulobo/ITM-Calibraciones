@@ -8,6 +8,9 @@ export enum EmailTemplate {
   NEW_INSTRUMENT = 'src/email/templates/new-instrument.hbs',
   NEW_Technical_INFORM = 'src/email/templates/new-technical-inform.hbs',
   INSTRUMENT_SOON_EXPIRED = 'src/email/templates/instrument-sonn-expired.hbs',
+  BUDGET_NOTIFICATION = 'src/email/templates/budget-notification.hbs',
+  BUDGET_APPROVED = 'src/email/templates/budget-approved.hbs',
+  EQUIPMENT_BLOCKED = 'src/email/templates/equipment-blocked.hbs',
 }
 
 export enum EmailTemplateList {
@@ -17,5 +20,7 @@ export enum EmailTemplateList {
   NEW_INSTRUMENT = 'NEW_INSTRUMENT',
   NEW_Technical_INFORM = 'NEW_Technical_INFORM',
   USER_UPDATE_PASSWORD = 'USER_UPDATE_PASSWORD',
-  INSTRUMENT_SOON_EXPIRED = 'INSTRUMENT_SOON_EXPIRED'
+  INSTRUMENT_SOON_EXPIRED = 'INSTRUMENT_SOON_EXPIRED',
+  BUDGET_NOTIFICATION = 'BUDGET_NOTIFICATION',
+  EQUIPMENT_BLOCKED = 'EQUIPMENT_BLOCKED',
 }

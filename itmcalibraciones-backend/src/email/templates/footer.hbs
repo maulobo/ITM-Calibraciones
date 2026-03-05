@@ -1,13 +1,42 @@
-    <tr>
-      <td style="padding: 12px 24px;" align="center" valign="top">
-      </td>
-    </tr>
-  </tbody>
+          </td>
+        </tr>
+
+        {{#if portalLink}}
+        <!-- PORTAL CTA — sólo cuando se pasa portalLink en locals -->
+        <tr>
+          <td style="background-color:#eef4fb;padding:20px 32px;border-top:1px solid #ccddf0;text-align:center;">
+            <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1e4470;margin:0 0 14px;font-weight:bold;">
+              Podés ver el estado actualizado en tu portal
+            </p>
+            <a
+              href="{{portalLink}}"
+              style="display:inline-block;background-color:#326699;color:#ffffff;text-decoration:none;padding:11px 30px;border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;letter-spacing:0.3px;"
+            >
+              Ver en mi portal &rarr;
+            </a>
+          </td>
+        </tr>
+        {{/if}}
+
+        <!-- FOOTER INFO -->
+        <tr>
+          <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 32px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;text-align:center;line-height:1.9;">
+            <strong style="display:block;color:#1e4470;font-size:12px;margin-bottom:4px;">Calibraciones ITM S.A.</strong>
+            Almafuerte 357, Bahía Blanca, Buenos Aires &nbsp;&middot;&nbsp; CUIT 30-71167690-9<br />
+            xxxxxxxxxx &nbsp;&middot;&nbsp; xxxxxxxxxx
+          </td>
+        </tr>
+
+        <!-- BOTTOM ACCENT BAR -->
+        <tr>
+          <td height="4" style="background-color:#326699;font-size:0;line-height:0;border-radius:0 0 4px 4px;">&nbsp;</td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
 </table>
-</td>
-</tr>
-</tbody>
-</table>
-</center>
+
 </body>
 </html>

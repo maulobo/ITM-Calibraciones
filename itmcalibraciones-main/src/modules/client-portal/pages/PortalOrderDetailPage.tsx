@@ -35,20 +35,28 @@ const SO_STATUS: Record<ServiceOrderStatus, { label: string; color: "default" | 
 const LOGISTIC_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
   RECEIVED:        { label: "Recibido",          color: "primary"  },
   IN_LABORATORY:   { label: "En laboratorio",    color: "warning"  },
-  EXTERNAL:        { label: "En externo",        color: "warning"  },
+  EXTERNAL:        { label: "En laboratorio",    color: "warning"  }, // interno — el cliente no ve "En externo"
   ON_HOLD:         { label: "En espera",         color: "error"    },
   READY_TO_DELIVER:{ label: "Listo para retirar",color: "success"  },
   DELIVERED:       { label: "Entregado",         color: "default"  },
 };
 
 const TECHNICAL_LABELS: Record<string, { label: string; color: "default" | "primary" | "warning" | "success" | "error" }> = {
-  PENDING:                    { label: "Pendiente",      color: "default" },
-  IN_PROCESS:                 { label: "En proceso",     color: "warning" },
-  CALIBRATED:                 { label: "Calibrado",      color: "success" },
-  VERIFIED:                   { label: "Verificado",     color: "success" },
-  MAINTENANCE:                { label: "Mantenimiento",  color: "success" },
-  OUT_OF_SERVICE:             { label: "Fuera de servicio", color: "error" },
-  RETURN_WITHOUT_CALIBRATION: { label: "Devolución",    color: "error"   },
+  PENDING:                    { label: "Pendiente",         color: "default" },
+  IN_PROCESS:                 { label: "En proceso",        color: "warning" },
+  BLOCKED:                    { label: "Frenado",           color: "warning" },
+  CALIBRATED:                 { label: "Calibrado",         color: "success" },
+  VERIFIED:                   { label: "Verificado",        color: "success" },
+  MAINTENANCE:                { label: "Mantenimiento",     color: "success" },
+  OUT_OF_SERVICE:             { label: "Fuera de servicio", color: "error"   },
+  RETURN_WITHOUT_CALIBRATION: { label: "Devolución",        color: "error"   },
+};
+
+const BLOCK_TYPE_LABELS: Record<string, string> = {
+  BROKEN:                     "Equipo roto / no funciona",
+  NEEDS_PART:                 "Requiere repuesto",
+  NEEDS_EXTERNAL_MAINTENANCE: "Requiere mantenimiento externo",
+  OTHER:                      "Otro motivo",
 };
 
 const formatDate = (d?: string) => {
@@ -262,7 +270,21 @@ export const PortalOrderDetailPage = () => {
                           </TableCell>
                           <TableCell>
                             {technical
-                              ? <Chip label={technical.label} color={technical.color} size="small" variant="outlined" />
+                              ? (
+                                <Box>
+                                  <Chip label={technical.label} color={technical.color} size="small" variant="outlined" />
+                                  {eq.technicalState === "BLOCKED" && eq.blockType && (
+                                    <Typography variant="caption" color="warning.dark" display="block" sx={{ mt: 0.5, fontWeight: 500 }}>
+                                      {BLOCK_TYPE_LABELS[eq.blockType] ?? eq.blockType}
+                                    </Typography>
+                                  )}
+                                  {eq.technicalState === "BLOCKED" && eq.blockReason && (
+                                    <Typography variant="caption" color="text.secondary" display="block" sx={{ fontStyle: "italic" }}>
+                                      {eq.blockReason}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              )
                               : <Typography variant="caption" color="text.disabled">—</Typography>
                             }
                           </TableCell>
